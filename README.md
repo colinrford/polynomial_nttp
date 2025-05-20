@@ -28,7 +28,7 @@ structure, `std::array` (where the entries are coefficients $a_i$, $i = 0,
 ii) compiles inside `constexpr`, `consteval` contexts. This deeply saddens the 
 author, but at least its still possible to achieve the second point ii). 
 
-## `division_prototype()` (find it in `src/polynomial_nttp.cpp`, line `184`)
+## `division_prototype()` (find it in [`src/polynomial_nttp.cpp`, line `176`](https://github.com/colinrford/polynomial_nttp/blob/main/src/polynomial_nttp.cpp#L176))
 So, why was this implementation ~~doomed~~ forced from the outset (i.e. the 
 author's choice to use `std::array`) to rely on NTTPs to achieve simple 
 polynomial division at compile time? Well, that's just it, apparently, since 
@@ -50,11 +50,20 @@ something like the use of `std::integer_sequence<int, ints...>` and fold
 expressions. One could use `std::index_sequence` instead, of course.
 
 ### implementation
-this readme section is wip, for now check out `src/polynomial_nttp.cpp`
+this readme section is wip, for now check out
+[`src/polynomial_nttp.cpp`](https://github.com/colinrford/polynomial_nttp/blob/main/src/polynomial_nttp.cpp)
 ### testing
-this readme section is wip, for now check out `tests/thousand_divisions.cpp`
+this readme section is wip, for now check out [`tests/thousand_divisions.cpp`](https://github.com/colinrford/polynomial_nttp/blob/main/tests/thousand_divisions.cpp)
 take note that this may require some compiler flags to increase the number of 
 iterations, and `clang` may not want to do 1000 at a time (in my sad 
 experience). currently `thousand_divisions.cpp` is a little messy, the 
 chosen filenames are kind of lame, and there is some redundancy that I plan to 
 reduce into a function soon enough. 
+
+## building
+this readme section is wip, for now e.g. in the `tests` directory
+```c++
+g++ -std=c++23 -I../src test_polynomial_nttp.cpp -o test_polynomial
+g++ -std=c++23 -I../src thousand_divisions.cpp -o thousand_divisions
+```
+

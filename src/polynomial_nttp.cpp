@@ -50,9 +50,6 @@ struct polynomial_nttp
   : coefficients(coeffs)
   { }
 
-  //polynomial_nttp(std::initializer_list<coefficient_t> il)
-  //{ stdr::copy_if(il, coefficients, il.size() == coefficients.size()); }
-
   constexpr auto begin()
   { return stdr::begin(coefficients); }
   constexpr auto end()

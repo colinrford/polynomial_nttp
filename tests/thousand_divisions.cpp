@@ -29,84 +29,82 @@ constexpr auto division_test()
 
 consteval auto divide_thousand_polynomials()
 {
-  return [&]() {
-    using deg_0_poly = math::polynomial_nttp<double, 0>;
-    using deg_0_poly_pair = std::pair<int, deg_0_poly>;
-    std::array<deg_0_poly_pair, 1000 + 1> possible_deg_0_remainders{};
+  using deg_0_poly = math::polynomial_nttp<double, 0>;
+  using deg_0_poly_pair = std::pair<int, deg_0_poly>;
+  std::array<deg_0_poly_pair, 1000 + 1> possible_deg_0_remainders{};
 
-    using deg_1_poly = math::polynomial_nttp<double, 1>;
-    using deg_1_poly_pair = std::pair<int, deg_1_poly>;
-    std::array<deg_1_poly_pair, 1000 + 1> possible_deg_1_remainders{};
+  using deg_1_poly = math::polynomial_nttp<double, 1>;
+  using deg_1_poly_pair = std::pair<int, deg_1_poly>;
+  std::array<deg_1_poly_pair, 1000 + 1> possible_deg_1_remainders{};
 
-    using deg_2_poly = math::polynomial_nttp<double, 2>;
-    using deg_2_poly_pair = std::pair<int, deg_2_poly>;
-    std::array<deg_2_poly_pair, 1000 + 1> possible_deg_2_quotients{};
-    std::array<deg_2_poly_pair, 1000 + 1> possible_deg_2_remainders{};
+  using deg_2_poly = math::polynomial_nttp<double, 2>;
+  using deg_2_poly_pair = std::pair<int, deg_2_poly>;
+  std::array<deg_2_poly_pair, 1000 + 1> possible_deg_2_quotients{};
+  std::array<deg_2_poly_pair, 1000 + 1> possible_deg_2_remainders{};
 
-    using deg_3_poly = math::polynomial_nttp<double, 3>;
-    using deg_3_poly_pair = std::pair<int, deg_3_poly>;
-    std::array<deg_3_poly_pair, 1000 + 1> possible_deg_3_quotients{};
+  using deg_3_poly = math::polynomial_nttp<double, 3>;
+  using deg_3_poly_pair = std::pair<int, deg_3_poly>;
+  std::array<deg_3_poly_pair, 1000 + 1> possible_deg_3_quotients{};
 
-    using deg_4_poly = math::polynomial_nttp<double, 4>;
-    using deg_4_poly_pair = std::pair<int, deg_4_poly>;
-    std::array<deg_4_poly_pair, 1000 + 1> possible_deg_4_quotients{};
+  using deg_4_poly = math::polynomial_nttp<double, 4>;
+  using deg_4_poly_pair = std::pair<int, deg_4_poly>;
+  std::array<deg_4_poly_pair, 1000 + 1> possible_deg_4_quotients{};
 
-    using deg_unknown_poly = std::variant<deg_0_poly,
-                                          deg_1_poly,
-                                          deg_2_poly,
-                                          deg_3_poly,
-                                          deg_4_poly>;
+  using deg_unknown_poly = std::variant<deg_0_poly,
+                                        deg_1_poly,
+                                        deg_2_poly,
+                                        deg_3_poly,
+                                        deg_4_poly>;
 
-    std::array<int, 1000 + 1> quotient_errors{};
-    auto filter_quotients = [&] (int i, deg_unknown_poly q) {
-      std::size_t index = static_cast<std::size_t>(i);
-      if (q.index() == 2)
-        possible_deg_2_quotients[index] = std::make_pair(i, std::get<2>(q));
-      else if (q.index() == 3)
-        possible_deg_3_quotients[index] = std::make_pair(i, std::get<3>(q));
-      else if (q.index() == 4)
-        possible_deg_4_quotients[index] = std::make_pair(i, std::get<4>(q));
-      else
-        quotient_errors[index] = i;
-    };
+  std::array<int, 1000 + 1> quotient_errors{};
+  auto filter_quotients = [&] (int i, deg_unknown_poly q) {
+    std::size_t index = static_cast<std::size_t>(i);
+    if (q.index() == 2)
+      possible_deg_2_quotients[index] = std::make_pair(i, std::get<2>(q));
+    else if (q.index() == 3)
+      possible_deg_3_quotients[index] = std::make_pair(i, std::get<3>(q));
+    else if (q.index() == 4)
+      possible_deg_4_quotients[index] = std::make_pair(i, std::get<4>(q));
+    else
+      quotient_errors[index] = i;
+  };
 
-    std::array<int, 1000 + 1> remainder_errors{};
-    auto filter_remainders = [&] (int i, deg_unknown_poly r) {
-      std::size_t index = static_cast<std::size_t>(i);
-      if (r.index() == 0)
-        possible_deg_0_remainders[index] = std::make_pair(i, std::get<0>(r));
-      else if (r.index() == 1)
-        possible_deg_1_remainders[index] = std::make_pair(i, std::get<1>(r));
-      else if (r.index() == 2)
-        possible_deg_2_remainders[index] = std::make_pair(i, std::get<2>(r));
-      else
-        remainder_errors[index] = i;
-    };
+  std::array<int, 1000 + 1> remainder_errors{};
+  auto filter_remainders = [&] (int i, deg_unknown_poly r) {
+    std::size_t index = static_cast<std::size_t>(i);
+    if (r.index() == 0)
+      possible_deg_0_remainders[index] = std::make_pair(i, std::get<0>(r));
+    else if (r.index() == 1)
+      possible_deg_1_remainders[index] = std::make_pair(i, std::get<1>(r));
+    else if (r.index() == 2)
+      possible_deg_2_remainders[index] = std::make_pair(i, std::get<2>(r));
+    else
+      remainder_errors[index] = i;
+  };
 
-    auto monster = [&] <int... ints> (std::integer_sequence<int, ints...>) {
-      ([&]
-        {
-          auto a_divided_by_b = division_test<ints>();
-          auto ith_quotient = a_divided_by_b.first;
-          filter_quotients(ints, ith_quotient);
-          auto ith_remainder = a_divided_by_b.second;
-          filter_remainders(ints, ith_remainder);
-        }(),
-      ...);
-    };
-    // clang is being weird for some reason and will not work for N > ~400???
-    monster(std::make_integer_sequence<int, 1000>());
+  auto monster = [&] <int... ints> (std::integer_sequence<int, ints...>) {
+    ([&]
+      {
+        auto a_divided_by_b = division_test<ints>();
+        auto ith_quotient = a_divided_by_b.first;
+        filter_quotients(ints, ith_quotient);
+        auto ith_remainder = a_divided_by_b.second;
+        filter_remainders(ints, ith_remainder);
+      }(),
+    ...);
+  };
+  // clang is being weird for some reason and will not work for N > ~400???
+  monster(std::make_integer_sequence<int, 1000>());
 
-    return std::make_pair(std::make_tuple(possible_deg_2_quotients,
-                                          possible_deg_3_quotients,
-                                          possible_deg_4_quotients,
-                                          quotient_errors),
-                          std::make_tuple(possible_deg_0_remainders,
-                                          possible_deg_1_remainders,
-                                          possible_deg_2_remainders,
-                                          remainder_errors)
-    );
-  }();
+  return std::make_pair(std::make_tuple(possible_deg_2_quotients,
+                                        possible_deg_3_quotients,
+                                        possible_deg_4_quotients,
+                                        quotient_errors),
+                        std::make_tuple(possible_deg_0_remainders,
+                                        possible_deg_1_remainders,
+                                        possible_deg_2_remainders,
+                                        remainder_errors)
+  );
 }
 
 int main()
