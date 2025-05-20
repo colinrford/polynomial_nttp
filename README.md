@@ -28,7 +28,7 @@ structure, `std::array` (where the entries are coefficients $a_i$, $i = 0,
 ii) compiles inside `constexpr`, `consteval` contexts. This deeply saddens the 
 author, but at least its still possible to achieve the second point ii). 
 
-## `division_prototype()` (find it in [`src/polynomial_nttp.cpp`, line `176`](https://github.com/colinrford/polynomial_nttp/blob/main/src/polynomial_nttp.cpp#L176))
+## `division_prototype()` (find it in [`src/polynomial_nttp.cpp`, line `173`](https://github.com/colinrford/polynomial_nttp/blob/main/src/polynomial_nttp.cpp#L173))
 So, why was this implementation ~~doomed~~ forced from the outset (i.e. the 
 author's choice to use `std::array`) to rely on NTTPs to achieve simple 
 polynomial division at compile time? Well, that's just it, apparently, since 
