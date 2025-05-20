@@ -50,9 +50,9 @@ something like the use of `std::integer_sequence<int, ints...>` and fold
 expressions. One could use `std::index_sequence` instead, of course.
 
 ### implementation
-wip, for now check out `src/polynomial_nttp.cpp`
+this readme section is wip, for now check out `src/polynomial_nttp.cpp`
 ### testing
-wip, for now check out `tests/thousand_divisions.cpp`
+this readme section is wip, for now check out `tests/thousand_divisions.cpp`
 take note that this may require some compiler flags to increase the number of 
 iterations, and `clang` may not want to do 1000 at a time (in my sad 
 experience). currently `thousand_divisions.cpp` is a little messy, the 
