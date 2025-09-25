@@ -1,7 +1,7 @@
 # `polynomial_nttp`
-`polynomial_nttp` is a fun little implementation of polynomial algebra in `c++`
+`polynomial_nttp` implements a model of a polynomial algebra in `c++`
 which, as the name suggests, achieves this via  Non-Type Template Parameters 
-(NTTPs) (it's a wrapped `std::array`; however, I could only figure out the 
+(NTTPs) (it's a wrapped `std::array`; thusly I could only figure out the 
 Division Algorithm / Euclidean Algorithm using NTTPs – more on this in a 
 moment). Thanks to NTTPs, combined with recent enhancements for lambdas in 
 `c++20`, a model of a polynomial ring $k[X]$ over a field $k$ (hopefully, of 
@@ -19,7 +19,7 @@ state, please expect it to work, albeit with an occasional quirk (early days).
 If you find it does not work for some reason, please alert me somehow, either 
 via GitHub or via email. Any feedback is greatly appreciated.
 
-The biggest flaw of this implementation is division (because its not 
+The biggest flaw of this implementation is division (because it's not 
 `operator/`). The author is not an expert in `c++` or the kinds of things this 
 implentation found thrust upon itself at its onset – all this is to say, this 
 author has not (yet?) figured out how to use the choice of container / data 
@@ -45,7 +45,7 @@ was attainable... (at compile time... (using this implementation...))
 Now the astute reader may already realize that a chain reaction has occured. 
 Having been thrown into the land of template metaprogramming, as 
 `division_prototype()` takes 5 template parameters, 4 of which are NTTPs, 
-performing large number of tests of such a function requires (as far as I know)
+performing large numbers of tests of such a function requires (as far as I know)
 something like the use of `std::integer_sequence<int, ints...>` and fold 
 expressions. One could use `std::index_sequence` instead, of course.
 
@@ -62,7 +62,7 @@ reduce into a function soon enough.
 
 ## building
 this readme section is wip, for now e.g. in the `tests` directory
-```c++
+```bash
 g++ -std=c++23 -I../src test_polynomial_nttp.cpp -o test_polynomial
 g++ -std=c++23 -I../src thousand_divisions.cpp -o thousand_divisions
 ```
