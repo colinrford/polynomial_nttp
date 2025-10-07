@@ -1,3 +1,9 @@
+/*
+ *  type_erased.cpp – written by Colin Ford
+ *    see github.com/colinrford/polynomial_nttp for AGPL-3.0 License, and
+ *                                              for more info
+ *  not sure if this is interesting or not but 'twas an idea
+ */
 
 import std;
 import polynomial_nttp;

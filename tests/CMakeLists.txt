@@ -5,7 +5,6 @@ target_include_directories(test_polynomial_nttp PRIVATE ${CMAKE_BINARY_DIR})
 target_link_libraries(test_polynomial_nttp polynomial_nttp experimental_concepts)
 target_compile_features(test_polynomial_nttp PRIVATE cxx_std_23)
 
-# Add compiler flags specifically for this test target
 # this is for thousand_divisions
 #target_compile_options(thousand_divisions PRIVATE
 #    # Example for GCC/Clang
@@ -17,5 +16,5 @@ target_compile_features(test_polynomial_nttp PRIVATE cxx_std_23)
 
 add_test(NAME PolynomialNttpTest
          COMMAND test_polynomial_nttp)
-         
+
 add_subdirectory(unit)
