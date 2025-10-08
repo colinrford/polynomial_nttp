@@ -30,24 +30,24 @@ at compile time.
 | antiderivative | [`antiderivative`](https://github.com/colinrford/polynomial_nttp/blob/main/src/polynomial_nttp.cpp#L405)       | [`/tests/unit/antiderivative.cpp`](https://github.com/colinrford/polynomial_nttp/blob/main/tests/unit/antiderivative.cpp)                                                                                                                                                                                                             |
 | root-finding   | in-progress (circa Oct.8.25)                                                                                   | n/a                                                                                                                                                                                                                                                                                                                                   |
 
-Syntax such as `3 * p + q`, `p - 1.5 * q`, `6 * p * q`, is all possible. 
-Dividing a polynomial `p` of degree `M` by a polynomial `q` of degree `N`, both 
-with coefficients represented as `double`s, is achieved by 
-`division_prototype<double, M, p, N, q>()`. 
+Syntax such as `3 * p + q`, `p - 1.5 * q`, `6 * p * q`, is all possible.
+Dividing a polynomial `p` of degree `M` by a polynomial `q` of degree `N`, both
+with coefficients represented as `double`s, is achieved by
+`division_prototype<double, M, p, N, q>()`.
 
 One possibly-glaring issue in the current state is that `polynomial_nttp` allows
-the user to create arbitrary-degree constant polynomials, that is, we can e.g. 
-construct a `100` degree polynomial whose only nonzero coefficient is its 
+the user to create arbitrary-degree constant polynomials, that is, we can e.g.
+construct a `100` degree polynomial whose only nonzero coefficient is its
 constant coefficient. `operator+`, `operator-`, and `operator*` will all assume
-the degree of the resulting polynomial without checking whether the leading 
-term (or any for that matter) is `0`, while `division_prototype<>` will simply 
-fail at compile time, as the **_compiler_** will **not** divide by `0`. 
+the degree of the resulting polynomial without checking whether the leading
+term (or any for that matter) is `0`, while `division_prototype<>` will simply
+fail at compile time, as the **_compiler_** will **not** divide by `0`.
 Clearly this sort of behavior is a bit contrived and undesirable, but it is
 present at this time. I hope to find desirable alternative behavior for this.
-For addition, subtraction, and multiplication, it may require NTTP-based 
-functions (possibly replacements?), while for division there will need to be 
-a clever way to deal with the case where the leading coefficient of the 
-divisor is zero. 
+For addition, subtraction, and multiplication, it may require NTTP-based
+functions (possibly replacements?), while for division there will need to be
+a clever way to deal with the case where the leading coefficient of the
+divisor is zero.
 
 The biggest flaw of this implementation is division - because it is not
 `operator/`... The author is not an expert in `c++` or the kinds of things this
@@ -58,7 +58,7 @@ structure, `std::array` (where the entries are coefficients $a_i$, $i = 0,
 ii) compiles inside `constexpr`, `consteval` contexts. This deeply saddens the
 author, but at least its still possible to achieve the second point ii).
 
-## `division_prototype()` (find it in [`src/polynomial_nttp.cpp`, line `297`](https://github.com/colinrford/polynomial_nttp/blob/main/src/polynomial_nttp.cpp#L297))
+## `division_prototype()` (find it in [`src/polynomial_nttp.cpp`, line `302`](https://github.com/colinrford/polynomial_nttp/blob/main/src/polynomial_nttp.cpp#L297))
 So, why was this implementation ~~doomed~~ forced from the outset (i.e. the
 author's choice to use `std::array`) to rely on NTTPs to achieve simple
 polynomial division at compile time? Well, that's just it, apparently, since
@@ -75,8 +75,8 @@ was attainable... (at compile time... (using this implementation...))
 Now the astute reader may already realize that a chain reaction has occurred.
 Having been thrown into the land of template metaprogramming, as
 `division_prototype()` takes 5 template parameters, 4 of which are NTTPs,
-performing large numbers of tests of such a function requires something like 
-the use of `std::integer_sequence<int, ints...>` and fold expressions. 
+performing large numbers of tests of such a function requires something like
+the use of `std::integer_sequence<int, ints...>` and fold expressions.
 One could use `std::index_sequence` instead, of course.
 
 ### implementation
@@ -94,10 +94,10 @@ There is a chance I incorporate a different or additional test mechanism
 
 `test_polynomial_nttp.cpp` is an artifact of early development and
 may eventually be removed; there is an unrefined test file [`tests/thousand_divisions.cpp`](https://github.com/colinrford/polynomial_nttp/blob/main/tests/thousand_divisions.cpp)
-take note that this may require some compiler flags (`-fconstexpr-steps`) 
-to increase the number of iterations, and `clang` may not want to do 1000 
-at a time (in my sad experience). currently `thousand_divisions.cpp` is a 
-little messy, the chosen filenames are kind of lame, and there is some 
+take note that this may require some compiler flags (`-fconstexpr-steps`)
+to increase the number of iterations, and `clang` may not want to do 1000
+at a time (in my sad experience). currently `thousand_divisions.cpp` is a
+little messy, the chosen filenames are kind of lame, and there is some
 redundancy that I plan to reduce into a function soon enough.
 
 ## building
