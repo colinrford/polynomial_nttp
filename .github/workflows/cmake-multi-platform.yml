@@ -75,7 +75,6 @@ jobs:
     - name: Use Homebrew Clang on macOS
       if: startsWith(matrix.os, 'macos')
       run: |
-        # Install a newer version of LLVM Clang via Homebrew
         brew install llvm@21
         echo "LLVM_PREFIX=$(brew --prefix llvm@21)" >> $GITHUB_ENV
         echo "CC=$(brew --prefix llvm@21)/bin/clang" >> $GITHUB_ENV
@@ -93,8 +92,8 @@ jobs:
       run: >
         cmake -B ${{ steps.strings.outputs.build-output-dir }}
         -G Ninja
-        -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
-        -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
+        -DCMAKE_CXX_COMPILER=${{ env.CMAKE_CXX_COMPILER }}
+        -DCMAKE_C_COMPILER=${{ env.CMAKE_C_COMPILER }}
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
         -S ${{ github.workspace }}
         ${{ env.CMAKE_CXX_FLAGS }} 
