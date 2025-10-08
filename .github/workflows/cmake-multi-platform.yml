@@ -37,14 +37,15 @@ jobs:
             c_compiler: gcc
           - os: ubuntu-latest
             c_compiler: cl
-            cpp_compiler: c1
           - os: ubuntu-latest
             c_compiler: gcc
           - os: macos-latest
             c_compiler: gcc
+          - os: macos-latest
             cpp_compiler: g++
           - os: macos-latest
             c_compiler: c1
+          - os: macos-latest
             cpp_compiler: c1
 
     steps:
