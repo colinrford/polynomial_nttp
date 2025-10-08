@@ -7,18 +7,18 @@ which uses `#include`s rather than `import`s, but also only builds
 the rest. More build information is found below.
 
 ## Overview
-`polynomial_nttp` implements a model of a polynomial algebra in `c++`
-which, as the name suggests, achieves this via  Non-Type Template Parameters
-(NTTPs) (it's a wrapped `std::array`; thusly I could only figure out the
-Division Algorithm / Euclidean Algorithm using NTTPs – more on this in a
-moment). Thanks to NTTPs, combined with recent enhancements for lambdas in
-`c++20`, a model of a polynomial ring $k[X]$ over a field $k$ (hopefully, of
-any characteristic, but at least a reasonable subset of computable rationals)
-works in `constexpr` and `consteval` contexts. Such a ring $k[X]$ is a
-Euclidean Domain, in which case we have a Euclidean Algorithm, and indeed, in
-addition to addition, overloading `operator+`, subtraction `operator-`, and
-multiplication `operator*`, all of this can be done, if one *truly* insists,
-at compile time.
+`polynomial_nttp` implements a model of a polynomial algebra in one 
+indeterminate in `c++` which, as the name suggests, achieves this via 
+Non-Type Template Parameters (NTTPs) (it's a wrapped `std::array`; thusly I 
+could only figure out the Division Algorithm / Euclidean Algorithm using NTTPs 
+– more on this in a moment). Thanks to NTTPs, combined with recent enhancements 
+for lambdas in `c++20`, a model of a polynomial ring $k[X]$ over a field $k$ 
+(hopefully, of any characteristic, but at least a reasonable subset of 
+computable rationals) works in `constexpr` and `consteval` contexts. Such a 
+ring $k[X]$ is a Euclidean Domain, in which case we have a Euclidean Algorithm, 
+and indeed, in addition to addition, overloading `operator+`, subtraction 
+`operator-`, and multiplication `operator*`, all of this can be done, if one 
+*truly* insists, at compile time.
 
 | operation      | implemented                                                                                                    | unit-tested                                                                                                                                                                                                                                                                                                                           |
 |----------------|----------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
