@@ -58,7 +58,7 @@ structure, `std::array` (where the entries are coefficients $a_i$, $i = 0,
 ii) compiles inside `constexpr`, `consteval` contexts. This deeply saddens the
 author, but at least its still possible to achieve the second point ii).
 
-## `division_prototype()` (find it in [`src/polynomial_nttp.cpp`, line `302`](https://github.com/colinrford/polynomial_nttp/blob/main/src/polynomial_nttp.cpp#L297))
+## `division_prototype()` (find it in [`src/polynomial_nttp.cpp`, line `302`](https://github.com/colinrford/polynomial_nttp/blob/main/src/polynomial_nttp.cpp#L302))
 So, why was this implementation ~~doomed~~ forced from the outset (i.e. the
 author's choice to use `std::array`) to rely on NTTPs to achieve simple
 polynomial division at compile time? Well, that's just it, apparently, since
@@ -85,7 +85,7 @@ I documented my approach in the
 
 ### testing
 Unit tests for the contents in `polynomial_nttp.cppm` are found in
-`/tests/unit`. Currently they will build with a proper `cmake` command, and
+[`/tests/unit`](https://github.com/colinrford/polynomial_nttp/blob/main/tests/unit). Currently they will build with a proper `cmake` command, and
 run with `ctest`. The unit tests all have `if constexpr` statements so that
 even when asserts are turned off the program will `return 0` for passing and
 `return 1` otherwise, and of course this switch is determined at compile time.
@@ -103,7 +103,7 @@ redundancy that I plan to reduce into a function soon enough.
 ## building
 
 ### some preliminaries
-Despite limited support, still, as of (circa) October 1, 2025, for `c++`
+Despite limited support, still, as of (circa) October 8, 2025, for `c++`
 modules, the project will build as a `c++` module. The primary build route
 currently provided builds the project using `cmake`, so you will need `cmake`
 at least version `3.30` (use `3.31.6` if you can, otherwise you'll need to
@@ -120,8 +120,8 @@ this feature, and instead solely relies on / supports `ninja` at this time
 * `ninja`
 * `clang` or `msvc`
 
-and to build with the `Makefile`, have at least `g++` version `15.1.0` and be
-willing to make changes based upon your machine or distribution. I will try to
+~~and to build with the `Makefile`, have at least `g++` version `15.1.0` and be
+willing to make changes based upon your machine or distribution.~~ I will try to
 elaborate on this in the near future.
 
 For the `macOS` user, please see [here](https://github.com/colinrford/polynomial_nttp/wiki/Troubles-with-macOS,-Apple-Clang,-and-LLVM-Clang)
