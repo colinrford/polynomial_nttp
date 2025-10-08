@@ -71,7 +71,8 @@ jobs:
         echo "LLVM_PREFIX=/usr/lib/llvm-21" >> $GITHUB_ENV
         echo "CC=clang-21" >> $GITHUB_ENV
         echo "CXX=clang++-21" >> $GITHUB_ENV
-        cmake_options="$cmake_options -DCMAKE_CXX_FLAGS='-stdlib=libc++' -DCMAKE_EXE_LINKER_FLAGS='-stdlib=libc++'"
+        echo "CMAKE_CXX_FLAGS='-stdlib=libc++'" >> $GITHUB_ENV
+        echo "CMAKE_EXE_LINKER_FLAGS='-stdlib=libc++'" >> $GITHUB_ENV
         
     - name: Use Homebrew Clang on macOS
       if: startsWith(matrix.os, 'macos')
@@ -82,7 +83,8 @@ jobs:
         echo "CXX=$(brew --prefix llvm@21)/bin/clang++" >> $GITHUB_ENV
         SDK_PATH=$(xcrun --show-sdk-path)
         echo "::notice::macOS SDK path: $SDK_PATH"
-        cmake_options="-isysroot $SDK_PATH -stdlib=libc++ -nostdinc++ -I$SDK_PATH/include/c++/v1 -DCMAKE_OSX_SYSROOT=$SDK_PATH"
+        echo "CMAKE_CXX_FLAGS=-isysroot $SDK_PATH -stdlib=libc++ -nostdinc++ -isystem $SDK_PATH/include/c++/v1" >> $GITHUB_ENV 
+        echo "CMAKE_OSX_SYSROOT=$SDK_PATH" >> $GITHUB_ENV
         
     - name: Set up Clang on Windows
       if: matrix.compiler == 'clang' && runner.os == 'Windows'
@@ -99,11 +101,11 @@ jobs:
         -G Ninja
         -DCMAKE_CXX_COMPILER=${{ env.CXX }}
         -DCMAKE_C_COMPILER=${{ env.CC }}
+        -DCMAKE_CXX_FLAGS=${{ env.CMAKE_CXX_FLAGS }}
+        -DCMAKE_EXE_LINKER_FLAGS=${{ env.CMAKE_EXE_LINKER_FLAGS }}
+        -DCMAKE_OSX_SYSROOT=${{ env.CMAKE_OSX_SYSROOT }}
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
         -S ${{ github.workspace }}
-        ${{ env.CMAKE_CXX_FLAGS }} 
-        ${{ env.CMAKE_EXE_LINKER_FLAGS }}
-        ${ cmake_options }
 
     - name: Build
       # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
