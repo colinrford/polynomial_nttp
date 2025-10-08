@@ -60,7 +60,7 @@ jobs:
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
         
-    - name: Install LLVM/libc++ on Ubuntu
+    - name: Set up LLVM/libc++ on Ubuntu
       if: startsWith(matrix.os, 'ubuntu')
       run: |
         # Use the official LLVM installation script
@@ -72,9 +72,9 @@ jobs:
         echo "CC=clang-21" >> $GITHUB_ENV
         echo "CXX=clang++-21" >> $GITHUB_ENV
         echo "CMAKE_CXX_FLAGS='-stdlib=libc++'" >> $GITHUB_ENV
-        echo "CMAKE_EXE_LINKER_FLAGS='-stdlib=libc++'" >> $GITHUB_ENV
+        echo "CMAKE_EXE_LINKER_FLAGS=-stdlib=libc++ -Wl,-rpath,$LLVM_PREFIX/lib -L$LLVM_PREFIX/lib" >> $GITHUB_ENV
         
-    - name: Use Homebrew Clang on macOS
+    - name: Set up Homebrew Clang/libc++ on macOS
       if: startsWith(matrix.os, 'macos')
       run: |
         brew install llvm@21
@@ -83,7 +83,7 @@ jobs:
         echo "CXX=$(brew --prefix llvm@21)/bin/clang++" >> $GITHUB_ENV
         SDK_PATH=$(xcrun --show-sdk-path)
         echo "::notice::macOS SDK path: $SDK_PATH"
-        echo "CMAKE_CXX_FLAGS=-isysroot $SDK_PATH -stdlib=libc++ -nostdinc++ -isystem $SDK_PATH/include/c++/v1" >> $GITHUB_ENV 
+        echo "CMAKE_CXX_FLAGS=-isysroot $SDK_PATH -stdlib=libc++ -nostdinc++ -I$LLVM_PREFIX/include/c++/v1" >> $GITHUB_ENV 
         echo "CMAKE_OSX_SYSROOT=$SDK_PATH" >> $GITHUB_ENV
         
     - name: Set up Clang on Windows
@@ -92,6 +92,7 @@ jobs:
         choco install llvm -y
         echo "CC=clang-cl" >> $GITHUB_ENV
         echo "CXX=clang-cl" >> $GITHUB_ENV
+      shell: cmd
       
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
