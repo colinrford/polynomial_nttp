@@ -68,6 +68,7 @@ jobs:
         chmod +x llvm.sh
         sudo ./llvm.sh 21 all
         sudo apt-get install -y libc++-21-dev libc++abi-21-dev
+        LLVM_PREFIX="/usr/lib/llvm-21"
         echo "LLVM_PREFIX=/usr/lib/llvm-21" >> $GITHUB_ENV
         echo "CC=clang-21" >> $GITHUB_ENV
         echo "CXX=clang++-21" >> $GITHUB_ENV
@@ -78,6 +79,7 @@ jobs:
       if: startsWith(matrix.os, 'macos')
       run: |
         brew install llvm@21
+        LLVM_PREFIX=$(brew --prefix llvm@21)
         echo "LLVM_PREFIX=$(brew --prefix llvm@21)" >> $GITHUB_ENV
         echo "CC=$(brew --prefix llvm@21)/bin/clang" >> $GITHUB_ENV
         echo "CXX=$(brew --prefix llvm@21)/bin/clang++" >> $GITHUB_ENV
