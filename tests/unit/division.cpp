@@ -3,9 +3,9 @@
  *    see github.com/colinrford/polynomial_nttp for AGPL-3.0 License, and
  *                                              for more info
  *  unit test for polynomial_nttp polynomial division
+ *    need to return (placeholder circa Oct. 8, 2025)
  */
 
-import std;
 import polynomial_nttp;
 
 using namespace math_nttp::polynomial;
@@ -21,10 +21,8 @@ constexpr bool comparitore(double a, double b)
 
 consteval auto division_by_zero_result()
 {
-  constexpr std::array<double, 3> quadratic_coefficients{0., 1., 2.};
-  constexpr polynomial_nttp<double, 2> a(std::move(quadratic_coefficients));
-  constexpr std::array<double, 2> linear_coefficients{0., 0.};
-  constexpr polynomial_nttp<double, 1> b(std::move(linear_coefficients));
+  constexpr polynomial_nttp<double, 2> a{0., 1., 2.};
+  constexpr polynomial_nttp<double, 1> b{0., 0.};
   constexpr auto a_divided_by_b =
                         division_prototype<double, 2, a, 1, b>();
   return a_divided_by_b;
@@ -49,10 +47,8 @@ consteval bool divide_by_zero()
 
 consteval auto division_by_greater_degree_result()
 {
-  constexpr std::array<double, 3> quadratic_coefficients{-1.2, 1.5, 2.2};
-  constexpr polynomial_nttp<double, 2> a(std::move(quadratic_coefficients));
-  constexpr std::array<double, 2> linear_coefficients{1.5, 2.5};
-  constexpr polynomial_nttp<double, 1> b(std::move(linear_coefficients));
+  constexpr polynomial_nttp<double, 2> a{-1.2, 1.5, 2.2};
+  constexpr polynomial_nttp<double, 1> b{1.5, 2.5};
   constexpr auto b_divided_by_a =
                         division_prototype<double, 1, b, 2, a>();
   return b_divided_by_a;

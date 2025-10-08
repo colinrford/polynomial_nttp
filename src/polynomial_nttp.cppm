@@ -117,7 +117,7 @@ struct polynomial_nttp
 };
 
 // enable syntax for adding polynomials in R[X]
-template<experimental::concepts::field_element_c_weak R = double,
+template<experimental::concepts::ring_element_c_weak R = double,
          std::size_t M,
          std::size_t N>
 constexpr auto operator+(const polynomial_nttp<R, M>& p,
@@ -134,7 +134,7 @@ constexpr auto operator+(const polynomial_nttp<R, M>& p,
 }
 
 // add a constant on the left
-template<experimental::concepts::field_element_c_weak R = double,
+template<experimental::concepts::ring_element_c_weak R = double,
          std::size_t N>
 constexpr auto operator+(R&& r,
                          const polynomial_nttp<R, N>& p) noexcept
@@ -147,7 +147,7 @@ constexpr auto operator+(R&& r,
 }
 
 // add a constant on the right
-template<experimental::concepts::field_element_c_weak R = double,
+template<experimental::concepts::ring_element_c_weak R = double,
          std::size_t N>
 constexpr auto operator+(const polynomial_nttp<R, N>& p,
                          R&& r) noexcept
@@ -159,7 +159,7 @@ constexpr auto operator+(const polynomial_nttp<R, N>& p,
   }();
 }
 // enable syntax for subtracting polynomials in R[X]
-template<experimental::concepts::field_element_c_weak R = double,
+template<experimental::concepts::ring_element_c_weak R = double,
          std::size_t M,
          std::size_t N>
 constexpr auto operator-(const polynomial_nttp<R, M>& p,
@@ -176,7 +176,7 @@ constexpr auto operator-(const polynomial_nttp<R, M>& p,
 }
 
 // subtract a constant on the left
-template<experimental::concepts::field_element_c_weak R = double,
+template<experimental::concepts::ring_element_c_weak R = double,
          std::size_t N>
 constexpr auto operator-(R&& r,
                          const polynomial_nttp<R, N>& p) noexcept
@@ -189,7 +189,7 @@ constexpr auto operator-(R&& r,
 }
 
 // subtract a constant on the right
-template<experimental::concepts::field_element_c_weak R = double,
+template<experimental::concepts::ring_element_c_weak R = double,
          std::size_t N>
 constexpr auto operator-(const polynomial_nttp<R, N>& p,
                          R&& r) noexcept
@@ -201,7 +201,7 @@ constexpr auto operator-(const polynomial_nttp<R, N>& p,
   }();
 }
 // enable syntax for multiplying polynomials in R[X]
-template<experimental::concepts::field_element_c_weak R = double,
+template<experimental::concepts::ring_element_c_weak R = double,
          std::size_t M,
          std::size_t N>
 constexpr auto operator*(const polynomial_nttp<R, M>& p,
@@ -217,7 +217,7 @@ constexpr auto operator*(const polynomial_nttp<R, M>& p,
 }
 
 // multiply a constant on the left
-template<experimental::concepts::field_element_c_weak R = double,
+template<experimental::concepts::ring_element_c_weak R = double,
          std::size_t N>
 constexpr auto operator*(R&& r,
                          const polynomial_nttp<R, N>& p) noexcept
@@ -233,7 +233,7 @@ constexpr auto operator*(R&& r,
 }
 
 // multiply a constant on the right
-template<experimental::concepts::field_element_c_weak R = double,
+template<experimental::concepts::ring_element_c_weak R = double,
          std::size_t N>
 constexpr auto operator*(const polynomial_nttp<R, N>& p,
                          R&& r) noexcept
@@ -252,17 +252,17 @@ constexpr auto operator*(const polynomial_nttp<R, N>& p,
  *  the norm of a polynomial is its degree
  *  a `polynomial_nttp` can be of degree `N > 0` with all zero coefficients
  */
-template<experimental::concepts::field_element_c_weak R = double,
+template<experimental::concepts::ring_element_c_weak R = double,
          std::size_t N>
 constexpr auto norm([[maybe_unused]] const polynomial_nttp<R, N>& p) noexcept
 { return N; }
 /* returns the leading coefficient, even if it is zero! */
-template<experimental::concepts::field_element_c_weak R = double,
+template<experimental::concepts::ring_element_c_weak R = double,
          std::size_t N>
 constexpr R leading(const polynomial_nttp<R, N>& p) noexcept
 { return p.coefficients[N]; }
 /* returns a new monomial of degree `N` */
-template<experimental::concepts::field_element_c_weak R = double,
+template<experimental::concepts::ring_element_c_weak R = double,
          std::size_t N>
 constexpr polynomial_nttp<R, N> make_monomial() noexcept
 {
@@ -288,7 +288,12 @@ constexpr polynomial_nttp<R, N> make_monomial() noexcept
  *    the remainder `r` is identically `a_of_x` if
  *      - `b_of_x` is identically `0`, or
  *      - `N > M`, i.e., `norm(b_of_x) > norm(a_of_x)`
-\*                                                            */
+ *
+ *    division_prototype() will trigger a compile-time failure if one chooses
+ *      to create (directly or inadvertently) an `N` degree polynomial with
+ *      0 as leading coefficient; the author sees this as a drawback of the
+ *      current version and will introduce better behavior in the future
+\*                                                                          */
 template<experimental::concepts::field_element_c_weak R = double,
          std::size_t M,
          polynomial_nttp<R, M> a_of_x,
@@ -324,10 +329,10 @@ noexcept
     if (N <= M && b_is_not_zero)
     {
       auto deg_b = norm(b_of_x);
-      auto lead_coeff_b = leading(b_of_x);
+      auto lead_coeff_b = leading(b_of_x); // will fail at compile time if = 0
       while (remainder.size() - 1 >= deg_b)
       {
-        auto s = remainder.back() / lead_coeff_b;
+        auto s = remainder.back() / lead_coeff_b; // see 3 lines above
         quotient.push_back(s);
         std::size_t i_offset = remainder.size() - deg_b - 1;
         for (std::size_t i = 0; i <= N; ++i)
@@ -339,7 +344,7 @@ noexcept
         remainder.pop_back();
       std::reverse(quotient.begin(), quotient.end());
       quotient_size = quotient.size() - 1;
-    } else // we will dereference a null without something like this
+    } else // will dereference a null without something like this
     { quotient.push_back(static_cast<R>(0)); }
     for (std::size_t i = 0; i <= quotient_size; ++i)
       oversized_quotient[i] = quotient[i];
@@ -391,8 +396,8 @@ constexpr auto derivative(const polynomial_nttp<R, N>& p) noexcept
 }
 
 /*
- * this function returns the antiderivative of p for which a_0 = 0
- * R needs to be a field and the cast R(i) needs to make sense
+ *  this function returns the antiderivative of p for which a_0 = 0
+ *  R needs to be a field and the cast R(i) needs to make sense
  */
 template<experimental::concepts::field_element_c_weak R = double,
          std::size_t N>
@@ -404,13 +409,6 @@ antiderivative(const polynomial_nttp<R, N>& p) noexcept
     auto ids = indexing_set_from_to(1, N + 1 + 1);
     for (auto i : ids)
       antiderivative_of_p.coefficients[i] = 1 / static_cast<R>(i) * p[i - 1];
-    /*stdr::transform(stdr::cbegin(ids),
-                    stdr::cend(ids),
-                    stdr::begin(antiderivative_of_p),
-                    [&](auto&& index) {
-                      return (static_cast<R>(1) / static_cast<R>(index))
-                            * p[index - 1];
-                    });*/
     return antiderivative_of_p;
   }();
 }
