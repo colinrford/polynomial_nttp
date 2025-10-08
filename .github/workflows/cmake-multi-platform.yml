@@ -2,9 +2,9 @@ name: CMake on multiple platforms
 
 on:
   push:
-    branches: [ "modularize" ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ "modularize" ]
+    branches: [ "main" ]
 
 jobs:
   build:
