@@ -104,9 +104,9 @@ jobs:
         -G Ninja
         -DCMAKE_CXX_COMPILER=${{ env.CXX }}
         -DCMAKE_C_COMPILER=${{ env.CC }}
-        -DCMAKE_CXX_FLAGS=${{ env.CMAKE_CXX_FLAGS }}
-        -DCMAKE_EXE_LINKER_FLAGS=${{ env.CMAKE_EXE_LINKER_FLAGS }}
-        -DCMAKE_OSX_SYSROOT=${{ env.CMAKE_OSX_SYSROOT }}
+        -DCMAKE_CXX_FLAGS="${{ env.CMAKE_CXX_FLAGS }}"
+        -DCMAKE_EXE_LINKER_FLAGS="${{ env.CMAKE_EXE_LINKER_FLAGS }}"
+        -DCMAKE_OSX_SYSROOT="${{ env.CMAKE_OSX_SYSROOT }}"
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
         -S ${{ github.workspace }}
 
