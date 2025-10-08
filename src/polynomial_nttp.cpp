@@ -239,15 +239,19 @@ noexcept
 
 // R needs to be a field and the cast R(i) needs to make sense
 template<typename R = double, std::size_t N>
-constexpr polynomial_nttp<R, N - 1>
+constexpr auto
 derivative(const polynomial_nttp<R, N>& p) noexcept
 {
-  return [&]() {
-    polynomial_nttp<R, N - 1> ddxp{};
-    for (auto i : indexing_set(N))
-      ddxp.coefficients[i] = (static_cast<R>(i) + 1) * p[i + 1];
-    return ddxp;
-  }();
+  if constexpr (N == 0)
+    return polynomial_nttp<R, 0>{};
+  else {
+    return [&]() {
+      polynomial_nttp<R, N - 1> ddxp{};
+      for (auto i : indexing_set(N))
+        ddxp.coefficients[i] = (static_cast<R>(i) + 1) * p[i + 1];
+      return ddxp;
+    }();
+  }
 }
 
 /*

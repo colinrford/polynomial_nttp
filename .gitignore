@@ -33,3 +33,19 @@
 
 # macOS
 .DS_Store
+
+# JetBrains / CLion
+.idea
+cmake-build-*
+
+# gcc modules
+gcm.cache
+
+# cmake
+CMakeFiles/
+CMakeCache.txt
+CMakeUserPresets.json
+
+# build directory
+build*/
+

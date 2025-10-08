@@ -1,0 +1,11 @@
+module;
+
+import std;
+
+export module config;
+
+export namespace build_info
+{
+  inline constexpr std::string_view get_build_config()
+  { return "@CMAKE_BUILD_TYPE@"; }
+}
