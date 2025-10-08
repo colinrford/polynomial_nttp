@@ -95,8 +95,7 @@ jobs:
           SDK_PATH=$(xcrun --show-sdk-path)
           echo "::notice::macOS SDK path: $SDK_PATH"
           cmake_options="-isysroot $SDK_PATH -stdlib=libc++ -nostdinc++ -I$SDK_PATH/include/c++/v1 -DCMAKE_OSX_SYSROOT=$SDK_PATH"
-        fi
-        if [ "${{ runner.os }}" == "Linux" ]; then
+        elif [ "${{ runner.os }}" == "Linux" ]; then
           cmake_options="$cmake_options -DCMAKE_CXX_FLAGS='-stdlib=libc++' -DCMAKE_EXE_LINKER_FLAGS='-stdlib=libc++'"
         fi
         cmake -B ${{ steps.strings.outputs.build-output-dir }}
@@ -107,6 +106,7 @@ jobs:
         -S ${{ github.workspace }}
         ${{ env.CMAKE_CXX_FLAGS }} 
         ${{ env.CMAKE_EXE_LINKER_FLAGS }}
+        ${{ cmake_options }}
 
     - name: Build
       # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
