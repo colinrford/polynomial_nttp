@@ -60,17 +60,32 @@ jobs:
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
         
+    - name: Install LLVM/libc++ on Ubuntu
+      if: startsWith(matrix.os, 'ubuntu')
+      run: |
+        # Use the official LLVM installation script
+        wget https://apt.llvm.org/llvm.sh
+        chmod +x llvm.sh
+        sudo ./llvm.sh 21 all
+        sudo apt-get install -y libc++-21-dev libc++abi-21-dev
+        echo "LLVM_PREFIX=/usr/lib/llvm-21" >> $GITHUB_ENV
+        echo "CC=clang-21" >> $GITHUB_ENV
+        echo "CXX=clang++-21" >> $GITHUB_ENV
+        
     - name: Use Homebrew Clang on macOS
       if: startsWith(matrix.os, 'macos')
       run: |
         # Install a newer version of LLVM Clang via Homebrew
         brew install llvm@21
+        echo "LLVM_PREFIX=$(brew --prefix llvm@21)" >> $GITHUB_ENV
         echo "CC=$(brew --prefix llvm@21)/bin/clang" >> $GITHUB_ENV
         echo "CXX=$(brew --prefix llvm@21)/bin/clang++" >> $GITHUB_ENV
         
     - name: Set up Clang on Windows
       if: matrix.compiler == 'clang' && runner.os == 'Windows'
-      run: choco install llvm -y
+      run: |
+        choco install llvm -y
+        echo "CXX=clang-cl" >> $GITHUB_ENV
       
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
