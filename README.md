@@ -111,11 +111,11 @@ adjust `CMakeLists.txt`), as well as at least `llvm` version `18.1.1` (newer is
 better, given status of module `std`) OR `MSVC` version `14.35`. Minimum
 requirements can be found
 [on Kitware's announcement for `import std`](https://www.kitware.com/import-std-in-cmake-3-30/).
-Sadly `cmake` does not yet support `g++` or `stdlibc++` with `import std`, so I
+Sadly `cmake` does not yet support `g++` or `stdlibc++` with `import std`, ~~so I
 have included a separate `Makefile` intended exclusively for compilation with
 `g++` and `stdlibc++`; `cmake` also does not support `Makefile`s when using
 this feature, and instead solely relies on / supports `ninja` at this time
-(circa Oct. 1, 2025). In other words, to build with `cmake` you will need
+(circa Oct. 8, 2025).~~ In other words, to build with `cmake` you will need
 * `cmake`
 * `ninja`
 * `clang` or `msvc`
