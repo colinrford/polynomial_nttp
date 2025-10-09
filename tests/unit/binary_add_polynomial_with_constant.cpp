@@ -11,7 +11,7 @@ import polynomial_nttp;
 
 using namespace math_nttp::polynomial;
 
-int main() // not finished!!!!!!!
+int main()
 {
   constexpr polynomial_nttp<int, 1> linear{1, 3};
   constexpr auto linear_plus_constant = linear + 1;
