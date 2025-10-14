@@ -12,7 +12,7 @@ import std;
 import experimental.concepts;
 import polynomial_nttp;
 
-namespace pnttp = math_nttp::polynomial;//
+namespace pnttp = math_nttp;//
 
 consteval double line(double x)
 {

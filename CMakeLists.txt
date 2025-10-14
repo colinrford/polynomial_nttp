@@ -12,7 +12,7 @@ else()
 endif()
 
 set(CMAKE_CXX_EXTENSIONS OFF)
-#set(CMAKE_CXX_STANDARD_REQUIRED True) #is this needed?
+set(CMAKE_CXX_STANDARD_REQUIRED True) #is this needed?
 set(CMAKE_CXX_MODULE_STD ON)
 set(CMAKE_CXX_SCAN_FOR_MODULES ON)
 
@@ -25,7 +25,7 @@ configure_file(
   ${CMAKE_CURRENT_BINARY_DIR}/config.cppm
 )
 
-add_library(experimental_concepts src/experimental/concepts.cppm)
+add_library(experimental_concepts)
 target_sources(experimental_concepts PUBLIC
   FILE_SET CXX_MODULES
   TYPE CXX_MODULES
@@ -33,15 +33,20 @@ target_sources(experimental_concepts PUBLIC
 )
 target_compile_features(experimental_concepts PUBLIC cxx_std_23)
 
-add_library(polynomial_nttp src/polynomial_nttp.cppm)
-target_sources(polynomial_nttp PUBLIC
+add_library(polynomial_nttp)
+
+target_sources(polynomial_nttp
+  PUBLIC
   FILE_SET CXX_MODULES
   TYPE CXX_MODULES
   FILES src/polynomial_nttp.cppm
-        ${CMAKE_CURRENT_BINARY_DIR}/config.cppm
+        src/polynomial_nttp-univariate-structure.cppm
+        src/polynomial_nttp-univariate-algebra.cppm
+        src/polynomial_nttp-univariate.cppm
 )
+
 target_link_libraries(polynomial_nttp experimental_concepts)
 target_compile_features(polynomial_nttp PUBLIC cxx_std_23)
 
 add_subdirectory(tests)
-add_subdirectory(examples)
+#add_subdirectory(examples)

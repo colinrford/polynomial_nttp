@@ -9,7 +9,7 @@
 import std;
 import polynomial_nttp;
 
-using namespace math_nttp::polynomial;
+using namespace math_nttp;
 
 int main()
 {

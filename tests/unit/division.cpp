@@ -8,7 +8,7 @@
 
 import polynomial_nttp;
 
-using namespace math_nttp::polynomial;
+using namespace math_nttp;
 
 constexpr bool comparitore(double a, double b)
 {
