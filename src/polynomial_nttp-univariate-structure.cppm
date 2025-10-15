@@ -22,8 +22,11 @@ namespace polynomial
 namespace univariate
 {
 
+template<typename R>
+concept ring_element_c_weak = experimental::concepts::ring_element_c_weak<R>;
+
 export
-template<experimental::concepts::ring_element_c_weak R = double,
+template<ring_element_c_weak R = double,
          std::size_t N = 0>
 struct polynomial_nttp
 {

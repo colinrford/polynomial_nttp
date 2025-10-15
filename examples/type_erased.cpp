@@ -8,6 +8,17 @@
 import std;
 import polynomial_nttp;
 
+namespace stdr = std::ranges;
+namespace stdv = std::views;
+
+auto indexing_set = [](auto n) {
+  return stdv::iota(decltype(n)(0), n);
+};
+
+auto indexing_set_from_to = [](auto m, auto n) {
+  return stdv::iota(decltype(n)(m), n);
+};
+
 constexpr double factorial(std::size_t n)
 { return n == 0 ? 1. : static_cast<double>(n) * factorial(n - 1); }
 
@@ -20,7 +31,7 @@ constexpr auto sin_impl_test()
     constexpr std::size_t n = 12;
     constexpr std::size_t two_n_plus_1 = 2 * n + 1;
     math_nttp::polynomial_nttp<double, two_n_plus_1> power_series{};
-    for (std::size_t i : math_nttp::indexing_set(n))
+    for (std::size_t&& i : indexing_set(n))
     {
       double neg_one_i = neg_one_multiplier(i);
       double two_i_plus_one_fact = factorial(2 * i + 1);
@@ -39,7 +50,7 @@ constexpr auto cos_impl_test()
     constexpr std::size_t n = 12;
     constexpr std::size_t two_n = 2 * n;
     math_nttp::polynomial_nttp<double, two_n> power_series{};
-    for (std::size_t i : math_nttp::indexing_set(n))
+    for (std::size_t&& i : indexing_set(n))
     {
       double neg_one_i = neg_one_multiplier(i);
       double two_i_fact = factorial(2 * i);
@@ -58,7 +69,7 @@ constexpr auto exp_impl_test()
     constexpr std::size_t n = 16;
     constexpr std::size_t two_n = 30;
     math_nttp::polynomial_nttp<double, two_n> power_series{};
-    for (std::size_t i : math_nttp::indexing_set(two_n))
+    for (std::size_t&& i : indexing_set(two_n))
     {
       double one_over_n_fact = 1 / factorial(i);
       power_series.coefficients[i] = one_over_n_fact;
@@ -142,7 +153,7 @@ int main()
   int type_erased_counter = 0;
   constexpr int last = 100;
   constexpr double one_half = 0.5;
-  for (auto& p : type_erased_polynomials)
+  for (auto&& p : type_erased_polynomials)
   {
     std::println("type_erased_counter =\t{}", type_erased_counter);
     const auto current_test_function = which_type_erased_polynomial(

@@ -49,4 +49,4 @@ target_link_libraries(polynomial_nttp experimental_concepts)
 target_compile_features(polynomial_nttp PUBLIC cxx_std_23)
 
 add_subdirectory(tests)
-#add_subdirectory(examples)
+add_subdirectory(examples)

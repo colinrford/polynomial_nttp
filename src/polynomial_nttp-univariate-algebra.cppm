@@ -31,12 +31,13 @@ auto indexing_set_from_to = [](auto m, auto n) {
   return stdv::iota(decltype(n)(m), n);
 };
 
-template<typename R>
-concept ring_element_c_weak = experimental::concepts::ring_element_c_weak<R>;
+// ring_element_c_weak is defined in :univariate.structure
+template<typename K>
+concept field_element_c_weak = experimental::concepts::field_element_c_weak<K>;
 
 // enable syntax for adding polynomials in R[X]
 export
-template<experimental::concepts::ring_element_c_weak R = double,
+template<ring_element_c_weak R = double,
          std::size_t M,
          std::size_t N>
 constexpr auto operator+(const polynomial_nttp<R, M>& p,
@@ -55,7 +56,7 @@ noexcept
 
 // add a constant on the left
 export
-template<experimental::concepts::ring_element_c_weak R = double,
+template<ring_element_c_weak R = double,
          std::size_t N>
 constexpr auto operator+(R&& r, const polynomial_nttp<R, N>& p)
 noexcept
@@ -69,7 +70,7 @@ noexcept
 
 // add a constant on the right
 export
-template<experimental::concepts::ring_element_c_weak R = double,
+template<ring_element_c_weak R = double,
          std::size_t N>
 constexpr auto operator+(const polynomial_nttp<R, N>& p, R&& r)
 noexcept
@@ -83,7 +84,7 @@ noexcept
 
 // enable syntax for subtracting polynomials in R[X]
 export
-template<experimental::concepts::ring_element_c_weak R = double,
+template<ring_element_c_weak R = double,
          std::size_t M,
          std::size_t N>
 constexpr auto operator-(const polynomial_nttp<R, M>& p,
@@ -102,7 +103,7 @@ noexcept
 
 // subtract a constant on the left
 export
-template<experimental::concepts::ring_element_c_weak R = double,
+template<ring_element_c_weak R = double,
          std::size_t N>
 constexpr auto operator-(R&& r, const polynomial_nttp<R, N>& p)
 noexcept
@@ -116,7 +117,7 @@ noexcept
 
 // subtract a constant on the right
 export
-template<experimental::concepts::ring_element_c_weak R = double,
+template<ring_element_c_weak R = double,
          std::size_t N>
 constexpr auto operator-(const polynomial_nttp<R, N>& p, R&& r)
 noexcept
@@ -130,7 +131,7 @@ noexcept
 
 // enable syntax for multiplying polynomials in R[X]
 export
-template<experimental::concepts::ring_element_c_weak R = double,
+template<ring_element_c_weak R = double,
          std::size_t M,
          std::size_t N>
 constexpr auto operator*(const polynomial_nttp<R, M>& p,
@@ -148,7 +149,7 @@ noexcept
 
 // multiply a constant on the left
 export
-template<experimental::concepts::ring_element_c_weak R = double,
+template<ring_element_c_weak R = double,
          std::size_t N>
 constexpr auto operator*(R&& r, const polynomial_nttp<R, N>& p)
 noexcept
@@ -165,7 +166,7 @@ noexcept
 
 // multiply a constant on the right
 export
-template<experimental::concepts::ring_element_c_weak R = double,
+template<ring_element_c_weak R = double,
          std::size_t N>
 constexpr auto operator*(const polynomial_nttp<R, N>& p, R&& r)
 noexcept
@@ -185,21 +186,21 @@ noexcept
  *  a `polynomial_nttp` can be of degree `N > 0` with all zero coefficients
  */
 export
-template<experimental::concepts::ring_element_c_weak R = double,
+template<ring_element_c_weak R = double,
          std::size_t N>
 constexpr auto norm([[maybe_unused]] const polynomial_nttp<R, N>& p)
 noexcept
 { return N; }
 /* returns the leading coefficient, even if it is zero! */
 export
-template<experimental::concepts::ring_element_c_weak R = double,
+template<ring_element_c_weak R = double,
          std::size_t N>
 constexpr R leading(const polynomial_nttp<R, N>& p)
 noexcept
 { return p.coefficients[N]; }
 /* returns a new monomial of degree `N` */
 export
-template<experimental::concepts::ring_element_c_weak R = double,
+template<ring_element_c_weak R = double,
          std::size_t N>
 constexpr polynomial_nttp<R, N> make_monomial()
 noexcept
@@ -233,7 +234,7 @@ noexcept
  *      current version and will introduce better behavior in the future
 \*                                                                          */
 export
-template<experimental::concepts::field_element_c_weak R = double,
+template<field_element_c_weak R = double,
          std::size_t M,
          polynomial_nttp<R, M> a_of_x,
          std::size_t N,
@@ -315,7 +316,7 @@ noexcept
  *    `auto` and `if constexpr` are how we choose to avoid `0 - 1` underflow
  */
 export
-template<experimental::concepts::field_element_c_weak R = double,
+template<field_element_c_weak R = double,
          std::size_t N>
 constexpr auto derivative(const polynomial_nttp<R, N>& p)
 noexcept
@@ -341,7 +342,7 @@ noexcept
  *  R needs to be a field and the cast R(i) needs to make sense
  */
 export
-template<experimental::concepts::field_element_c_weak R = double,
+template<field_element_c_weak R = double,
          std::size_t N>
 constexpr polynomial_nttp<R, N + 1>
 antiderivative(const polynomial_nttp<R, N>& p)
@@ -350,7 +351,7 @@ noexcept
   return [&]() {
     polynomial_nttp<R, N + 1> antiderivative_of_p{};
     auto ids = indexing_set_from_to(1, N + 1 + 1);
-    for (auto i : ids)
+    for (auto&& i : ids)
       antiderivative_of_p.coefficients[i] = 1 / static_cast<R>(i) * p[i - 1];
     return antiderivative_of_p;
   }();
