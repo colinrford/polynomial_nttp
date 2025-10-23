@@ -58,7 +58,7 @@ noexcept
 export
 template<ring_element_c_weak R = double,
          std::size_t N>
-constexpr auto operator+(R&& r, const polynomial_nttp<R, N>& p)
+constexpr auto operator+(const R& r, const polynomial_nttp<R, N>& p)
 noexcept
 {
   return [&]() {
@@ -72,7 +72,7 @@ noexcept
 export
 template<ring_element_c_weak R = double,
          std::size_t N>
-constexpr auto operator+(const polynomial_nttp<R, N>& p, R&& r)
+constexpr auto operator+(const polynomial_nttp<R, N>& p, const R& r)
 noexcept
 {
   return [&]() {
@@ -105,7 +105,7 @@ noexcept
 export
 template<ring_element_c_weak R = double,
          std::size_t N>
-constexpr auto operator-(R&& r, const polynomial_nttp<R, N>& p)
+constexpr auto operator-(const R& r, const polynomial_nttp<R, N>& p)
 noexcept
 {
   return [&]() {
@@ -119,7 +119,7 @@ noexcept
 export
 template<ring_element_c_weak R = double,
          std::size_t N>
-constexpr auto operator-(const polynomial_nttp<R, N>& p, R&& r)
+constexpr auto operator-(const polynomial_nttp<R, N>& p, const R& r)
 noexcept
 {
   return [&]() {
@@ -151,7 +151,7 @@ noexcept
 export
 template<ring_element_c_weak R = double,
          std::size_t N>
-constexpr auto operator*(R&& r, const polynomial_nttp<R, N>& p)
+constexpr auto operator*(const R& r, const polynomial_nttp<R, N>& p)
 noexcept
 {
   polynomial_nttp<R, N> r_times_p{};
@@ -168,7 +168,7 @@ noexcept
 export
 template<ring_element_c_weak R = double,
          std::size_t N>
-constexpr auto operator*(const polynomial_nttp<R, N>& p, R&& r)
+constexpr auto operator*(const polynomial_nttp<R, N>& p, const R& r)
 noexcept
 {
   polynomial_nttp<R, N> p_times_r{};
@@ -198,6 +198,22 @@ template<ring_element_c_weak R = double,
 constexpr R leading(const polynomial_nttp<R, N>& p)
 noexcept
 { return p.coefficients[N]; }
+/* returns the leading coefficient, even if it is zero! */
+//export
+template<ring_element_c_weak R = double,
+         std::size_t N,
+         polynomial_nttp<R, N> p_of_x>
+constexpr R leading()
+noexcept
+{
+  if constexpr (p_of_x.coefficients[N] != static_cast<R>(0)) // placeholder
+  {
+    return leading(p_of_x);
+  } else
+  {
+    return p_of_x.coefficients[N];
+  }
+}
 /* returns a new monomial of degree `N` */
 export
 template<ring_element_c_weak R = double,
@@ -240,7 +256,7 @@ template<field_element_c_weak R = double,
          std::size_t N,
          polynomial_nttp<R, N> b_of_x>
 constexpr auto division_prototype()
-noexcept
+// noexcept // don't think this can be marked noexcept!
 {
   constexpr auto comparatore = [&](auto&& a, auto&& b_i) {
     auto abs_val = a - b_i;
@@ -263,8 +279,10 @@ noexcept
     std::array<R, M + 1> oversized_remainder{};
     std::vector<R> quotient{};
     std::vector<R> remainder{};
-    for (std::size_t i = 0; i < a_of_x.coefficients.size(); ++i)
-      remainder.push_back(a_of_x.coefficients[i]);
+    //remainder.reserve(a_of_x.coefficients.size()); // have not compared
+    stdr::copy(a_of_x.coefficients.begin(),
+               a_of_x.coefficients.end(),
+               std::back_inserter(remainder));
     std::size_t quotient_size = 0;
     if (N <= M && b_is_not_zero)
     {
@@ -308,7 +326,7 @@ noexcept
   return std::make_pair(q, r);
 }
 
-/*  R needs to be a field and the cast R(i) needs to make sense
+/*  R needs to model a field and static_cast<R>(i) needs to make sense
  *
  *  return type is `auto` because:
  *    the derivative of a constant is 0, and as a polynomial is of degree 0
@@ -339,7 +357,7 @@ noexcept
 
 /*
  *  this function returns the antiderivative of p for which a_0 = 0
- *  R needs to be a field and the cast R(i) needs to make sense
+ *  R needs to model a field and static_cast<R>(i) needs to make sense
  */
 export
 template<field_element_c_weak R = double,

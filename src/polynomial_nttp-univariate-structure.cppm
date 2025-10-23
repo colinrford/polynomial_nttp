@@ -45,7 +45,7 @@ struct polynomial_nttp
                coefficient_t{0});
   }
 
-  constexpr polynomial_nttp(std::initializer_list<R> li) noexcept
+  constexpr polynomial_nttp(std::initializer_list<coefficient_t> li) noexcept
   { std::copy(li.begin(), li.end(), coefficients.begin()); }
 
   explicit constexpr
@@ -68,6 +68,10 @@ struct polynomial_nttp
   using end_type = decltype(stdr::end(coefficients));
   using cbegin_type = decltype(stdr::cbegin(coefficients));
   using cend_type = decltype(stdr::cend(coefficients));
+  using rbegin_type = decltype(stdr::rbegin(coefficients));
+  using rend_type = decltype(stdr::rend(coefficients));
+  using crbegin_type = decltype(stdr::crbegin(coefficients));
+  using crend_type = decltype(stdr::crend(coefficients));
   constexpr auto begin()
   { return std::forward<begin_type>(stdr::begin(coefficients)); }
   constexpr auto end()
@@ -80,6 +84,14 @@ struct polynomial_nttp
   { return std::forward<cbegin_type>(stdr::cbegin(coefficients)); }
   constexpr auto cend() const
   { return std::forward<cend_type>(stdr::cend(coefficients)); }
+  constexpr auto rbegin()
+  { return std::forward<rbegin_type>(stdr::rbegin(coefficients)); }
+  constexpr auto rend()
+  { return std::forward<rend_type>(stdr::rend(coefficients)); }
+  constexpr auto crbegin() const
+  { return std::forward<crbegin_type>(stdr::crbegin(coefficients)); }
+  constexpr auto crend() const
+  { return std::forward<crend_type>(stdr::crend(coefficients)); }
 
   constexpr coefficient_t operator[](index_t index) noexcept
   { return index <= N ? coefficients[index] : coefficient_t{0}; }
