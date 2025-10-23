@@ -13,6 +13,7 @@ using namespace math_nttp;
 
 int main()
 {
+  // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
   constexpr polynomial_nttp<int, 1> linear{1, 3};
   constexpr auto zero_linear = linear - linear;
   static_assert(zero_linear[0] == 0 && zero_linear[0] == zero_linear[1]);
@@ -33,4 +34,5 @@ int main()
   {
     return 1; // fail
   }
+  // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
 }

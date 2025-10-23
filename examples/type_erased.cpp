@@ -10,13 +10,13 @@ import polynomial_nttp;
 
 namespace stdr = std::ranges;
 namespace stdv = std::views;
-
-auto indexing_set = [](auto n) {
-  return stdv::iota(decltype(n)(0), n);
+// NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
+const auto indexing_set = [](auto n) {
+  return stdv::iota(static_cast<decltype(n)>(0), n);
 };
 
-auto indexing_set_from_to = [](auto m, auto n) {
-  return stdv::iota(decltype(n)(m), n);
+const auto indexing_set_from_to = [](auto m, auto n) {
+  return stdv::iota(static_cast<decltype(n)>(m), n);
 };
 
 constexpr double factorial(std::size_t n)
@@ -35,7 +35,7 @@ constexpr auto sin_impl_test()
     {
       double neg_one_i = neg_one_multiplier(i);
       double two_i_plus_one_fact = factorial(2 * i + 1);
-      power_series.coefficients[2 * i + 1] = neg_one_i / two_i_plus_one_fact;
+      power_series.coefficients.at(2 * i + 1) = neg_one_i / two_i_plus_one_fact;
     }
     return power_series;
   }();
@@ -54,7 +54,7 @@ constexpr auto cos_impl_test()
     {
       double neg_one_i = neg_one_multiplier(i);
       double two_i_fact = factorial(2 * i);
-      power_series.coefficients[2 * i] = neg_one_i / two_i_fact;
+      power_series.coefficients.at(2 * i) = neg_one_i / two_i_fact;
     }
     return power_series;
   }();
@@ -72,7 +72,7 @@ constexpr auto exp_impl_test()
     for (std::size_t&& i : indexing_set(two_n))
     {
       double one_over_n_fact = 1 / factorial(i);
-      power_series.coefficients[i] = one_over_n_fact;
+      power_series.coefficients.at(i) = one_over_n_fact;
     }
     return power_series;
   }();
@@ -92,13 +92,14 @@ constexpr double sqrt_test(double of)
   if (of < 0.)
     return std::nan("");
   constexpr double epsilon = std::numeric_limits<double>::epsilon();
-  double running_root = 1.;
+  double running_root = sqrt_iterator(of, 1.);
   double most_recent_running_root = 1.;
   auto abs_val = [](double val) { return val > 0. ? val : -val; };
-  do {
+  while (abs_val(running_root - most_recent_running_root) > epsilon)
+  {
     most_recent_running_root = running_root;
     running_root = sqrt_iterator(of, running_root);
-  } while (abs_val(running_root - most_recent_running_root) > epsilon);
+  }
   return running_root;
 }
 
@@ -183,4 +184,4 @@ int main()
     if (type_erased_counter != type_erased_polynomials.size())
       std::println("\tswitch function");
   }
-}
+} // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)

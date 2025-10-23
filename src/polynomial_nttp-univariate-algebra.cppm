@@ -23,12 +23,12 @@ namespace polynomial
 namespace univariate
 {
 
-auto indexing_set = [](auto n) {
-  return stdv::iota(decltype(n)(0), n);
+const auto indexing_set = [](auto n) {
+  return stdv::iota(static_cast<decltype(n)>(0), n);
 };
 
-auto indexing_set_from_to = [](auto m, auto n) {
-  return stdv::iota(decltype(n)(m), n);
+const auto indexing_set_from_to = [](auto m, auto n) {
+  return stdv::iota(static_cast<decltype(n)>(m), n);
 };
 
 // ring_element_c_weak is defined in :univariate.structure
@@ -49,7 +49,7 @@ noexcept
   return [&]() {
     polynomial_nttp<R, max_degree> p_plus_q{};
     for (auto&& i : indexing_set(max_degree + 1))
-      p_plus_q.coefficients[i] = p[i] + q[i];
+      p_plus_q.coefficients.at(i) = p[i] + q[i];
     return p_plus_q;
   }();
 }
@@ -96,7 +96,7 @@ noexcept
   return [&]() {
     polynomial_nttp<R, max_degree> p_minus_q{};
     for (auto&& i : indexing_set(max_degree + 1))
-      p_minus_q.coefficients[i] = p[i] - q[i];
+      p_minus_q.coefficients.at(i) = p[i] - q[i];
     return p_minus_q;
   }();
 }
@@ -142,7 +142,7 @@ noexcept
     polynomial_nttp<R, M + N> p_times_q{};
     for (auto&& k : indexing_set(M + N + 1))
       for (auto&& i : indexing_set(k + 1))
-        p_times_q.coefficients[k] += p[i] * q[k - i];
+        p_times_q.coefficients.at(k) += p[i] * q[k - i];
     return p_times_q;
   }();
 }
@@ -261,7 +261,7 @@ constexpr auto division_prototype()
   constexpr auto comparatore = [&](auto&& a, auto&& b_i) {
     auto abs_val = a - b_i;
     abs_val = abs_val > 0 ? abs_val : -abs_val;
-    return abs_val < 1e-7 ? true : false;
+    return abs_val < 1e-7 ? true : false; // NOLINT
   };
   constexpr auto b_is_not_zero = [&]() {
     bool is_zero = true;
@@ -295,7 +295,7 @@ constexpr auto division_prototype()
         std::size_t i_offset = remainder.size() - deg_b - 1;
         for (std::size_t i = 0; i <= N; ++i)
           remainder[i + i_offset] = remainder[i + i_offset]
-                                    - (s * b_of_x.coefficients[i]);
+                                    - (s * b_of_x.coefficients.at(i));
         remainder.pop_back();
       }
       if (comparatore(static_cast<R>(0), remainder.back()))
@@ -305,10 +305,10 @@ constexpr auto division_prototype()
     } else // will dereference a null without something like this
     { quotient.push_back(static_cast<R>(0)); }
     for (std::size_t i = 0; i <= quotient_size; ++i)
-      oversized_quotient[i] = quotient[i];
+      oversized_quotient.at(i) = quotient[i];
     std::size_t remainder_size = remainder.size() - 1;
     for (std::size_t i = 0; i <= remainder_size; ++i)
-      oversized_remainder[i] = remainder[i];
+      oversized_remainder.at(i) = remainder[i];
     return std::make_pair(std::make_pair(quotient_size,
                                          remainder_size),
                           std::make_pair(oversized_quotient,
@@ -317,11 +317,11 @@ constexpr auto division_prototype()
 
   polynomial_nttp<R, sizes_and_oversized_arrays_q_and_r.first.first> q{};
   for (std::size_t i = 0; i <= norm(q); ++i)
-    q.coefficients[i] = sizes_and_oversized_arrays_q_and_r.second.first[i];
+    q.coefficients.at(i) = sizes_and_oversized_arrays_q_and_r.second.first.at(i);
 
   polynomial_nttp<R, sizes_and_oversized_arrays_q_and_r.first.second> r{};
   for (std::size_t i = 0; i <= norm(r); ++i)
-    r.coefficients[i] = sizes_and_oversized_arrays_q_and_r.second.second[i];
+    r.coefficients.at(i) = sizes_and_oversized_arrays_q_and_r.second.second.at(i);
 
   return std::make_pair(q, r);
 }
@@ -370,7 +370,7 @@ noexcept
     polynomial_nttp<R, N + 1> antiderivative_of_p{};
     auto ids = indexing_set_from_to(1, N + 1 + 1);
     for (auto&& i : ids)
-      antiderivative_of_p.coefficients[i] = 1 / static_cast<R>(i) * p[i - 1];
+      antiderivative_of_p.coefficients.at(i) = 1 / static_cast<R>(i) * p[i - 1];
     return antiderivative_of_p;
   }();
 }

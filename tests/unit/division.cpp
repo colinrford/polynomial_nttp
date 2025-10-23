@@ -9,7 +9,7 @@
 import polynomial_nttp;
 
 using namespace math_nttp;
-
+// NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
 constexpr bool comparitore(double a, double b)
 {
   constexpr auto abs_val = [](double val) { return val > 0. ? val : -val; };
@@ -134,6 +134,7 @@ consteval bool reconstruct_original_polynomial()
   else
     return true;
 }
+// NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
 
 int main()
 {

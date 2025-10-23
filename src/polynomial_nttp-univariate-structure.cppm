@@ -94,10 +94,10 @@ struct polynomial_nttp
   { return std::forward<crend_type>(stdr::crend(coefficients)); }
 
   constexpr coefficient_t operator[](index_t index) noexcept
-  { return index <= N ? coefficients[index] : coefficient_t{0}; }
+  { return index <= N ? coefficients.at(index) : coefficient_t{0}; }
 
   constexpr coefficient_t operator[](index_t index) const noexcept
-  { return index <= N ? coefficients[index] : coefficient_t{0}; }
+  { return index <= N ? coefficients.at(index) : coefficient_t{0}; }
 
   constexpr coefficient_t operator()(const coefficient_t x) const noexcept
   { // obviously insufficient :-)
@@ -107,7 +107,7 @@ struct polynomial_nttp
       coefficient_t x_power = i == 0 ? 1 : x;
       for (index_t j = 1; j < i; ++j)
         x_power *= x;
-      value += coefficients[i] * x_power;
+      value += coefficients.at(i) * x_power;
     }
     return value;
   }

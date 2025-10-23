@@ -13,6 +13,7 @@ using namespace math_nttp;
 
 int main()
 {
+  // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
   constexpr auto comparitore = [](double a, double b) {
     constexpr auto abs_val = [](double val) { return val > 0. ? val : -val; };
     if (abs_val(a - b) < 1e-7)
@@ -81,4 +82,5 @@ int main()
   {
     return 1; // fail
   }
+  // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
 }

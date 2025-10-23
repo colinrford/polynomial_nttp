@@ -17,7 +17,7 @@ using namespace math_nttp;
 constexpr bool comparitore(double a, double b)
 {
   constexpr auto abs_val = [](double val) { return val > 0. ? val : -val; };
-  if (abs_val(a - b) < 1e-7)
+  if (abs_val(a - b) < 1e-7) // NOLINT
     return true;
   else
     return false;
@@ -25,6 +25,7 @@ constexpr bool comparitore(double a, double b)
 
 int main()
 {
+  // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
   constexpr polynomial_nttp<double, 0> constant(1.);
   constexpr polynomial_nttp another_constant(2.);
   constexpr polynomial_nttp<double, 100> wasteful_constant(3.);
@@ -45,4 +46,5 @@ int main()
   {
     return 1;
   }
+  // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
 }

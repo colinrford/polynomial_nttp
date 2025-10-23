@@ -11,6 +11,7 @@ using namespace math_nttp;
 
 int main()
 {
+  // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
   constexpr polynomial_nttp<int, 1> linear{1, 3};
   constexpr polynomial_nttp<double, 10> ten_degree_poly{};
   static_assert(leading(linear) == 3 && leading(ten_degree_poly) == 0);
@@ -26,4 +27,5 @@ int main()
   {
     return 1; // fail
   }
+  // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
 }

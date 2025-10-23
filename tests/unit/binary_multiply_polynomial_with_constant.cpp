@@ -13,6 +13,7 @@ using namespace math_nttp;
 
 int main()
 {
+  // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
   constexpr polynomial_nttp<int, 1> linear{-2, 1};
   constexpr auto thrice_linear = 3 * linear;
   static_assert(thrice_linear[0] == -6 && thrice_linear[1] == 3);
@@ -31,4 +32,5 @@ int main()
   {
     return 1; // fail
   }
+  // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
 }

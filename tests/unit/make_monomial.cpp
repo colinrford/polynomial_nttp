@@ -12,6 +12,7 @@ using namespace math_nttp;
 
 int main()
 {
+  // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
   constexpr auto linear = make_monomial<int, 1>();
   constexpr auto ten_degree_poly = make_monomial<double, 10>();
   static_assert(norm(linear) == 1 && norm(ten_degree_poly) == 10);
@@ -35,4 +36,5 @@ int main()
   {
     return 1; // fail
   }
+  // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
 }
