@@ -5,25 +5,22 @@
  *  polynomial_nttp is a c++ module
  */
 
-export module polynomial_nttp:univariate.structure;
+export module lam.polynomial_nttp:univariate.structure;
 
 import std;
-import experimental.concepts;
+import lam.experimental.concepts;
 
 namespace stdr = std::ranges;
 namespace stdv = std::views;
 
-namespace math_nttp
+namespace lam
 {
 
-namespace polynomial
-{
-
-namespace univariate
+namespace polynomial::univariate
 {
 
 template<typename R>
-concept ring_element_c_weak = experimental::concepts::ring_element_c_weak<R>;
+concept ring_element_c_weak = lam::experimental::concepts::ring_element_c_weak<R>;
 
 export
 template<ring_element_c_weak R = double,
@@ -124,8 +121,6 @@ struct polynomial_nttp
   };
 };
 
-} // end namespace univariate
-} // end namespace polynomial
-  export using namespace polynomial::univariate;
-  //using polynomial::univariate::polynomial_nttp;
-} // end namespace math_nttp
+} // end namespace polynomial::univariate
+  export using polynomial::univariate::polynomial_nttp;
+} // end namespace lam

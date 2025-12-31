@@ -58,7 +58,7 @@ structure, `std::array` (where the entries are coefficients $a_i$, $i = 0,
 ii) compiles inside `constexpr`, `consteval` contexts. This deeply saddens the
 author, but at least its still possible to achieve the second point ii).
 
-## `division_prototype()` (find it in [`src/polynomial_nttp.cpp`, line `302`](https://github.com/colinrford/polynomial_nttp/blob/main/src/polynomial_nttp.cpp#L302))
+## `division_prototype()` (find it in [`src/polynomial_nttp-univariate-algebra.cppm`, line `244`](https://github.com/colinrford/polynomial_nttp/blob/main/src/polynomial_nttp-univariate-algebra.cppm#L244))
 So, why was this implementation ~~doomed~~ forced from the outset (i.e. the
 author's choice to use `std::array`) to rely on NTTPs to achieve simple
 polynomial division at compile time? Well, that's just it, apparently, since
@@ -68,7 +68,7 @@ appropriately-sized quotients and remainders (at compile time) is to use a
 dynamic data structure (like `std::vector`) for the Euclidean Algorithm while
 temporarily storing the quotient and remainder in oversized arrays, and
 subsequently copying the quotient and remainder into "right-sized" arrays.**
-This technique, coined ["The constexpr 2-step" by Jason Turner](https://youtu.be/_AefJX66io8?si=6oBkCYUXy5VfIaOQ),
+This technique, coined ["The constexpr 2-step" by Jason Turner](https://youtu.be/_AefJX66io8),
 is useful, as it is the only (first?) way this author found polynomial division
 was attainable... (at compile time... (using this implementation...))
 

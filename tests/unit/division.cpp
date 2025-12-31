@@ -6,9 +6,12 @@
  *    need to return (placeholder circa Oct. 8, 2025)
  */
 
-import polynomial_nttp;
+import std;
+import lam.polynomial_nttp;
 
-using namespace math_nttp;
+using namespace lam;
+using namespace lam::polynomial::univariate;
+
 // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
 constexpr bool comparitore(double a, double b)
 {
@@ -134,6 +137,21 @@ consteval bool reconstruct_original_polynomial()
   else
     return true;
 }
+consteval bool test_leading_zero_coeff()
+{
+  constexpr polynomial_nttp<double, 2> p{1., 2., 1.};
+  constexpr polynomial_nttp<double, 2> d{1., 1., 0.};
+  constexpr auto q_and_r = division_prototype<double, 2, p, 2, d>();
+  constexpr auto q = q_and_r.first;
+  constexpr auto r = q_and_r.second;
+  bool q_ok = comparitore(q[0], 1.) && comparitore(q[1], 1.);
+  for(std::size_t i = 2; i < q.coefficients.size(); ++i)
+    if (!comparitore(q[i], 0.)) q_ok = false;
+  bool r_ok = true;
+  for(const auto& val : r)
+    if (!comparitore(val, 0.)) r_ok = false;
+  return q_ok && r_ok;
+}
 // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
 
 int main()
@@ -145,12 +163,14 @@ int main()
                   = self_squared_divided_by_self();
   constexpr bool reconstruct_original_polynomial_works
                   = reconstruct_original_polynomial();
+  constexpr bool leading_zero_coeff_works = test_leading_zero_coeff();
 
   if constexpr (divide_by_zero_works
              && divide_by_greater_degree_works
              && divide_by_self_works
              && self_squared_divided_by_self_works
-             && reconstruct_original_polynomial_works)
+             && reconstruct_original_polynomial_works
+             && leading_zero_coeff_works)
   {
     return 0;
   } else

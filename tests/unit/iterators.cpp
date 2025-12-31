@@ -8,9 +8,9 @@
  */
 
 import std;
-import polynomial_nttp;
+import lam.polynomial_nttp;
 
-using namespace math_nttp;
+using namespace lam;
 
 int main()
 {

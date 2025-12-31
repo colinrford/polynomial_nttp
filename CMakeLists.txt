@@ -11,21 +11,49 @@ else()
   message(FATAL_ERROR "Version lower than 3.31.6 not supported (by me)")
 endif()
 
-set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_EXTENSIONS OFF CACHE BOOL "Use compiler extensions" FORCE)
 set(CMAKE_CXX_STANDARD_REQUIRED True) #is this needed?
 set(CMAKE_CXX_MODULE_STD ON)
 set(CMAKE_CXX_SCAN_FOR_MODULES ON)
 
-project(math_nttp_polynomial LANGUAGES CXX)
+project(lam_polynomial_nttp VERSION 0.1.0 LANGUAGES CXX)
+
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
+find_package(Git)
+if(GIT_FOUND)
+  execute_process(
+    COMMAND ${GIT_EXECUTABLE} rev-parse --short HEAD
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    OUTPUT_VARIABLE GIT_HASH
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+else()
+  set(GIT_HASH "unknown")
+endif()
 
 enable_testing()
+
+#find_program(CLANG_TIDY_EXE "clang-tidy")
+#if(CLANG_TIDY_EXE)
+#  set(CMAKE_CXX_CLANG_TIDY ${CLANG_TIDY_EXE} "-checks=-*,bugprone-*")
+#endif()
+
+if(CMAKE_BUILD_TYPE AND CMAKE_BUILD_TYPE MATCHES "^[Dd][Ee][Bb][Uu][Gg]$")
+  set(IS_DEBUG "true")
+else()
+  set(IS_DEBUG "false")
+endif()
 
 configure_file(
   config.cppm.in
   ${CMAKE_CURRENT_BINARY_DIR}/config.cppm
 )
 
-add_library(experimental_concepts)
+add_library(experimental_concepts STATIC)
+add_library(lam::experimental_concepts ALIAS experimental_concepts)
 target_sources(experimental_concepts PUBLIC
   FILE_SET CXX_MODULES
   TYPE CXX_MODULES
@@ -33,7 +61,8 @@ target_sources(experimental_concepts PUBLIC
 )
 target_compile_features(experimental_concepts PUBLIC cxx_std_23)
 
-add_library(polynomial_nttp)
+add_library(polynomial_nttp STATIC)
+add_library(lam::polynomial_nttp ALIAS polynomial_nttp)
 
 target_sources(polynomial_nttp
   PUBLIC
@@ -43,10 +72,12 @@ target_sources(polynomial_nttp
         src/polynomial_nttp-univariate-structure.cppm
         src/polynomial_nttp-univariate-algebra.cppm
         src/polynomial_nttp-univariate.cppm
+        ${CMAKE_CURRENT_BINARY_DIR}/config.cppm
 )
 
-target_link_libraries(polynomial_nttp experimental_concepts)
+target_link_libraries(polynomial_nttp lam::experimental_concepts)
 target_compile_features(polynomial_nttp PUBLIC cxx_std_23)
+set_target_properties(polynomial_nttp PROPERTIES CXX_SCAN_FOR_MODULES ON)
 
 add_subdirectory(tests)
 add_subdirectory(examples)

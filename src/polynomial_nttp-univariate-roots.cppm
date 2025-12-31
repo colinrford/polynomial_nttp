@@ -7,25 +7,16 @@
 
 module;
 
-export module polynomial_nttp:univariate.roots;
+export module lam.polynomial_nttp:univariate.roots;
 
 import std;
-import experimental.concepts;
-
+import lam.experimental.concepts;
+using namespace lam::experimental::concepts;
 
 namespace stdr = std::ranges;
 namespace stdv = std::views;
 
-namespace math_nttp
+namespace lam::polynomial::univariate::roots
 {
-
-namespace polynomial
-{
-
-namespace univariate
-{
-
-} // end namespace univariate
-} // end namespace polynomial
-  using namespace polynomial; // lol rip gcc c++20 modules implementation
-} // end namespace math_nttp
+  
+} // end namespace lam::polynomial::univariate::roots

@@ -5,22 +5,19 @@
  *  polynomial_nttp is a c++ module
  */
 
-export module polynomial_nttp:univariate.algebra;
+export module lam.polynomial_nttp:univariate.algebra;
 
 import std;
-import experimental.concepts;
+import lam.experimental.concepts;
 import :univariate.structure;
 
 namespace stdr = std::ranges;
 namespace stdv = std::views;
 
-namespace math_nttp
+namespace lam
 {
 
-namespace polynomial
-{
-
-namespace univariate
+namespace polynomial::univariate
 {
 
 const auto indexing_set = [](auto n) {
@@ -33,7 +30,7 @@ const auto indexing_set_from_to = [](auto m, auto n) {
 
 // ring_element_c_weak is defined in :univariate.structure
 template<typename K>
-concept field_element_c_weak = experimental::concepts::field_element_c_weak<K>;
+concept field_element_c_weak = lam::experimental::concepts::field_element_c_weak<K>;
 
 // enable syntax for adding polynomials in R[X]
 export
@@ -46,12 +43,10 @@ noexcept
 {
   constexpr auto max_degree = stdr::max(M, N);
 
-  return [&]() {
-    polynomial_nttp<R, max_degree> p_plus_q{};
-    for (auto&& i : indexing_set(max_degree + 1))
-      p_plus_q.coefficients.at(i) = p[i] + q[i];
-    return p_plus_q;
-  }();
+  polynomial_nttp<R, max_degree> p_plus_q{};
+  for (auto&& i : indexing_set(max_degree + 1))
+    p_plus_q.coefficients.at(i) = p[i] + q[i];
+  return p_plus_q;
 }
 
 // add a constant on the left
@@ -61,11 +56,9 @@ template<ring_element_c_weak R = double,
 constexpr auto operator+(const R& r, const polynomial_nttp<R, N>& p)
 noexcept
 {
-  return [&]() {
-    polynomial_nttp<R, N> r_plus_p = p;
-    r_plus_p.coefficients[0] = r + r_plus_p.coefficients[0];
-    return r_plus_p;
-  }();
+  polynomial_nttp<R, N> r_plus_p = p;
+  r_plus_p.coefficients[0] = r + r_plus_p.coefficients[0];
+  return r_plus_p;
 }
 
 // add a constant on the right
@@ -75,11 +68,9 @@ template<ring_element_c_weak R = double,
 constexpr auto operator+(const polynomial_nttp<R, N>& p, const R& r)
 noexcept
 {
-  return [&]() {
-    polynomial_nttp<R, N> p_plus_r = p;
-    p_plus_r.coefficients[0] = p_plus_r.coefficients[0] + r;
-    return p_plus_r;
-  }();
+  polynomial_nttp<R, N> p_plus_r = p;
+  p_plus_r.coefficients[0] = p_plus_r.coefficients[0] + r;
+  return p_plus_r;
 }
 
 // enable syntax for subtracting polynomials in R[X]
@@ -93,12 +84,10 @@ noexcept
 {
   constexpr auto max_degree = stdr::max(M, N);
 
-  return [&]() {
-    polynomial_nttp<R, max_degree> p_minus_q{};
-    for (auto&& i : indexing_set(max_degree + 1))
-      p_minus_q.coefficients.at(i) = p[i] - q[i];
-    return p_minus_q;
-  }();
+  polynomial_nttp<R, max_degree> p_minus_q{};
+  for (auto&& i : indexing_set(max_degree + 1))
+    p_minus_q.coefficients.at(i) = p[i] - q[i];
+  return p_minus_q;
 }
 
 // subtract a constant on the left
@@ -108,11 +97,9 @@ template<ring_element_c_weak R = double,
 constexpr auto operator-(const R& r, const polynomial_nttp<R, N>& p)
 noexcept
 {
-  return [&]() {
-    polynomial_nttp<R, N> r_minus_p = -p;
-    r_minus_p.coefficients[0] += r; // R needs +=
-    return r_minus_p;
-  }();
+  polynomial_nttp<R, N> r_minus_p = -p;
+  r_minus_p.coefficients[0] += r; // R needs +=
+  return r_minus_p;
 }
 
 // subtract a constant on the right
@@ -122,11 +109,9 @@ template<ring_element_c_weak R = double,
 constexpr auto operator-(const polynomial_nttp<R, N>& p, const R& r)
 noexcept
 {
-  return [&]() {
-    polynomial_nttp<R, N> p_minus_r = p;
-    p_minus_r.coefficients[0] = p_minus_r.coefficients[0] - r;
-    return p_minus_r;
-  }();
+  polynomial_nttp<R, N> p_minus_r = p;
+  p_minus_r.coefficients[0] = p_minus_r.coefficients[0] - r;
+  return p_minus_r;
 }
 
 // enable syntax for multiplying polynomials in R[X]
@@ -138,13 +123,11 @@ constexpr auto operator*(const polynomial_nttp<R, M>& p,
                          const polynomial_nttp<R, N>& q)
 noexcept
 {
-  return [&]() {
-    polynomial_nttp<R, M + N> p_times_q{};
-    for (auto&& k : indexing_set(M + N + 1))
-      for (auto&& i : indexing_set(k + 1))
-        p_times_q.coefficients.at(k) += p[i] * q[k - i];
-    return p_times_q;
-  }();
+  polynomial_nttp<R, M + N> p_times_q{};
+  for (auto&& k : indexing_set(M + N + 1))
+    for (auto&& i : indexing_set(k + 1))
+      p_times_q.coefficients.at(k) += p[i] * q[k - i];
+  return p_times_q;
 }
 
 // multiply a constant on the left
@@ -198,7 +181,8 @@ template<ring_element_c_weak R = double,
 constexpr R leading(const polynomial_nttp<R, N>& p)
 noexcept
 { return p.coefficients[N]; }
-/* returns the leading coefficient, even if it is zero! */
+/* returns the leading nonzero coefficient, UNFINISHED */
+/*
 //export
 template<ring_element_c_weak R = double,
          std::size_t N,
@@ -213,7 +197,7 @@ noexcept
   {
     return p_of_x.coefficients[N];
   }
-}
+} */
 /* returns a new monomial of degree `N` */
 export
 template<ring_element_c_weak R = double,
@@ -256,54 +240,104 @@ template<field_element_c_weak R = double,
          std::size_t N,
          polynomial_nttp<R, N> b_of_x>
 constexpr auto division_prototype()
-// noexcept // don't think this can be marked noexcept!
 {
-  constexpr auto comparatore = [&](auto&& a, auto&& b_i) {
-    auto abs_val = a - b_i;
-    abs_val = abs_val > 0 ? abs_val : -abs_val;
-    return abs_val < 1e-7 ? true : false; // NOLINT
+  // helper for epsilon scaling
+  static constexpr auto get_epsilon = []() {
+      if constexpr (std::is_floating_point_v<R>) 
+        return std::numeric_limits<R>::epsilon();
+      else if constexpr (requires { typename R::value_type; }) 
+        if constexpr (std::is_floating_point_v<typename R::value_type>)
+          return std::numeric_limits<typename R::value_type>::epsilon();
+      return 0.; // dummy for non-float types
   };
-  constexpr auto b_is_not_zero = [&]() {
-    bool is_zero = true;
-    for (auto&& b_i : b_of_x)
-      if (!comparatore(static_cast<R>(0), b_i))
+
+  constexpr auto comparatore = [](auto&& a, auto&& b_i) { 
+    if constexpr (std::is_floating_point_v<R>) 
+    {
+      auto diff = a - b_i;
+      if (diff < static_cast<R>(0)) diff = -diff;
+      return diff < (get_epsilon() * static_cast<R>(2));
+    } else 
+    {
+      if constexpr (requires { typename R::value_type; }) 
       {
-        is_zero = false;
-        break;
+        using value_t = typename R::value_type;
+        if constexpr (std::is_floating_point_v<value_t> && 
+                      requires(R r) { 
+                        { r.real() } -> std::convertible_to<value_t>;
+                        { r.imag() } -> std::convertible_to<value_t>; 
+                      }) 
+        {
+          auto diff = a - b_i;
+          auto real_diff = diff.real();
+          auto imag_diff = diff.imag();
+          if (real_diff < static_cast<value_t>(0)) 
+            real_diff = -real_diff;
+          if (imag_diff < static_cast<value_t>(0)) 
+            imag_diff = -imag_diff;
+          auto eps = get_epsilon() * static_cast<value_t>(2);
+          return (real_diff < eps) && (imag_diff < eps);
+        } // else if constexpr (std::is_floating_point_v<R>)
+        // { } // maybe there exists a non-complex type out there that has R::value_type
       }
-    return !is_zero;
+      return a == b_i;
+    }
+  };
+
+  using divisor_info = std::tuple<bool, std::size_t, R>;
+
+  constexpr auto b_info = [&]() -> divisor_info {
+    auto b_reversed = stdv::reverse(b_of_x);
+    auto it = stdr::find_if(b_reversed,
+        [&](auto&& coeff) { return !comparatore(R(0), coeff); });
+    
+    if (it != b_reversed.end()) 
+    {
+        std::size_t dist = std::distance(b_reversed.begin(), it);
+        return { true, N - dist, *it };
+    }
+    return { false, 0, R(0) };
   }();
+
+  constexpr bool b_is_not_zero = std::get<0>(b_info);
+  constexpr std::size_t degree_of_b = std::get<1>(b_info);
+  constexpr R leading_coeff_of_b = std::get<2>(b_info);
 
   constexpr auto sizes_and_oversized_arrays_q_and_r = [&]() {
     std::array<R, M + 1> oversized_quotient{};
     std::array<R, M + 1> oversized_remainder{};
     std::vector<R> quotient{};
     std::vector<R> remainder{};
-    //remainder.reserve(a_of_x.coefficients.size()); // have not compared
+    remainder.reserve(a_of_x.coefficients.size()); // have not compared w/o
     stdr::copy(a_of_x.coefficients.begin(),
                a_of_x.coefficients.end(),
                std::back_inserter(remainder));
     std::size_t quotient_size = 0;
-    if (N <= M && b_is_not_zero)
+    if (N <= M and b_is_not_zero)
     {
-      auto deg_b = norm(b_of_x);
-      auto lead_coeff_b = leading(b_of_x); // will fail at compile time if = 0
+      auto deg_b = degree_of_b;
+      auto lead_coeff_b = leading_coeff_of_b;
       while (remainder.size() - 1 >= deg_b)
       {
-        auto s = remainder.back() / lead_coeff_b; // see 3 lines above
+        auto s = remainder.back() / lead_coeff_b;
         quotient.push_back(s);
         std::size_t i_offset = remainder.size() - deg_b - 1;
-        for (std::size_t i = 0; i <= N; ++i)
+        auto remainder_span = std::span(remainder).subspan(i_offset, deg_b + 1);
+        for (auto&& [r_i, b_i] : stdv::zip(remainder_span, b_of_x.coefficients))
+          r_i = r_i - (s * b_i);
+        /*for (std::size_t i = 0; i <= deg_b; ++i)
           remainder[i + i_offset] = remainder[i + i_offset]
-                                    - (s * b_of_x.coefficients.at(i));
+                                    - (s * b_of_x.coefficients.at(i));*/
         remainder.pop_back();
       }
-      if (comparatore(static_cast<R>(0), remainder.back()))
+      if (comparatore(R(0), remainder.back()))
         remainder.pop_back();
+      if (remainder.empty())
+        remainder.push_back(R(0));
       std::reverse(quotient.begin(), quotient.end());
       quotient_size = quotient.size() - 1;
     } else // will dereference a null without something like this
-    { quotient.push_back(static_cast<R>(0)); }
+    { quotient.push_back(R(0)); }
     for (std::size_t i = 0; i <= quotient_size; ++i)
       oversized_quotient.at(i) = quotient[i];
     std::size_t remainder_size = remainder.size() - 1;
@@ -316,13 +350,20 @@ constexpr auto division_prototype()
   }();
 
   polynomial_nttp<R, sizes_and_oversized_arrays_q_and_r.first.first> q{};
-  for (std::size_t i = 0; i <= norm(q); ++i)
-    q.coefficients.at(i) = sizes_and_oversized_arrays_q_and_r.second.first.at(i);
+  stdr::copy(sizes_and_oversized_arrays_q_and_r.second.first.begin(),
+             sizes_and_oversized_arrays_q_and_r.second.first.begin()
+                                                           + norm(q)
+                                                           +       1,
+                                              q.coefficients.begin()
+  );
 
   polynomial_nttp<R, sizes_and_oversized_arrays_q_and_r.first.second> r{};
-  for (std::size_t i = 0; i <= norm(r); ++i)
-    r.coefficients.at(i) = sizes_and_oversized_arrays_q_and_r.second.second.at(i);
-
+  stdr::copy(sizes_and_oversized_arrays_q_and_r.second.second.begin(),
+             sizes_and_oversized_arrays_q_and_r.second.second.begin()
+                                                            + norm(r)
+                                                            +       1,
+                                               r.coefficients.begin()
+  );
   return std::make_pair(q, r);
 }
 
@@ -370,12 +411,17 @@ noexcept
     polynomial_nttp<R, N + 1> antiderivative_of_p{};
     auto ids = indexing_set_from_to(1, N + 1 + 1);
     for (auto&& i : ids)
-      antiderivative_of_p.coefficients.at(i) = 1 / static_cast<R>(i) * p[i - 1];
+      antiderivative_of_p.coefficients.at(i) = 1 / static_cast<R>(i)
+                                              * p[i - 1];
     return antiderivative_of_p;
   }();
 }
 
-} // end namespace univariate
-} // end namespace polynomial
-  export using namespace polynomial::univariate;
-} // end namespace math_nttp
+} // end namespace polynomial::univariate
+  export using polynomial::univariate::norm;
+  export using polynomial::univariate::leading;
+  export using polynomial::univariate::make_monomial;
+  export using polynomial::univariate::division_prototype;
+  export using polynomial::univariate::derivative;
+  export using polynomial::univariate::antiderivative;
+} // end namespace lam

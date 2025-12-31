@@ -6,7 +6,7 @@
  */
 
 import std;
-import polynomial_nttp;
+import lam.polynomial_nttp;
 
 namespace stdr = std::ranges;
 namespace stdv = std::views;
@@ -30,7 +30,7 @@ constexpr auto sin_impl_test()
   return []() {
     constexpr std::size_t n = 12;
     constexpr std::size_t two_n_plus_1 = 2 * n + 1;
-    math_nttp::polynomial_nttp<double, two_n_plus_1> power_series{};
+    lam::polynomial_nttp<double, two_n_plus_1> power_series{};
     for (std::size_t&& i : indexing_set(n))
     {
       double neg_one_i = neg_one_multiplier(i);
@@ -49,7 +49,7 @@ constexpr auto cos_impl_test()
   return []() {
     constexpr std::size_t n = 12;
     constexpr std::size_t two_n = 2 * n;
-    math_nttp::polynomial_nttp<double, two_n> power_series{};
+    lam::polynomial_nttp<double, two_n> power_series{};
     for (std::size_t&& i : indexing_set(n))
     {
       double neg_one_i = neg_one_multiplier(i);
@@ -68,7 +68,7 @@ constexpr auto exp_impl_test()
   return []() {
     constexpr std::size_t n = 16;
     constexpr std::size_t two_n = 30;
-    math_nttp::polynomial_nttp<double, two_n> power_series{};
+    lam::polynomial_nttp<double, two_n> power_series{};
     for (std::size_t&& i : indexing_set(two_n))
     {
       double one_over_n_fact = 1 / factorial(i);
@@ -91,29 +91,73 @@ constexpr double sqrt_test(double of)
 {
   if (of < 0.)
     return std::nan("");
-  constexpr double epsilon = std::numeric_limits<double>::epsilon();
+  if (of == 0.)
+    return 0.;
   double running_root = sqrt_iterator(of, 1.);
-  double most_recent_running_root = 1.;
-  auto abs_val = [](double val) { return val > 0. ? val : -val; };
-  while (abs_val(running_root - most_recent_running_root) > epsilon)
+  double prev = 1.;
+  // Iterate until we reach the Newton-Raphson fixed point (no change)
+  while (running_root != prev)
   {
-    most_recent_running_root = running_root;
+    prev = running_root;
     running_root = sqrt_iterator(of, running_root);
+  }
+  // If the result squared is less than 'of', it's an underestimate.
+  // Bump up by 1 ULP to match correctly-rounded behavior.
+  if (running_root * running_root < of)
+  {
+    auto bits = std::bit_cast<std::uint64_t>(running_root);
+    return std::bit_cast<double>(bits + 1);
   }
   return running_root;
 }
 
+// Fast sqrt using bit manipulation for initial guess.
+// sqrt(x) has roughly half the exponent of x in IEEE 754 representation.
+// This gives us a ~12-bit accurate initial guess, so we only need ~4 iterations.
+constexpr double sqrt_fast(double of)
+{
+  if (of < 0.)
+    return std::nan("");
+  if (of == 0.)
+    return 0.;
+  
+  // Magic constant for double precision sqrt initial guess.
+  // The idea: for IEEE 754 doubles, (bits >> 1) + magic ≈ sqrt.
+  // 0x1FF7A3BEA91D9B1B is tuned for minimal initial error.
+  constexpr std::uint64_t magic = 0x1FF7A3BEA91D9B1BULL;
+  auto bits = std::bit_cast<std::uint64_t>(of);
+  double guess = std::bit_cast<double>((bits >> 1) + magic);
+  
+  // Only ~4 Newton-Raphson iterations needed with this good initial guess
+  guess = sqrt_iterator(of, guess);
+  guess = sqrt_iterator(of, guess);
+  guess = sqrt_iterator(of, guess);
+  guess = sqrt_iterator(of, guess);
+  
+  // Final ULP refinement for correct rounding
+  if (guess * guess < of)
+  {
+    auto result_bits = std::bit_cast<std::uint64_t>(guess);
+    return std::bit_cast<double>(result_bits + 1);
+  }
+  return guess;
+}
+
 std::function<double(double)> which_type_erased_polynomial(int index)
 {
-  if (index == 0)
-    return [](double d) { return std::sin<double>(d); };
-  else if (index == 1)
-    return [](double d) { return std::cos<double>(d); };
-  else if (index == 2)
-    return [](double d) { return std::exp<double>(d); };
-  else if (index == 3)
-    return [](double d) { return std::sqrt<double>(d); };
-  else return {};
+  switch (index)
+  {
+    case 0:
+      return [](double d) { return std::sin<double>(d); };
+    case 1:
+      return [](double d) { return std::cos<double>(d); };
+    case 2:
+      return [](double d) { return std::exp<double>(d); };
+    case 3:
+      return [](double d) { return std::sqrt<double>(d); };
+    default:
+      return {};
+  }
 }
 
 int main()
@@ -184,4 +228,90 @@ int main()
     if (type_erased_counter != type_erased_polynomials.size())
       std::println("\tswitch function");
   }
+
+  // Quick test: compare sqrt_test vs std::sqrt for 1000 rational numbers in [1, 50]
+  constexpr int N = 1000;
+  constexpr double range_start = 1.0;
+  constexpr double range_end = 50.0;
+  int exact_matches = 0;
+  int ulp_1_off = 0;
+  double max_diff = 0.0;
+  double max_diff_at = 0.0;
+  
+  std::println("\n--- sqrt comparison test ({} rationals in [{}, {}]) ---", N, range_start, range_end);
+  for (int i = 0; i < N; ++i)
+  {
+    double val = range_start + (range_end - range_start) * static_cast<double>(i) / static_cast<double>(N - 1);
+    double mine = sqrt_test(val);
+    double standard = std::sqrt(val);
+    double diff = std::abs(mine - standard);
+    
+    if (diff == 0.0)
+      ++exact_matches;
+    else if (diff <= std::numeric_limits<double>::epsilon() * standard)
+      ++ulp_1_off;
+    
+    if (diff > max_diff)
+    {
+      max_diff = diff;
+      max_diff_at = val;
+    }
+  }
+  
+  std::println("Exact matches: {}/{}", exact_matches, N);
+  std::println("Within 1 ULP:  {}/{}", exact_matches + ulp_1_off, N);
+  std::println("Max difference: {} (at sqrt({}))", max_diff, max_diff_at);
+
+  // Speed comparison: time both implementations over many iterations
+  constexpr int iterations = 1'000'000;
+  constexpr int num_values = 100;
+  std::array<double, num_values> test_values{};
+  for (int i = 0; i < num_values; ++i)
+    test_values[i] = 1.0 + 49.0 * static_cast<double>(i) / static_cast<double>(num_values - 1);
+
+  volatile double sink = 0.0; // prevent optimizer from eliminating the loop
+
+  std::println("\n--- sqrt speed comparison ({} iterations x {} values) ---", iterations, num_values);
+
+  // Time sqrt_test
+  auto start_mine = std::chrono::steady_clock::now();
+  for (int iter = 0; iter < iterations; ++iter)
+    for (const auto& val : test_values)
+      sink = sqrt_test(val);
+  auto end_mine = std::chrono::steady_clock::now();
+  auto duration_mine = std::chrono::duration_cast<std::chrono::milliseconds>(end_mine - start_mine);
+
+  // Time sqrt_fast
+  auto start_fast = std::chrono::steady_clock::now();
+  for (int iter = 0; iter < iterations; ++iter)
+    for (const auto& val : test_values)
+      sink = sqrt_fast(val);
+  auto end_fast = std::chrono::steady_clock::now();
+  auto duration_fast = std::chrono::duration_cast<std::chrono::milliseconds>(end_fast - start_fast);
+
+  // Time std::sqrt
+  auto start_std = std::chrono::steady_clock::now();
+  for (int iter = 0; iter < iterations; ++iter)
+    for (const auto& val : test_values)
+      sink = std::sqrt(val);
+  auto end_std = std::chrono::steady_clock::now();
+  auto duration_std = std::chrono::duration_cast<std::chrono::milliseconds>(end_std - start_std);
+
+  std::println("sqrt_test: {} ms", duration_mine.count());
+  std::println("sqrt_fast: {} ms", duration_fast.count());
+  std::println("std::sqrt: {} ms", duration_std.count());
+  std::println("Ratio sqrt_test/std: {:.2f}x", 
+               static_cast<double>(duration_mine.count()) / static_cast<double>(duration_std.count()));
+  std::println("Ratio sqrt_fast/std: {:.2f}x", 
+               static_cast<double>(duration_fast.count()) / static_cast<double>(duration_std.count()));
+
+  // Quick accuracy check for sqrt_fast
+  int fast_exact = 0;
+  for (int i = 0; i < N; ++i)
+  {
+    double val = range_start + (range_end - range_start) * static_cast<double>(i) / static_cast<double>(N - 1);
+    if (sqrt_fast(val) == std::sqrt(val))
+      ++fast_exact;
+  }
+  std::println("\nsqrt_fast exact matches: {}/{}", fast_exact, N);
 } // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
