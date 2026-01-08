@@ -88,10 +88,7 @@ constexpr double cos_final(double x)
   }
 }
 
-constexpr double sin_final(double x)
-{
-  return cos_final(x - PI_2);
-}
+constexpr double sin_final(double x) { return cos_final(x - PI_2); }
 
 } // namespace constexpr_math
 
@@ -125,7 +122,7 @@ int main()
   constexpr double c0 = constexpr_math::cos_final(0.0);
   constexpr double cPi = constexpr_math::cos_final(3.141592653589793);
   static_assert(c0 == 1.0);
-  
+
   // Note: cPi check might fail if PI constant isn't perfectly matching std::cos behavior at compile time
   // But we saw it passed with includes.
 
