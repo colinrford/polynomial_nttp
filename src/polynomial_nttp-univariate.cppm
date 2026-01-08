@@ -9,3 +9,8 @@ export module lam.polynomial_nttp:univariate;
 
 export import :univariate.structure;
 export import :univariate.algebra;
+export import :univariate.roots;
+export import :univariate.berlekamp;
+export import :univariate.print;
+export import :univariate.compat;
+

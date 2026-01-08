@@ -9,8 +9,10 @@
  */
 
 import std;
-import lam.experimental.concepts;
+import lam.concepts;
 import lam.polynomial_nttp;
+
+using namespace lam;
 
 consteval double line(double x)
 {
@@ -137,5 +139,5 @@ int main()
   std::println("4th coefficient of antiderivative of 3x^2 + 2x - 1 is {}",
                 coefficient_of_ad);
 
-  static_assert(lam::experimental::concepts::field_element_c_weak<double>);
+  static_assert(lam::concepts::experimental::field_element_c_weak<double>);
 }

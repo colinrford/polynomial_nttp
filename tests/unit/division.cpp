@@ -10,7 +10,7 @@ import std;
 import lam.polynomial_nttp;
 
 using namespace lam;
-using namespace lam::polynomial::univariate;
+
 
 // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
 constexpr bool comparitore(double a, double b)

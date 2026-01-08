@@ -1,10 +1,8 @@
-# `polynomial_nttp`
-`polynomial_nttp` is now a `c++` module. If instead you prefer a header
+# `lam.polynomial_nttp`
+`lam.polynomial_nttp` is a `c++` module and a part of [LAM](https://github.com/colinrford/lam). If instead you prefer a header
 version, and / or you would like to give it a try, please see
 [here](https://godbolt.org/z/s58zEqKeY) for a Compiler Explorer implementation,
-which uses `#include`s rather than `import`s, but also only builds
-`test_polynomial_nttp.cpp` at this time and not `thousand_divisions.cpp` or
-the rest. More build information is found below.
+which uses `#include`s rather than `import`s, but it is relatively outdated at this point.
 
 ## Overview
 `polynomial_nttp` implements a model of a polynomial algebra in one 
@@ -50,15 +48,14 @@ a clever way to deal with the case where the leading coefficient of the
 divisor is zero.
 
 The biggest flaw of this implementation is division - because it is not
-`operator/`... The author is not an expert in `c++` or the kinds of things this
-implementation found thrust upon itself at its onset – all this is to say, this
-author has not (yet?) figured out how to use the choice of container / data
-structure, `std::array` (where the entries are coefficients $a_i$, $i = 0,
-\ldots, n$) in a Euclidean Algorithm which both i) overloads `operator/` and
-ii) compiles inside `constexpr`, `consteval` contexts. This deeply saddens the
-author, but at least its still possible to achieve the second point ii).
+`operator/`... This author has not (yet?) figured out how to use the choice of
+container / data structure, `std::array` (where the entries are coefficients
+$a_i$, $i = 0, \ldots, n$) in a Euclidean Algorithm which both i) overloads
+`operator/` and ii) compiles inside `constexpr`, `consteval` contexts. This
+deeply saddens the author, but at least its still possible to achieve the
+second point ii).
 
-## `division_prototype()` (find it in [`src/polynomial_nttp-univariate-algebra.cppm`, line `244`](https://github.com/colinrford/polynomial_nttp/blob/main/src/polynomial_nttp-univariate-algebra.cppm#L244))
+## `division_prototype()` (find it in [`src/polynomial_nttp-univariate-algebra.cppm`, line `266`](https://github.com/colinrford/polynomial_nttp/blob/main/src/polynomial_nttp-univariate-algebra.cppm#L266))
 So, why was this implementation ~~doomed~~ forced from the outset (i.e. the
 author's choice to use `std::array`) to rely on NTTPs to achieve simple
 polynomial division at compile time? Well, that's just it, apparently, since
@@ -80,7 +77,7 @@ the use of `std::integer_sequence<int, ints...>` and fold expressions.
 One could use `std::index_sequence` instead, of course.
 
 ### implementation
-I documented my approach in the
+I have partially documented my approach in the
 [wiki for this repository.](https://github.com/colinrford/polynomial_nttp/wiki/Implementation-of-%60division_prototype()%60)
 
 ### testing
@@ -163,7 +160,7 @@ for details on getting `cmake` to avoid using Apple `clang` and `ld64` (Apple's
    ctest
    ```
 
-## thank you for checking out `polynomial_nttp`
+## thank you for checking out `lam.polynomial_nttp`
 I do not claim this is the first of its kind, but the work here is my own.
 There are possible blind spots of the author. In its current state, please
 expect it to work, albeit with an occasional quirk. If you find it does not

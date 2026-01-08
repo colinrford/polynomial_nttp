@@ -8,29 +8,18 @@
 export module lam.polynomial_nttp:univariate.algebra;
 
 import std;
-import lam.experimental.concepts;
+import lam.concepts;
 import :univariate.structure;
 
 namespace stdr = std::ranges;
 namespace stdv = std::views;
 
-namespace lam
-{
-
-namespace polynomial::univariate
+namespace lam::polynomial::univariate
 {
 
 const auto indexing_set = [](auto n) {
   return stdv::iota(static_cast<decltype(n)>(0), n);
 };
-
-const auto indexing_set_from_to = [](auto m, auto n) {
-  return stdv::iota(static_cast<decltype(n)>(m), n);
-};
-
-// ring_element_c_weak is defined in :univariate.structure
-template<typename K>
-concept field_element_c_weak = lam::experimental::concepts::field_element_c_weak<K>;
 
 // enable syntax for adding polynomials in R[X]
 export
@@ -164,6 +153,36 @@ noexcept
   return p_times_r;
 }
 
+// divide a constant on the right
+export
+template<ring_element_c_weak R = double,
+         std::size_t N>
+constexpr auto operator/(const polynomial_nttp<R, N>& p, const R& r)
+noexcept
+{
+  polynomial_nttp<R, N> p_quotient_r{};
+  stdr::transform(stdr::cbegin(p),
+                  stdr::cend(p),
+                  stdr::begin(p_quotient_r),
+                  [&](auto&& p_i) {
+                    return p_i / r;
+                  });
+  return p_quotient_r;
+}
+
+} // end namespace lam::polynomial::univariate
+
+namespace lam::polynomial::univariate::algebra
+{
+
+const auto indexing_set = [](auto n) {
+  return stdv::iota(static_cast<decltype(n)>(0), n);
+};
+
+const auto indexing_set_from_to = [](auto m, auto n) {
+  return stdv::iota(static_cast<decltype(n)>(m), n);
+};
+
 /*
  *  the norm of a polynomial is its degree
  *  a `polynomial_nttp` can be of degree `N > 0` with all zero coefficients
@@ -213,10 +232,10 @@ noexcept
 /*
  *  division_prototype()
  *    takes several NTTPs:
- *      `std::size_t M`                 – the degree of the first polynomial
- *      `polynomial_nttp<R, M> a_of_x`  – polynomial a(x) of degree M in R[X]
- *      `std::size_t N`                 – the degree of the second polynomial
- *      `polynomial_nttp<R, N> b_of_x`  – polynomial b(x) of degree N in R[X]
+ *      `std::size_t M`                 – the degree of the first polynomial
+ *      `polynomial_nttp<R, M> a_of_x`  – polynomial a(x) of degree M in R[X]
+ *      `std::size_t N`                 – the degree of the second polynomial
+ *      `polynomial_nttp<R, N> b_of_x`  – polynomial b(x) of degree N in R[X]
  *
  *    returns a `std::pair` composed of the quotient `q` and the remainder `r`
  *      the exact return type is determined inside the body of the function
@@ -241,60 +260,17 @@ template<field_element_c_weak R = double,
          polynomial_nttp<R, N> b_of_x>
 constexpr auto division_prototype()
 {
-  // helper for epsilon scaling
-  static constexpr auto get_epsilon = []() {
-      if constexpr (std::is_floating_point_v<R>) 
-        return std::numeric_limits<R>::epsilon();
-      else if constexpr (requires { typename R::value_type; }) 
-        if constexpr (std::is_floating_point_v<typename R::value_type>)
-          return std::numeric_limits<typename R::value_type>::epsilon();
-      return 0.; // dummy for non-float types
-  };
-
-  constexpr auto comparatore = [](auto&& a, auto&& b_i) { 
-    if constexpr (std::is_floating_point_v<R>) 
-    {
-      auto diff = a - b_i;
-      if (diff < static_cast<R>(0)) diff = -diff;
-      return diff < (get_epsilon() * static_cast<R>(2));
-    } else 
-    {
-      if constexpr (requires { typename R::value_type; }) 
-      {
-        using value_t = typename R::value_type;
-        if constexpr (std::is_floating_point_v<value_t> && 
-                      requires(R r) { 
-                        { r.real() } -> std::convertible_to<value_t>;
-                        { r.imag() } -> std::convertible_to<value_t>; 
-                      }) 
-        {
-          auto diff = a - b_i;
-          auto real_diff = diff.real();
-          auto imag_diff = diff.imag();
-          if (real_diff < static_cast<value_t>(0)) 
-            real_diff = -real_diff;
-          if (imag_diff < static_cast<value_t>(0)) 
-            imag_diff = -imag_diff;
-          auto eps = get_epsilon() * static_cast<value_t>(2);
-          return (real_diff < eps) && (imag_diff < eps);
-        } // else if constexpr (std::is_floating_point_v<R>)
-        // { } // maybe there exists a non-complex type out there that has R::value_type
-      }
-      return a == b_i;
-    }
-  };
-
   using divisor_info = std::tuple<bool, std::size_t, R>;
 
   constexpr auto b_info = [&]() -> divisor_info {
     auto b_reversed = stdv::reverse(b_of_x);
     auto it = stdr::find_if(b_reversed,
-        [&](auto&& coeff) { return !comparatore(R(0), coeff); });
+      [&](auto&& coeff) { return !is_approx_equal(R(0), coeff); });
     
     if (it != b_reversed.end()) 
     {
-        std::size_t dist = std::distance(b_reversed.begin(), it);
-        return { true, N - dist, *it };
+      std::size_t dist = std::distance(b_reversed.begin(), it);
+      return { true, N - dist, *it };
     }
     return { false, 0, R(0) };
   }();
@@ -330,7 +306,7 @@ constexpr auto division_prototype()
                                     - (s * b_of_x.coefficients.at(i));*/
         remainder.pop_back();
       }
-      if (comparatore(R(0), remainder.back()))
+      if (is_approx_equal(R(0), remainder.back()))
         remainder.pop_back();
       if (remainder.empty())
         remainder.push_back(R(0));
@@ -417,11 +393,13 @@ noexcept
   }();
 }
 
-} // end namespace polynomial::univariate
-  export using polynomial::univariate::norm;
-  export using polynomial::univariate::leading;
-  export using polynomial::univariate::make_monomial;
-  export using polynomial::univariate::division_prototype;
-  export using polynomial::univariate::derivative;
-  export using polynomial::univariate::antiderivative;
+} // end namespace lam::polynomial::univariate::algebra
+
+namespace lam {
+export using polynomial::univariate::algebra::norm;
+export using polynomial::univariate::algebra::leading;
+export using polynomial::univariate::algebra::make_monomial;
+export using polynomial::univariate::algebra::division_prototype;
+export using polynomial::univariate::algebra::derivative;
+export using polynomial::univariate::algebra::antiderivative;
 } // end namespace lam
