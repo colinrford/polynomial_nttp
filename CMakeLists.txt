@@ -87,6 +87,18 @@ target_compile_features(polynomial_nttp PUBLIC cxx_std_23)
 set_target_properties(polynomial_nttp PROPERTIES CXX_SCAN_FOR_MODULES ON)
 set_target_properties(polynomial_nttp PROPERTIES OUTPUT_NAME "lam_polynomial_nttp")
 
+# lam_interop library (bridges polynomial_nttp with ctbignum and bitvector)
+# Only available when installed as a package
+find_package(lam_interop QUIET)
+
+if(lam_interop_FOUND)
+  message(STATUS "Found lam_interop package")
+  set(LAM_INTEROP_AVAILABLE TRUE CACHE BOOL "lam_interop library is available" FORCE)
+else()
+  message(STATUS "lam_interop not found - roots_finite_field test will be skipped")
+  set(LAM_INTEROP_AVAILABLE FALSE CACHE BOOL "lam_interop library is available" FORCE)
+endif()
+
 add_subdirectory(tests)
 add_subdirectory(examples)
 

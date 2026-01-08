@@ -356,6 +356,7 @@ template<field_element_c_weak R = double,
 constexpr auto derivative(const polynomial_nttp<R, N>& p)
 noexcept
 {
+
   if constexpr (N == 0)
     return polynomial_nttp<R, 0>{};
   else

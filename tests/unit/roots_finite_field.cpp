@@ -8,15 +8,12 @@
 import std;
 import lam.polynomial_nttp;
 import lam.ctbignum;
+import lam.interop;
 
 using namespace lam::cbn;
 using namespace lam::cbn::literals;
-// roots function is in lam or lam::polynomial::univariate::roots
-// but 'roots' is also a namespace in lam::polynomial::univariate
-// so 'using namespace lam::polynomial::univariate' makes 'roots' refer to the namespace.
-// We will call lam::roots explicitly or use a specific using declaration.
-using lam::roots; // Brings in the function
 using lam::polynomial::univariate::polynomial_nttp;
+using lam::roots;
 
 // Helper to check if roots match expected values (order independent)
 template<typename Roots, typename Expected>
@@ -100,14 +97,6 @@ bool test_quadratic()
   return true;
 }
 
-// ============================================================
-// Test 3: Cubic x^3 - 1 = 0 in GF(7)
-// ============================================================
-// Roots of unity in GF(7)?
-// 1^3 = 1
-// 2^3 = 8 = 1
-// 4^3 = 64 = 1
-// Roots: 1, 2, 4
 bool test_cubic()
 {
   using GF = decltype(Zq(7_Z));
@@ -116,10 +105,7 @@ bool test_cubic()
 
   polynomial_nttp<GF, 3> p{{minus_one, GF(0_Z), GF(0_Z), one}}; // x^3 - 1
   
-  // NOTE: ctbignum's ZqElement does not expose its modulus as a static member,
-  // so automatic dispatch to roots_berlekamp does not work.
-  // The user must call roots_berlekamp explicitly for finite fields until
-  // a trait specialization is added to bridge the two libraries.
+  // Now this should automatically dispatch to roots_berlekamp!
   auto r = roots(p);
 
   std::vector<GF> expected{one, GF(2_Z), GF(4_Z)};
@@ -138,14 +124,7 @@ int main()
   bool result = true;
   result &= test_linear();
   result &= test_quadratic();
-  
-  // We expect cubic might fail due to trig dependencies, but let's test it explicitly
-  // to confirm the "Gap".
-  if (!test_cubic())
-  {
-    std::println("Cubic test failed as expected (likely due to missing trig/cbrt support).");
-    result = false; 
-  }
+  result &= test_cubic();
 
   return result ? 0 : 1;
 }

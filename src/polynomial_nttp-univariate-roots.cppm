@@ -756,18 +756,14 @@ constexpr roots_result<K, N> roots(const polynomial_nttp<K, N>& p)
   roots_result<K, N> result;
 
   // ============================================================
-  // Finite Field Dispatch
+  // Finite Field Dispatch (Prime Characteristic)
   // ============================================================
-  // Detect finite field via static `characteristic` or `modulus` member.
-  // ctbignum uses neither - it stores modulus as NTTP.
-  // TODO: Add trait specialization for ctbignum::ZqElement
-  // For now, we rely on the has_optional_sqrt dispatch for quadratics,
-  // and fall back to analytic solvers (which may fail for cubics/higher).
-  
-  // Future: if constexpr (is_finite_field_v<K>) {
-  //   constexpr auto P = get_field_characteristic<K>();
-  //   return roots_berlekamp<K, P, N>(p, K(0), K(1));
-  // }
+  if constexpr (univariate::finite_field_traits<K>::is_finite_field)
+  {
+    constexpr auto P = univariate::finite_field_traits<K>::modulus;
+    return lam::polynomial::univariate::berlekamp::roots_berlekamp<K, P, N>(
+      p, K(0), K(1));
+  }
 
   if constexpr (N == 0)
     return result;

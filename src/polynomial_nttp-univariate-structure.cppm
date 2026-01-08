@@ -21,6 +21,16 @@ concept ring_element_c_weak = lam::concepts::experimental::ring_element_c_weak<R
 template<typename R>
 concept field_element_c_weak = lam::concepts::experimental::field_element_c_weak<R>;
 
+// Primary template for finite field detection
+// Users or interop modules specialize this for their field types
+export 
+template<typename K>
+struct finite_field_traits
+{
+  static constexpr bool is_finite_field = false;
+  static constexpr std::size_t modulus = 0;
+};
+
 export
 template<typename T>
 constexpr auto get_epsilon() 

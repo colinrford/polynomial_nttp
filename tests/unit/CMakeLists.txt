@@ -94,5 +94,11 @@ find_package(lam_ctbignum QUIET)
 if(TARGET lam::ctbignum)
   set_property(TARGET lam::ctbignum APPEND PROPERTY INTERFACE_COMPILE_FEATURES cxx_std_23)
   add_polynomial_test(berlekamp LIBS lam::ctbignum)
-  add_polynomial_test(roots_finite_field LIBS lam::ctbignum)
+  
+  # roots_finite_field requires lam_interop which needs ctbignum AND bitvector
+  if(LAM_INTEROP_AVAILABLE)
+    add_polynomial_test(roots_finite_field LIBS lam::interop)
+  else()
+    message(STATUS "Skipping roots_finite_field test (requires lam_interop)")
+  endif()
 endif()
