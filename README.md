@@ -26,26 +26,12 @@ and indeed, in addition to addition, overloading `operator+`, subtraction
 | division       | [`division_prototype<>`](https://github.com/colinrford/polynomial_nttp/blob/main/src/polynomial_nttp.cpp#L297) | [`/tests/unit/division.cpp`](https://github.com/colinrford/polynomial_nttp/blob/main/tests/unit/division.cpp)                                                                                                                                                                                                                         |
 | derivative     | [`derivative`](https://github.com/colinrford/polynomial_nttp/blob/main/src/polynomial_nttp.cpp#L380)           | [`/tests/unit/derivative.cpp`](https://github.com/colinrford/polynomial_nttp/blob/main/tests/unit/derivative.cpp)                                                                                                                                                                                                                     |
 | antiderivative | [`antiderivative`](https://github.com/colinrford/polynomial_nttp/blob/main/src/polynomial_nttp.cpp#L405)       | [`/tests/unit/antiderivative.cpp`](https://github.com/colinrford/polynomial_nttp/blob/main/tests/unit/antiderivative.cpp)                                                                                                                                                                                                             |
-| root-finding   | in-progress (circa Oct.8.25)                                                                                   | n/a                                                                                                                                                                                                                                                                                                                                   |
+| root-finding   | [`roots<>`](https://github.com/colinrford/polynomial_nttp/blob/main/src/polynomial_nttp-univariate-roots.cppm) | [`/tests/unit/roots.cpp`](https://github.com/colinrford/polynomial_nttp/blob/main/tests/unit/roots.cpp) and [`/tests/unit/roots_finite_field.cpp`](https://github.com/colinrford/polynomial_nttp/blob/main/tests/unit/roots_finite_field.cpp) |
 
 Syntax such as `3 * p + q`, `p - 1.5 * q`, `6 * p * q`, is all possible.
 Dividing a polynomial `p` of degree `M` by a polynomial `q` of degree `N`, both
 with coefficients represented as `double`s, is achieved by
 `division_prototype<double, M, p, N, q>()`.
-
-One possibly-glaring issue in the current state is that `polynomial_nttp` allows
-the user to create arbitrary-degree constant polynomials, that is, we can e.g.
-construct a `100` degree polynomial whose only nonzero coefficient is its
-constant coefficient. `operator+`, `operator-`, and `operator*` will all assume
-the degree of the resulting polynomial without checking whether the leading
-term (or any for that matter) is `0`, while `division_prototype<>` will simply
-fail at compile time, as the **_compiler_** will **not** divide by `0`.
-Clearly this sort of behavior is a bit contrived and undesirable, but it is
-present at this time. I hope to find desirable alternative behavior for this.
-For addition, subtraction, and multiplication, it may require NTTP-based
-functions (possibly replacements?), while for division there will need to be
-a clever way to deal with the case where the leading coefficient of the
-divisor is zero.
 
 The biggest flaw of this implementation is division - because it is not
 `operator/`... This author has not (yet?) figured out how to use the choice of
@@ -55,7 +41,7 @@ $a_i$, $i = 0, \ldots, n$) in a Euclidean Algorithm which both i) overloads
 deeply saddens the author, but at least its still possible to achieve the
 second point ii).
 
-## `division_prototype()` (find it in [`src/polynomial_nttp-univariate-algebra.cppm`, line `266`](https://github.com/colinrford/polynomial_nttp/blob/main/src/polynomial_nttp-univariate-algebra.cppm#L266))
+## `division_prototype()` (find it in [`src/polynomial_nttp-univariate-algebra.cppm`, line `261`](https://github.com/colinrford/polynomial_nttp/blob/main/src/polynomial_nttp-univariate-algebra.cppm#L261))
 So, why was this implementation ~~doomed~~ forced from the outset (i.e. the
 author's choice to use `std::array`) to rely on NTTPs to achieve simple
 polynomial division at compile time? Well, that's just it, apparently, since
