@@ -89,15 +89,19 @@ set_target_properties(polynomial_nttp PROPERTIES CXX_SCAN_FOR_MODULES ON)
 set_target_properties(polynomial_nttp PROPERTIES OUTPUT_NAME "lam_polynomial_nttp")
 
 # lam_interop library (bridges polynomial_nttp with ctbignum and bitvector)
-# Only available when installed as a package
-find_package(lam_interop QUIET)
-
-if(lam_interop_FOUND)
-  message(STATUS "Found lam_interop package")
+# Check if building as part of meta-repo (target exists) or installed package
+if(TARGET lam::interop)
+  message(STATUS "Found lam::interop target (meta-repo build)")
   set(LAM_INTEROP_AVAILABLE TRUE CACHE BOOL "lam_interop library is available" FORCE)
 else()
-  message(STATUS "lam_interop not found - roots_finite_field test will be skipped")
-  set(LAM_INTEROP_AVAILABLE FALSE CACHE BOOL "lam_interop library is available" FORCE)
+  find_package(lam_interop QUIET)
+  if(lam_interop_FOUND)
+    message(STATUS "Found lam_interop package")
+    set(LAM_INTEROP_AVAILABLE TRUE CACHE BOOL "lam_interop library is available" FORCE)
+  else()
+    message(STATUS "lam_interop not found - roots_finite_field test will be skipped")
+    set(LAM_INTEROP_AVAILABLE FALSE CACHE BOOL "lam_interop library is available" FORCE)
+  endif()
 endif()
 
 add_subdirectory(tests)
