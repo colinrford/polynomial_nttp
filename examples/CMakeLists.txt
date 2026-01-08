@@ -43,7 +43,13 @@ endif()
 
 find_package(lam_ctbignum QUIET)
 if(TARGET lam::ctbignum)
-    set_property(TARGET lam::ctbignum APPEND PROPERTY INTERFACE_COMPILE_FEATURES cxx_std_23)
+  get_target_property(_aliased lam::ctbignum ALIASED_TARGET)
+  if(_aliased)
+    set(_ctbignum_target ${_aliased})
+  else()
+    set(_ctbignum_target lam::ctbignum)
+  endif()
+  set_property(TARGET ${_ctbignum_target} APPEND PROPERTY INTERFACE_COMPILE_FEATURES cxx_std_23)
 endif()
 
 # Use helper for compatibility examples

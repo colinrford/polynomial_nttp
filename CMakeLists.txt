@@ -72,6 +72,7 @@ target_sources(polynomial_nttp
   PUBLIC
   FILE_SET CXX_MODULES
   TYPE CXX_MODULES
+  BASE_DIRS ${PROJECT_SOURCE_DIR}/src ${CMAKE_CURRENT_BINARY_DIR}
   FILES src/polynomial_nttp.cppm
         src/polynomial_nttp-univariate-structure.cppm
         src/polynomial_nttp-univariate-algebra.cppm
