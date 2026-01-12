@@ -1,11 +1,11 @@
 # `lam.polynomial_nttp`
-`lam.polynomial_nttp` is a `c++` module and a part of [LAM](https://github.com/colinrford/lam). If instead you prefer a header
+`lam.polynomial_nttp` is a `c++` module and a part of [LAM](https://www.github.com/colinrford/lam). If instead you prefer a header
 version, and / or you would like to give it a try, please see
 [here](https://godbolt.org/z/s58zEqKeY) for a Compiler Explorer implementation,
 which uses `#include`s rather than `import`s, but it is relatively outdated at this point.
 
-## Overview
-`polynomial_nttp` implements a model of a polynomial algebra in one 
+## polynomial_nttp, a [LAM](https://www.github.com/colinrford/lam) library
+`lam.polynomial_nttp` implements a model of a polynomial algebra in one 
 indeterminate in `c++` which, as the name suggests, achieves this via 
 Non-Type Template Parameters (NTTPs) (it's a wrapped `std::array`; thusly I 
 could only figure out the Division Algorithm / Euclidean Algorithm using NTTPs 

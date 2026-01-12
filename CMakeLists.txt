@@ -16,7 +16,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True) #is this needed?
 set(CMAKE_CXX_MODULE_STD ON)
 set(CMAKE_CXX_SCAN_FOR_MODULES ON)
 
-project(lam_polynomial_nttp VERSION 0.2.260107 LANGUAGES CXX)
+project(lam_polynomial_nttp VERSION 0.2.260111 LANGUAGES CXX)
 
 # Make helpers available to subdirectories
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
