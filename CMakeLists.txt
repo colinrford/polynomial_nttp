@@ -16,9 +16,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED True) #is this needed?
 set(CMAKE_CXX_MODULE_STD ON)
 set(CMAKE_CXX_SCAN_FOR_MODULES ON)
 
-project(lam_polynomial_nttp VERSION 0.2.260111 LANGUAGES CXX)
+project(lam_polynomial_nttp VERSION 0.2.260113 LANGUAGES CXX)
 
-# Make helpers available to subdirectories
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(PolynomialHelpers)
 
@@ -59,11 +58,10 @@ if(ENABLE_COVERAGE)
 endif()
 
 configure_file(
-  config.cppm.in
-  ${CMAKE_CURRENT_BINARY_DIR}/config.cppm
+  polynomial_nttp_config.cppm.in
+  ${CMAKE_CURRENT_BINARY_DIR}/polynomial_nttp_config.cppm
 )
 
-# Use installed lam_concepts library
 find_package(lam_concepts REQUIRED)
 
 add_library(polynomial_nttp STATIC)
@@ -81,42 +79,24 @@ target_sources(polynomial_nttp
         src/polynomial_nttp-univariate-print.cppm
         src/polynomial_nttp-univariate-compatibility.cppm
         src/polynomial_nttp-univariate.cppm
-        ${CMAKE_CURRENT_BINARY_DIR}/config.cppm
+        ${CMAKE_CURRENT_BINARY_DIR}/polynomial_nttp_config.cppm
 )
 target_link_libraries(polynomial_nttp lam::concepts)
 target_compile_features(polynomial_nttp PUBLIC cxx_std_23)
 set_target_properties(polynomial_nttp PROPERTIES CXX_SCAN_FOR_MODULES ON)
 set_target_properties(polynomial_nttp PROPERTIES OUTPUT_NAME "lam_polynomial_nttp")
 
-# lam_interop library (bridges polynomial_nttp with ctbignum and bitvector)
-# Check if building as part of meta-repo (target exists) or installed package
-if(TARGET lam::interop)
-  message(STATUS "Found lam::interop target (meta-repo build)")
-  set(LAM_INTEROP_AVAILABLE TRUE CACHE BOOL "lam_interop library is available" FORCE)
-else()
-  find_package(lam_interop QUIET)
-  if(lam_interop_FOUND)
-    message(STATUS "Found lam_interop package")
-    set(LAM_INTEROP_AVAILABLE TRUE CACHE BOOL "lam_interop library is available" FORCE)
-  else()
-    message(STATUS "lam_interop not found - roots_finite_field test will be skipped")
-    set(LAM_INTEROP_AVAILABLE FALSE CACHE BOOL "lam_interop library is available" FORCE)
-  endif()
-endif()
-
 add_subdirectory(tests)
 add_subdirectory(examples)
 
-# Installation Configuration
 include(GNUInstallDirs)
 
-# Library Installation
 install(TARGETS polynomial_nttp
   EXPORT polynomial_nttpTargets
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-  FILE_SET CXX_MODULES DESTINATION ${CMAKE_INSTALL_LIBDIR}/c++/v1
+  FILE_SET CXX_MODULES DESTINATION ${CMAKE_INSTALL_LIBDIR}/c++/v1/lam/polynomial_nttp
 )
 
 install(EXPORT polynomial_nttpTargets

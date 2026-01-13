@@ -396,7 +396,8 @@ noexcept
 
 } // end namespace lam::polynomial::univariate::algebra
 
-namespace lam {
+namespace lam 
+{
 export using polynomial::univariate::algebra::norm;
 export using polynomial::univariate::algebra::leading;
 export using polynomial::univariate::algebra::make_monomial;
