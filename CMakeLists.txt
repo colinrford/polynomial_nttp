@@ -16,7 +16,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True) #is this needed?
 set(CMAKE_CXX_MODULE_STD ON)
 set(CMAKE_CXX_SCAN_FOR_MODULES ON)
 
-project(lam_polynomial_nttp VERSION 0.2.260113 LANGUAGES CXX)
+project(lam_polynomial_nttp VERSION 0.2.260116 LANGUAGES CXX)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(PolynomialHelpers)
@@ -50,11 +50,47 @@ else()
   set(IS_DEBUG "false")
 endif()
 
-option(ENABLE_COVERAGE "Enable coverage build" OFF)
 if(ENABLE_COVERAGE)
     message(STATUS "Coverage enabled")
     add_compile_options(-fprofile-instr-generate -fcoverage-mapping)
     add_link_options(-fprofile-instr-generate)
+endif()
+
+# Accelerate / BLAS Configuration
+option(LAM_USE_ACCELERATE "Enable Apple Accelerate backend" OFF)
+option(LAM_USE_BLAS "Enable Generic BLAS backend" OFF)
+option(LAM_USE_TBB "Enable Intel TBB for bulk operations" OFF)
+
+if(LAM_USE_ACCELERATE)
+  find_library(ACCELERATE_FRAMEWORK Accelerate REQUIRED)
+  message(STATUS "Found Accelerate: ${ACCELERATE_FRAMEWORK}")
+  set(LAM_USE_ACCELERATE_BOOL "true")
+  set(LAM_ACCELERATE_BACKEND "Apple Accelerate")
+  add_compile_definitions(LAM_USE_ACCELERATE)
+else()
+  set(LAM_USE_ACCELERATE_BOOL "false")
+  set(LAM_ACCELERATE_BACKEND "None")
+endif()
+
+if(LAM_USE_BLAS)
+  find_package(BLAS REQUIRED)
+  message(STATUS "Found BLAS: ${BLAS_LIBRARIES}")
+  set(LAM_USE_BLAS_BOOL "true")
+  set(LAM_BLAS_BACKEND "Generic BLAS")
+  # Note: BLAS_LIBRARIES will be linked later
+  add_compile_definitions(LAM_USE_BLAS)
+else()
+  set(LAM_USE_BLAS_BOOL "false")
+  set(LAM_BLAS_BACKEND "None")
+endif()
+
+if(LAM_USE_TBB)
+  find_package(TBB REQUIRED)
+  message(STATUS "Found TBB: ${TBB_DIR} (Version ${TBB_VERSION})")
+  set(LAM_USE_TBB_BOOL "true")
+  add_compile_definitions(LAM_USE_TBB)
+else()
+  set(LAM_USE_TBB_BOOL "false")
 endif()
 
 configure_file(
@@ -65,6 +101,8 @@ configure_file(
 find_package(lam_concepts REQUIRED)
 
 add_library(polynomial_nttp STATIC)
+add_library(lam_polynomial_nttp::polynomial_nttp ALIAS polynomial_nttp)
+# Alias for internal usage (tests/examples expect this)
 add_library(lam::polynomial_nttp ALIAS polynomial_nttp)
 target_sources(polynomial_nttp
   PUBLIC
@@ -79,15 +117,32 @@ target_sources(polynomial_nttp
         src/polynomial_nttp-univariate-print.cppm
         src/polynomial_nttp-univariate-compatibility.cppm
         src/polynomial_nttp-univariate.cppm
+        src/polynomial_nttp-univariate-math.cppm 
+        src/polynomial_nttp-univariate-fft.cppm
         ${CMAKE_CURRENT_BINARY_DIR}/polynomial_nttp_config.cppm
 )
-target_link_libraries(polynomial_nttp lam::concepts)
+target_sources(polynomial_nttp PRIVATE src/polynomial_nttp-univariate-fft.cpp)
+target_link_libraries(polynomial_nttp PUBLIC lam::concepts)
+
+if(LAM_USE_ACCELERATE)
+  target_link_libraries(polynomial_nttp PRIVATE ${ACCELERATE_FRAMEWORK})
+endif()
+
+if(LAM_USE_BLAS)
+  target_link_libraries(polynomial_nttp PRIVATE ${BLAS_LIBRARIES})
+endif()
+
+if(LAM_USE_TBB)
+  target_link_libraries(polynomial_nttp PRIVATE TBB::tbb)
+endif()
+
 target_compile_features(polynomial_nttp PUBLIC cxx_std_23)
 set_target_properties(polynomial_nttp PROPERTIES CXX_SCAN_FOR_MODULES ON)
 set_target_properties(polynomial_nttp PROPERTIES OUTPUT_NAME "lam_polynomial_nttp")
 
 add_subdirectory(tests)
 add_subdirectory(examples)
+add_subdirectory(benchmarks)
 
 include(GNUInstallDirs)
 
@@ -101,7 +156,7 @@ install(TARGETS polynomial_nttp
 
 install(EXPORT polynomial_nttpTargets
   FILE polynomial_nttpTargets.cmake
-  NAMESPACE lam::
+  NAMESPACE lam_polynomial_nttp::
   DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/lam_polynomial_nttp
 )
 
@@ -111,6 +166,10 @@ file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/lam_polynomial_nttpConfig.cmake" [[
 include(CMakeFindDependencyMacro)
 find_dependency(lam_concepts)
 include("${CMAKE_CURRENT_LIST_DIR}/polynomial_nttpTargets.cmake")
+# Backward compatibility alias
+if(TARGET lam_polynomial_nttp::polynomial_nttp AND NOT TARGET lam::polynomial_nttp)
+  add_library(lam::polynomial_nttp ALIAS lam_polynomial_nttp::polynomial_nttp)
+endif()
 ]])
 
 write_basic_package_version_file(

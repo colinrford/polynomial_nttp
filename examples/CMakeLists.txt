@@ -5,13 +5,11 @@
 # ============================================================
 
 add_polynomial_executable(type_erased)
+add_polynomial_executable(audio_filtering_demo LIBS polynomial_nttp)
 
-# ============================================================
-# Benchmark Examples
-# ============================================================
-
-add_polynomial_executable(trig_benchmark LIBS polynomial_nttp)
-add_polynomial_executable(eval_benchmark)
+# Embed Wav Demo needs dependency on audio filtering to get clean wav
+add_polynomial_executable(embed_wav_demo LIBS polynomial_nttp)
+add_dependencies(embed_wav_demo audio_filtering_demo)
 
 # ============================================================
 # Orthogonal Polynomial Examples
@@ -39,6 +37,12 @@ if(Boost_FOUND)
   endforeach()
 else()
   message(STATUS "Boost NOT found: using local reference implementation")
+endif()
+
+find_package(TBB QUIET)
+if(TBB_FOUND)
+  message(STATUS "TBB found: enabling parallel evaluation")
+  # TBB mainly used for bulk benchmarks which moved to benchmarks dir
 endif()
 
 find_package(lam_ctbignum QUIET)
