@@ -1,13 +1,24 @@
 /*
  *  eval_benchmark.cpp
- *    see github.com/colinrford/polynomial_nttp for AGPL-3.0 License, and
- *                                              for more info
+ *    see github.com/colinrford/polynomial_nttp for AGPL-3.0 License
  *
- *    Benchmarks Horner's method for various polynomial degrees
+ *    Benchmarks single-point evaluation performance across different compiler
+ *    flags and backends. Compares:
+ *      - Generic Horner's Method (Scalar)
+ *      - SIMD/BLAS Accelerated Evaluation (if enabled)
+ *      - Boost.Math (if enabled)
  */
 
-import std;
+#include <chrono>
+#include <cmath>
+#include <print>
+#include <vector>
+
 import lam.polynomial_nttp;
+
+#ifdef HAS_BOOST_MATH
+#include <boost/math/tools/polynomial.hpp>
+#endif
 
 // Generate a polynomial with coefficients 1/i! for testing (exp series)
 template<typename R, std::size_t N>
@@ -45,6 +56,37 @@ void benchmark_degree(int iterations, int num_values)
   double evals_per_sec = static_cast<double>(iterations * num_values) / (static_cast<double>(duration.count()) / 1e6);
 
   std::println("  Degree {:3}: {:7} µs ({:.2f}M evals/sec)", N, duration.count(), evals_per_sec / 1e6);
+
+#ifdef HAS_BOOST_MATH
+  // Boost Benchmark
+  std::vector<double> coeffs_vec(poly.coefficients.begin(), poly.coefficients.end());
+  boost::math::tools::polynomial<double> boost_poly(coeffs_vec.data(), coeffs_vec.size() - 1);
+
+  volatile double sink_boost = 0.0;
+  double max_diff = 0.0;
+
+  auto start_boost = std::chrono::steady_clock::now();
+  for (int iter = 0; iter < iterations; ++iter)
+    for (const auto& x : values)
+    {
+      double b_val = boost_poly.evaluate(x);
+      sink_boost = b_val;
+
+      if (iter == 0)
+      { // Check accuracy on first iteration
+        double my_val = poly(x);
+        double diff = std::abs(my_val - b_val);
+        if (diff > max_diff)
+          max_diff = diff;
+      }
+    }
+  auto end_boost = std::chrono::steady_clock::now();
+  auto boost_us = std::chrono::duration_cast<std::chrono::microseconds>(end_boost - start_boost).count();
+  double boost_mps = static_cast<double>(iterations * num_values) / (static_cast<double>(boost_us) / 1e6);
+
+  std::println("        Boost: {:7} µs ({:.2f}M evals/sec) | Speedup: {:.2f}x | MaxDiff: {:e}", boost_us,
+               boost_mps / 1e6, static_cast<double>(boost_us) / static_cast<double>(duration.count()), max_diff);
+#endif
 }
 
 int main()
@@ -55,6 +97,12 @@ int main()
   std::println("=== Polynomial Evaluation Benchmark (Horner's Method) ===");
   std::println("    {} iterations × {} values\n", iterations, num_values);
 
+#ifdef HAS_BOOST_MATH
+  std::println("    [Boost Enabled]");
+#else
+  std::println("    [Boost DISABLED]");
+#endif
+
   // Verify correctness
   std::println("--- Correctness Check ---");
   constexpr auto poly = make_test_polynomial<double, 20>();
@@ -64,7 +112,26 @@ int main()
   std::println("  diff        = {}\n", std::abs(at_one - std::exp(1.0)));
 
   static_assert(poly(0.0) == 1.0);
-  std::println("  ✓ Compile-time evaluation verified\n");
+  std::println("  ✓ Compile-time evaluation verified");
+
+  // Verify Backend Consistency (Accelerate/BLAS vs Parallel Fallback)
+  // We explicitly call evaluate_parallel (assuming it's public) and compare to operator()
+  std::println("\n--- Backend Consistency Check ---");
+  double val_parallel = poly.evaluate_parallel(1.0);
+  double val_backend = poly(1.0); // Uses currently active backend
+  std::println("  Fallback : {}", val_parallel);
+  std::println("  Backend  : {}", val_backend);
+  double consistency_diff = std::abs(val_parallel - val_backend);
+  if (consistency_diff < 1e-14)
+  {
+    std::println("  ✓ Backend matches Fallback (diff = {})", consistency_diff);
+  }
+  else
+  {
+    std::println("  ✗ Backend MISMATCH (diff = {})", consistency_diff);
+    std::exit(1);
+  }
+  std::println("");
 
   std::println("--- Benchmark by Degree ---");
   benchmark_degree<5>(iterations, num_values);

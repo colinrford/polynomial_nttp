@@ -1,10 +1,9 @@
 /*
  *  trig_benchmark.cpp
- *    see github.com/colinrford/polynomial_nttp for AGPL-3.0 License, and
- *                                              for more info
+ *    see github.com/colinrford/polynomial_nttp for AGPL-3.0 License
  *
- *    Trigonometric function benchmark
- *    Demonstrates evaluating trigonometric functions at compile time
+ *    Benchmark and verification for compile-time trigonometric functions
+ *    (sin/cos) using Minimax approximation, ensuring accuracy for root finding.
  */
 
 import std;
