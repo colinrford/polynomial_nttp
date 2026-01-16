@@ -20,17 +20,14 @@ int main()
   // even if asserts are off this ought to still work as a test
   constexpr std::array<int, 3> three_element_array{-1, 0, 1};
   constexpr auto quadratic = polynomial_nttp<int, 2>(three_element_array);
-  if constexpr (quadratic.degree == 2
-             && quadratic.coefficients.size() == 3
-             && quadratic.coefficients[1] == 0
-             && quadratic.coefficients[0] == -quadratic.coefficients[2]
-             && std::same_as<std::array<int, 3>::value_type,
-                             polynomial_nttp<int, 2>::coefficient_t>
-             && std::same_as<std::array<int, 2>::size_type,
-                             polynomial_nttp<int, 1>::index_t>)
+  if constexpr (quadratic.degree == 2 && quadratic.coefficients.size() == 3 && quadratic.coefficients[1] == 0 &&
+                quadratic.coefficients[0] == -quadratic.coefficients[2] &&
+                std::same_as<std::array<int, 3>::value_type, polynomial_nttp<int, 2>::coefficient_t> &&
+                std::same_as<std::array<int, 2>::size_type, polynomial_nttp<int, 1>::index_t>)
   {
     return 0; // pass
-  } else
+  }
+  else
   {
     return 1; // fail
   }

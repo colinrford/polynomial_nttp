@@ -28,7 +28,9 @@ struct structural_complex
   constexpr structural_complex operator-(const structural_complex& other) const { return {r - other.r, i - other.i}; }
   constexpr structural_complex operator-() const { return {-r, -i}; }
   constexpr structural_complex operator*(const structural_complex& other) const
-  { return {r * other.r - i * other.i, r * other.i + i * other.r}; }
+  {
+    return {r * other.r - i * other.i, r * other.i + i * other.r};
+  }
   constexpr structural_complex operator/(const structural_complex& other) const
   {
     T d = other.r * other.r + other.i * other.i;

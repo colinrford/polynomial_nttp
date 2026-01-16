@@ -21,14 +21,13 @@ int main()
   // even if asserts are off this ought to still work as a test
   constexpr polynomial_nttp<int, 3> cubic{-2, 7, -5, 3};
   constexpr auto constant_times_cubic = -1 * cubic;
-  if constexpr (constant_times_cubic[0] == 2
-             && constant_times_cubic(-1) == 17
-             && (2 * cubic * -1)(1) == -6
-             && std::same_as<decltype(linear), decltype(thrice_linear)>
-             && std::same_as<decltype(cubic), decltype(constant_times_cubic)>)
+  if constexpr (constant_times_cubic[0] == 2 && constant_times_cubic(-1) == 17 && (2 * cubic * -1)(1) == -6 &&
+                std::same_as<decltype(linear), decltype(thrice_linear)> &&
+                std::same_as<decltype(cubic), decltype(constant_times_cubic)>)
   {
     return 0; // pass
-  } else
+  }
+  else
   {
     return 1; // fail
   }

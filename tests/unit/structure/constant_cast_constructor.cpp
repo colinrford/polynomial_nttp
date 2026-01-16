@@ -32,17 +32,16 @@ int main()
   constexpr bool wasteful_constant_is_indeed_wasteful = [&]() {
     for (auto&& coefficient : wasteful_constant)
     {
-      if (!comparitore(0., coefficient)
-       && !comparitore(wasteful_constant[0], coefficient))
+      if (!comparitore(0., coefficient) && !comparitore(wasteful_constant[0], coefficient))
         return false;
     }
     return true;
   }();
-  if constexpr (norm(constant) == norm(another_constant)
-              && wasteful_constant_is_indeed_wasteful)
+  if constexpr (norm(constant) == norm(another_constant) && wasteful_constant_is_indeed_wasteful)
   {
     return 0;
-  } else
+  }
+  else
   {
     return 1;
   }

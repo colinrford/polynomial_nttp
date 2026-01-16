@@ -19,14 +19,12 @@ int main()
   static_assert(linear.coefficients.size() == 2);
   // even if asserts are off this ought to still work as a test
   constexpr polynomial_nttp<int, 3> cubic{-1, 1, -3, 2};
-  if constexpr (cubic.degree == 3
-             && cubic.coefficients.size() == 4
-             && cubic[1] == 1
-             && cubic[0] == (-cubic[3] + 1)
-             && cubic[2] == -3)
+  if constexpr (cubic.degree == 3 && cubic.coefficients.size() == 4 && cubic[1] == 1 && cubic[0] == (-cubic[3] + 1) &&
+                cubic[2] == -3)
   {
     return 0; // pass
-  } else
+  }
+  else
   {
     return 1; // fail
   }

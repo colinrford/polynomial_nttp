@@ -22,7 +22,4 @@ static_assert(ring_element_c_weak<double>, "double should be a ring");
 static_assert(field_element_c_weak<double>, "double should be a field");
 static_assert(field_element_c_weak<int>, "int is weakly a field (due to integer division)");
 
-int main() 
-{
-  return 0;
-}
+int main() { return 0; }

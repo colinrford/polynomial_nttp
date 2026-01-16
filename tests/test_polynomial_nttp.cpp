@@ -16,16 +16,16 @@ using namespace lam;
 
 consteval double line(double x)
 {
-  constexpr std::array<double, 2> coefficients{1.,2.};
+  constexpr std::array<double, 2> coefficients{1., 2.};
   constexpr lam::polynomial_nttp<double, 1> p(coefficients);
   return p(x);
 }
 
 consteval double parabola(double x)
 {
-  constexpr std::array<double, 3> coefficients_p{0.,0.,3.};
+  constexpr std::array<double, 3> coefficients_p{0., 0., 3.};
   constexpr lam::polynomial_nttp<double, 2> p(coefficients_p);
-  constexpr std::array<double, 2> coefficients_q{0.,1.};
+  constexpr std::array<double, 2> coefficients_q{0., 1.};
   constexpr lam::polynomial_nttp<double, 1> q(coefficients_q);
   constexpr auto neg_q = -q;
   return (p + neg_q)(x);
@@ -33,18 +33,18 @@ consteval double parabola(double x)
 
 consteval double parabola2(double x)
 {
-  constexpr std::array<double, 3> coefficients_p{1.,2.,3.};
+  constexpr std::array<double, 3> coefficients_p{1., 2., 3.};
   constexpr lam::polynomial_nttp<double, 2> p(coefficients_p);
-  constexpr std::array<double, 2> coefficients_q{-1.,1.};
+  constexpr std::array<double, 2> coefficients_q{-1., 1.};
   constexpr lam::polynomial_nttp<double, 1> q(coefficients_q);
   return (q - p)(x);
 }
 
 consteval double cubic(double x)
 {
-  constexpr std::array<double, 3> coefficients_p{-1.,0.,2.};
+  constexpr std::array<double, 3> coefficients_p{-1., 0., 2.};
   constexpr lam::polynomial_nttp<double, 2> p(coefficients_p);
-  constexpr std::array<double, 2> coefficients_q{0.,3.};
+  constexpr std::array<double, 2> coefficients_q{0., 3.};
   constexpr lam::polynomial_nttp<double, 1> q(coefficients_q);
   return (p * q)(x);
 }
@@ -61,14 +61,13 @@ consteval auto division_test()
   constexpr lam::polynomial_nttp<double, 8> a(coefficients_a);
   constexpr std::array<double, 5> coefficients_b{1, 0, 2, 0, 1};
   constexpr lam::polynomial_nttp<double, 4> b(coefficients_b);
-  constexpr auto a_divided_by_b = lam::
-                                  division_prototype<double, 8, a, 4, b>();
+  constexpr auto a_divided_by_b = lam::division_prototype<double, 8, a, 4, b>();
   return a_divided_by_b;
 }
 
 consteval auto derivative_test()
 {
-  constexpr std::array<double, 3> coefficients_p{-1.,0.,1.};
+  constexpr std::array<double, 3> coefficients_p{-1., 0., 1.};
   constexpr lam::polynomial_nttp<double, 2> p(coefficients_p);
   constexpr auto d_dx_p = lam::derivative(p);
   return d_dx_p[1];
@@ -76,7 +75,7 @@ consteval auto derivative_test()
 
 consteval auto antiderivative_test()
 {
-  constexpr std::array<double, 3> coefficients_p{-1.,2.,3.};
+  constexpr std::array<double, 3> coefficients_p{-1., 2., 3.};
   constexpr lam::polynomial_nttp<double, 2> p(coefficients_p);
   constexpr auto integral_of_p = lam::antiderivative(p);
   return integral_of_p[3];
@@ -88,9 +87,7 @@ int main()
   constexpr auto left = line(-1);
   constexpr auto right = line(1);
   constexpr auto a_zero = line(0);
-  std::println("line(-1) = {}; line(1) = {}; line[0] = {}.", left,
-                                                             right,
-                                                             a_zero);
+  std::println("line(-1) = {}; line(1) = {}; line[0] = {}.", left, right, a_zero);
   std::println("the y intercept of the line y = 2 x + 1 equals {}", y_int);
   constexpr auto val = 1.;
   constexpr auto a = parabola(val);
@@ -98,12 +95,9 @@ int main()
   constexpr auto b = parabola2(val);
   std::println("-3x^2 - x - 2 evaluated at x = {} is {}", val, b);
   constexpr auto notta = cubic(a);
-  constexpr lam::polynomial_nttp<double, 2> p{-1.,0.,2.};
-  constexpr lam::polynomial_nttp<double, 1> q{0.,3.};
-  std::println("2x^2 - 1 times 3x at x = {} is {} (deg = {})",
-               a,
-               notta,
-               lam::norm(p * q));
+  constexpr lam::polynomial_nttp<double, 2> p{-1., 0., 2.};
+  constexpr lam::polynomial_nttp<double, 1> q{0., 3.};
+  std::println("2x^2 - 1 times 3x at x = {} is {} (deg = {})", a, notta, lam::norm(p * q));
   constexpr auto degree = degree_of_cubic();
   constexpr lam::polynomial_nttp<double, 3> x_cubed{0, 0, 0, 1};
   std::println("degree of {} x^{} is {}", x_cubed[3], x_cubed.degree, degree);
@@ -128,16 +122,11 @@ int main()
       std::print("{} x^{}", remainder[i], i);
   }
   std::print(", deg = {}\n", lam::norm(remainder));
-  static_assert(lam::norm(
-                  lam::derivative(
-                    lam::polynomial_nttp<double, 0>{}
-                  )
-                ) == 0);
+  static_assert(lam::norm(lam::derivative(lam::polynomial_nttp<double, 0>{})) == 0);
   constexpr auto slope_of_x_squared = derivative_test();
   std::println("slope of x^2 - 1 is {}x", slope_of_x_squared);
   constexpr auto coefficient_of_ad = antiderivative_test();
-  std::println("4th coefficient of antiderivative of 3x^2 + 2x - 1 is {}",
-                coefficient_of_ad);
+  std::println("4th coefficient of antiderivative of 3x^2 + 2x - 1 is {}", coefficient_of_ad);
 
   static_assert(lam::concepts::experimental::field_element_c_weak<double>);
 }

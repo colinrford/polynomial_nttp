@@ -26,8 +26,7 @@ consteval auto division_by_zero_result()
 {
   constexpr polynomial_nttp<double, 2> a{0., 1., 2.};
   constexpr polynomial_nttp<double, 1> b{0., 0.};
-  constexpr auto a_divided_by_b =
-                        division_prototype<double, 2, a, 1, b>();
+  constexpr auto a_divided_by_b = division_prototype<double, 2, a, 1, b>();
   return a_divided_by_b;
 }
 
@@ -40,9 +39,7 @@ consteval bool divide_by_zero()
     return false;
   else if (2 != norm(r_of_x))
     return false;
-  else if (!comparitore(0., r_of_x[0])
-        || !comparitore(1., r_of_x[1])
-        || !comparitore(2., r_of_x[2]))
+  else if (!comparitore(0., r_of_x[0]) || !comparitore(1., r_of_x[1]) || !comparitore(2., r_of_x[2]))
     return false;
   else
     return true;
@@ -52,8 +49,7 @@ consteval auto division_by_greater_degree_result()
 {
   constexpr polynomial_nttp<double, 2> a{-1.2, 1.5, 2.2};
   constexpr polynomial_nttp<double, 1> b{1.5, 2.5};
-  constexpr auto b_divided_by_a =
-                        division_prototype<double, 1, b, 2, a>();
+  constexpr auto b_divided_by_a = division_prototype<double, 1, b, 2, a>();
   return b_divided_by_a;
 }
 
@@ -66,8 +62,7 @@ consteval bool divide_by_greater_degree()
     return false;
   else if (1 != norm(r_of_x))
     return false;
-  else if (!comparitore(1.5, r_of_x[0])
-        || !comparitore(2.5, r_of_x[1]))
+  else if (!comparitore(1.5, r_of_x[0]) || !comparitore(2.5, r_of_x[1]))
     return false;
   else
     return true;
@@ -79,11 +74,7 @@ consteval bool divide_by_greater_degree()
 consteval bool divide_by_self()
 {
   constexpr polynomial_nttp<double, 2> quadratic{0., 1., 2.};
-  constexpr auto q_and_r = division_prototype<double,
-                                              2,
-                                              quadratic,
-                                              2,
-                                              quadratic>();
+  constexpr auto q_and_r = division_prototype<double, 2, quadratic, 2, quadratic>();
   constexpr auto q_of_x = q_and_r.first;
   constexpr auto r_of_x = q_and_r.second;
   if (norm(r_of_x) != 0 || !comparitore(r_of_x[0], 0.))
@@ -100,20 +91,15 @@ consteval bool self_squared_divided_by_self()
 {
   constexpr polynomial_nttp<double, 2> quadratic{0., 1., 2.};
   constexpr auto quartic = quadratic * quadratic;
-  constexpr auto q_and_r = division_prototype<double,
-                                              4,
-                                              quartic,
-                                              2,
-                                              quadratic>();
+  constexpr auto q_and_r = division_prototype<double, 4, quartic, 2, quadratic>();
   constexpr auto q_of_x = q_and_r.first;
   constexpr auto r_of_x = q_and_r.second;
   if (norm(r_of_x) != 0 || !comparitore(r_of_x[0], 0.))
     return false;
   else if (norm(q_of_x) != 2)
     return false;
-  else if (!comparitore(quadratic[0], q_of_x[0])
-        || !comparitore(quadratic[1], q_of_x[1])
-        || !comparitore(quadratic[2], q_of_x[2]))
+  else if (!comparitore(quadratic[0], q_of_x[0]) || !comparitore(quadratic[1], q_of_x[1]) ||
+           !comparitore(quadratic[2], q_of_x[2]))
     return false;
   else
     return true;
@@ -129,10 +115,8 @@ consteval bool reconstruct_original_polynomial()
   constexpr auto reconstructed_cubic = quotient * linear + remainder;
   if (norm(cubic) != norm(reconstructed_cubic))
     return false;
-  else if (!comparitore(cubic[0], reconstructed_cubic[0])
-        && !comparitore(cubic[1], reconstructed_cubic[1])
-        && !comparitore(cubic[2], reconstructed_cubic[2])
-        && !comparitore(cubic[3], reconstructed_cubic[3]))
+  else if (!comparitore(cubic[0], reconstructed_cubic[0]) && !comparitore(cubic[1], reconstructed_cubic[1]) &&
+           !comparitore(cubic[2], reconstructed_cubic[2]) && !comparitore(cubic[3], reconstructed_cubic[3]))
     return false;
   else
     return true;
@@ -145,11 +129,13 @@ consteval bool test_leading_zero_coeff()
   constexpr auto q = q_and_r.first;
   constexpr auto r = q_and_r.second;
   bool q_ok = comparitore(q[0], 1.) && comparitore(q[1], 1.);
-  for(std::size_t i = 2; i < q.coefficients.size(); ++i)
-    if (!comparitore(q[i], 0.)) q_ok = false;
+  for (std::size_t i = 2; i < q.coefficients.size(); ++i)
+    if (!comparitore(q[i], 0.))
+      q_ok = false;
   bool r_ok = true;
-  for(const auto& val : r)
-    if (!comparitore(val, 0.)) r_ok = false;
+  for (const auto& val : r)
+    if (!comparitore(val, 0.))
+      r_ok = false;
   return q_ok && r_ok;
 }
 // NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
@@ -159,21 +145,16 @@ int main()
   constexpr bool divide_by_zero_works = divide_by_zero();
   constexpr bool divide_by_greater_degree_works = divide_by_greater_degree();
   constexpr bool divide_by_self_works = divide_by_self();
-  constexpr bool self_squared_divided_by_self_works
-                  = self_squared_divided_by_self();
-  constexpr bool reconstruct_original_polynomial_works
-                  = reconstruct_original_polynomial();
+  constexpr bool self_squared_divided_by_self_works = self_squared_divided_by_self();
+  constexpr bool reconstruct_original_polynomial_works = reconstruct_original_polynomial();
   constexpr bool leading_zero_coeff_works = test_leading_zero_coeff();
 
-  if constexpr (divide_by_zero_works
-             && divide_by_greater_degree_works
-             && divide_by_self_works
-             && self_squared_divided_by_self_works
-             && reconstruct_original_polynomial_works
-             && leading_zero_coeff_works)
+  if constexpr (divide_by_zero_works && divide_by_greater_degree_works && divide_by_self_works &&
+                self_squared_divided_by_self_works && reconstruct_original_polynomial_works && leading_zero_coeff_works)
   {
     return 0;
-  } else
+  }
+  else
   {
     return 1;
   }

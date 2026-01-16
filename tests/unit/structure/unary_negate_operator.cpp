@@ -20,14 +20,13 @@ int main()
   // even if asserts are off this ought to still work as a test
   constexpr polynomial_nttp<int, 3> cubic{-2, 7, -5, 3};
   constexpr auto negated_cubic = -cubic;
-  if constexpr (negated_cubic(0) == 2
-             && negated_cubic(1) == -3
-             && negated_cubic[2] == 5
-             && std::same_as<decltype(linear), decltype(negated_linear)>
-             && std::same_as<decltype(cubic), decltype(negated_cubic)>)
+  if constexpr (negated_cubic(0) == 2 && negated_cubic(1) == -3 && negated_cubic[2] == 5 &&
+                std::same_as<decltype(linear), decltype(negated_linear)> &&
+                std::same_as<decltype(cubic), decltype(negated_cubic)>)
   {
     return 0; // pass
-  } else
+  }
+  else
   {
     return 1; // fail
   }

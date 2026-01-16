@@ -45,17 +45,14 @@ int main()
       return true;
   }();
 
-  if constexpr (leading(derivative(constant)) == 0
-             && norm(derivative(constant)) == 0
-             && quadratic_coefficients_are_correct
-             && quadratic(-1) == 26
-             && cubic_coefficients_are_correct
-             && std::same_as<std::remove_cvref_t<decltype(quadratic)>,
-                             polynomial_nttp<int, 2>>
-             && std::same_as<decltype(cubic), decltype(another_cubic)>)
+  if constexpr (leading(derivative(constant)) == 0 && norm(derivative(constant)) == 0 &&
+                quadratic_coefficients_are_correct && quadratic(-1) == 26 && cubic_coefficients_are_correct &&
+                std::same_as<std::remove_cvref_t<decltype(quadratic)>, polynomial_nttp<int, 2>> &&
+                std::same_as<decltype(cubic), decltype(another_cubic)>)
   {
     return 0; // pass
-  } else
+  }
+  else
   {
     return 1; // fail
   }

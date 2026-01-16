@@ -22,14 +22,13 @@ int main()
   constexpr polynomial_nttp<int, 3> cubic{-2, 7, -5, 3};
   constexpr auto zero_cubic = cubic + (-cubic);
   constexpr auto cubic_plus_linear = cubic + linear;
-  if constexpr (zero_cubic(0) == 0
-             && (cubic + cubic)(1) == 6
-             && cubic_plus_linear[2] == -5
-             && std::same_as<decltype(linear), decltype(twice_linear)>
-             && std::same_as<decltype(cubic_plus_linear), decltype(zero_cubic)>)
+  if constexpr (zero_cubic(0) == 0 && (cubic + cubic)(1) == 6 && cubic_plus_linear[2] == -5 &&
+                std::same_as<decltype(linear), decltype(twice_linear)> &&
+                std::same_as<decltype(cubic_plus_linear), decltype(zero_cubic)>)
   {
     return 0; // pass
-  } else
+  }
+  else
   {
     return 1; // fail
   }

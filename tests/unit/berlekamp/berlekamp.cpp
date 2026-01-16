@@ -4,7 +4,7 @@
  *                                              for more info
  *  unit test for polynomial_nttp berlekamp_factor function
  */
- 
+
 import std;
 import lam.polynomial_nttp;
 import lam.ctbignum;

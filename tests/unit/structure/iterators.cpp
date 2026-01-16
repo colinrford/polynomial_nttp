@@ -30,16 +30,13 @@ int main()
       coeff = 1;
     return polynomial_nttp<int, 2>(quadratic_poly);
   }();
-  if constexpr (result_should_be_zero == 0
-             && quadratic.degree == 2
-             && quadratic.coefficients.size() == 3
-             && quadratic.coefficients[1] == 1
-             && quadratic.coefficients[0] == quadratic.coefficients[2]
-             && std::same_as<decltype(std::array<int, 3>{}.begin()),
-                             decltype(polynomial_nttp<int, 2>{}.begin())>)
+  if constexpr (result_should_be_zero == 0 && quadratic.degree == 2 && quadratic.coefficients.size() == 3 &&
+                quadratic.coefficients[1] == 1 && quadratic.coefficients[0] == quadratic.coefficients[2] &&
+                std::same_as<decltype(std::array<int, 3>{}.begin()), decltype(polynomial_nttp<int, 2>{}.begin())>)
   {
     return 0; // pass
-  } else
+  }
+  else
   {
     return 1; // fail
   }

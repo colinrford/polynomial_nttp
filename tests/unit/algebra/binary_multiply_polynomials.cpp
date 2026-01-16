@@ -22,16 +22,13 @@ int main()
   constexpr polynomial_nttp<int, 3> cubic{-2, 7, -5, 3};
   constexpr auto cubic_times_linear = cubic * linear;
   constexpr auto cubic_squared = cubic * cubic;
-  if constexpr (cubic_times_linear[0] == 2
-             && cubic_squared(0) == 4
-             && cubic_times_linear(-3) == 1490
-             && std::same_as<std::remove_cvref_t<decltype(cubic_times_linear)>,
-                             polynomial_nttp<int, 4>>
-             && std::same_as<std::remove_cvref_t<decltype(cubic_squared)>,
-                             polynomial_nttp<int, 6>>)
+  if constexpr (cubic_times_linear[0] == 2 && cubic_squared(0) == 4 && cubic_times_linear(-3) == 1490 &&
+                std::same_as<std::remove_cvref_t<decltype(cubic_times_linear)>, polynomial_nttp<int, 4>> &&
+                std::same_as<std::remove_cvref_t<decltype(cubic_squared)>, polynomial_nttp<int, 6>>)
   {
     return 0; // pass
-  } else
+  }
+  else
   {
     return 1; // fail
   }
