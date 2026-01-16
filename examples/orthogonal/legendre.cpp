@@ -279,9 +279,9 @@ int main()
   // P_l^m(x) = (-1)^m (1-x^2)^(m/2) d^m/dx^m P_l(x)
   // For m positive even integer, (-1)^m = 1.
   // Example: m=2. P_l^2(x) = (1-x^2) * P_l''(x).
-  
+
   std::println("\n=== Spherical Harmonics Demo (Associated Legendre, even m) ===");
-  
+
   // Case 1: l=2, m=2
   // P_2(x) = 0.5(3x^2 - 1)
   // P_2'(x) = 3x
@@ -290,13 +290,13 @@ int main()
   // Reuse existing P2 from above
   constexpr auto P2_prime = lam::derivative(P2);
   constexpr auto P2_prime2 = lam::derivative(P2_prime);
-  
+
   constexpr auto x_poly = lam::make_monomial<R, 1>();
   constexpr auto one = lam::polynomial_nttp<R, 0>{1.0};
   constexpr auto one_minus_x2 = one - x_poly * x_poly;
-  
+
   constexpr auto P2_2 = one_minus_x2 * P2_prime2;
-  
+
   std::println("P_2^2(x) = {}", P2_2);
   // Expected: 3 - 3x^2
   static_assert(lam::is_approx_equal(P2_2.coefficients[0], 3.0));
@@ -311,9 +311,9 @@ int main()
   // Reuse existing P3 from above
   constexpr auto P3_prime = lam::derivative(P3);
   constexpr auto P3_prime2 = lam::derivative(P3_prime);
-  
+
   constexpr auto P3_2 = one_minus_x2 * P3_prime2;
-  
+
   std::println("P_3^2(x) = {}", P3_2);
   // Expected: 15x - 15x^3
   static_assert(lam::is_approx_equal(P3_2.coefficients[1], 15.0));

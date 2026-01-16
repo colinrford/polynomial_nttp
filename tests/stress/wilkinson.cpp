@@ -97,45 +97,52 @@ int main()
 template<typename RootsContainer>
 constexpr bool check_roots_contain(const RootsContainer& roots, std::initializer_list<double> expected)
 {
-    if (roots.size() != expected.size()) return false;
-    for (double exp : expected) {
-        bool found = false;
-        for (auto r : roots) {
-            if (r.value > exp - 0.1 && r.value < exp + 0.1) {
-                found = true;
-                break;
-            }
-        }
-        if (!found) return false;
+  if (roots.size() != expected.size())
+    return false;
+  for (double exp : expected)
+  {
+    bool found = false;
+    for (auto r : roots)
+    {
+      if (r.value > exp - 0.1 && r.value < exp + 0.1)
+      {
+        found = true;
+        break;
+      }
     }
-    return true;
+    if (!found)
+      return false;
+  }
+  return true;
 }
 
 // Compile-time verification
 // N=3: (x-1)(x-2)(x-3) = x^3 - 6x^2 + 11x - 6
-constexpr bool test_w3_constexpr() {
-    using Real = double;
-    constexpr polynomial_nttp<Real, 3> w3{{-6.0, 11.0, -6.0, 1.0}};
-    auto r = lam::polynomial::univariate::roots::roots(w3);
-    return check_roots_contain(r, {1.0, 2.0, 3.0});
+constexpr bool test_w3_constexpr()
+{
+  using Real = double;
+  constexpr polynomial_nttp<Real, 3> w3{{-6.0, 11.0, -6.0, 1.0}};
+  auto r = lam::polynomial::univariate::roots::roots(w3);
+  return check_roots_contain(r, {1.0, 2.0, 3.0});
 }
 static_assert(test_w3_constexpr(), "Wilkinson(3) [Cardano] should be solvable at compile-time");
 
 // N=4: (x-1)(x-2)(x-3)(x-4) = x^4 - 10x^3 + 35x^2 - 50x + 24
-constexpr bool test_w4_constexpr() {
-    using Real = double;
-    constexpr polynomial_nttp<Real, 4> w4{{24.0, -50.0, 35.0, -10.0, 1.0}};
-    auto r = lam::polynomial::univariate::roots::roots(w4);
-    return check_roots_contain(r, {1.0, 2.0, 3.0, 4.0});
+constexpr bool test_w4_constexpr()
+{
+  using Real = double;
+  constexpr polynomial_nttp<Real, 4> w4{{24.0, -50.0, 35.0, -10.0, 1.0}};
+  auto r = lam::polynomial::univariate::roots::roots(w4);
+  return check_roots_contain(r, {1.0, 2.0, 3.0, 4.0});
 }
 static_assert(test_w4_constexpr(), "Wilkinson(4) [Newton] should be solvable at compile-time");
 
 // N=5: (x-1)...(x-5)
-constexpr bool test_w5_constexpr() {
-    using Real = double;
-    constexpr polynomial_nttp<Real, 5> w5{{-120.0, 274.0, -225.0, 85.0, -15.0, 1.0}};
-    auto r = lam::polynomial::univariate::roots::roots(w5);
-    return check_roots_contain(r, {1.0, 2.0, 3.0, 4.0, 5.0});
+constexpr bool test_w5_constexpr()
+{
+  using Real = double;
+  constexpr polynomial_nttp<Real, 5> w5{{-120.0, 274.0, -225.0, 85.0, -15.0, 1.0}};
+  auto r = lam::polynomial::univariate::roots::roots(w5);
+  return check_roots_contain(r, {1.0, 2.0, 3.0, 4.0, 5.0});
 }
 static_assert(test_w5_constexpr(), "Wilkinson(5) [Newton Rec.] should be solvable at compile-time");
-

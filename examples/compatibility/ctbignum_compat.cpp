@@ -190,9 +190,9 @@ constexpr bool test_linear_roots_gf2()
   using namespace lam::cbn;
   using namespace lam::cbn::literals;
   using GF2 = decltype(Zq(2_Z));
-  
+
   constexpr GF2 one = GF2(1_Z);
-  
+
   // In GF(2): 1 + 1 = 0, so -1 = 1
   // Polynomial: x + 1 = 0 → x = 1
   return compat::verify_linear_roots(one, one, one);
@@ -209,10 +209,10 @@ constexpr bool test_linear_roots_gf7()
   using namespace lam::cbn;
   using namespace lam::cbn::literals;
   using GF7 = decltype(Zq(7_Z));
-  
+
   constexpr GF7 three = GF7(3_Z);
   constexpr GF7 five = GF7(5_Z);
-  
+
   // 5x + 3 = 0 → x = 5 (interesting: 5*5 = 25 mod 7 = 4, and 4 + 3 = 7 = 0)
   return compat::verify_linear_roots(five, three, five);
 }
@@ -228,11 +228,11 @@ constexpr bool test_linear_roots_gf11()
   using namespace lam::cbn;
   using namespace lam::cbn::literals;
   using GF11 = decltype(Zq(11_Z));
-  
+
   constexpr GF11 four = GF11(4_Z);
   constexpr GF11 nine = GF11(9_Z);
   constexpr GF11 six = GF11(6_Z);
-  
+
   return compat::verify_linear_roots(four, nine, six);
 }
 
@@ -247,11 +247,11 @@ constexpr bool test_linear_roots_gf13()
   using namespace lam::cbn;
   using namespace lam::cbn::literals;
   using GF13 = decltype(Zq(13_Z));
-  
+
   constexpr GF13 one = GF13(1_Z);
   constexpr GF13 five = GF13(5_Z);
   constexpr GF13 eight = GF13(8_Z);
-  
+
   return compat::verify_linear_roots(eight, five, one);
 }
 
@@ -290,10 +290,11 @@ constexpr bool test_zq_sqrt()
   using namespace lam::cbn::literals;
   auto z13 = GF17(13_Z);
   auto z8 = GF17(8_Z);
-  
+
   auto res = sqrt(z13);
-  if (!res.has_value()) return false;
-  
+  if (!res.has_value())
+    return false;
+
   // sqrt(13) is 8 or 9 (since 9*9=81=13, 8*8=64=13)
   return (*res == z8) || (*res == -z8);
 }
@@ -305,34 +306,36 @@ static_assert(test_zq_sqrt(), "Zq sqrt implementation should work correctly");
 constexpr bool test_quadratic_roots_gf17()
 {
   using namespace lam::cbn::literals;
-  
+
   auto one = GF17(1_Z);
   auto two = GF17(2_Z);
-  
+
   // Polynomial: 1x^2 + 2x + 2 = 0
   lam::polynomial::univariate::polynomial_nttp<GF17, 2> p{{two, two, one}};
-  
+
   // Solve using roots() which now should use ctbignum's sqrt!
   // Note: must call roots_degree_2 directly or fully qualified roots to avoid ambiguity
   auto r = lam::polynomial::univariate::roots::roots_degree_2(p);
-  
-  if (r.size() != 2) return false;
-  
+
+  if (r.size() != 2)
+    return false;
+
   // Roots are likely unordered, so check existence
   // Expected: 3 and 12
   auto r1 = GF17(3_Z);
   auto r2 = GF17(12_Z);
-  
+
   bool found_r1 = (r[0].value == r1 || r[1].value == r1);
   bool found_r2 = (r[0].value == r2 || r[1].value == r2);
-  
-  if (!found_r1 || !found_r2) return false;
-  
+
+  if (!found_r1 || !found_r2)
+    return false;
+
   // Verify p(root) == 0
   auto val1 = p(r[0].value);
   auto val2 = p(r[1].value);
   auto zero = GF17(0_Z);
-  
+
   return (val1 == zero) && (val2 == zero);
 }
 static_assert(test_quadratic_roots_gf17(), "Quadratic root finding should work in GF(17)");

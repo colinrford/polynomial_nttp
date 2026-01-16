@@ -94,6 +94,50 @@ constexpr auto chebyshev_u_n()
   return chebyshev_u_memo<R, N>::value;
 }
 
+// ============================================================
+// Prototype: Stable Basis Representation
+// ============================================================
+
+// A polynomial represented in the Chebyshev basis:
+// P(x) = c_0 T_0(x) + c_1 T_1(x) + ... + c_n T_n(x)
+template<typename R, std::size_t N>
+struct chebyshev_basis
+{
+  std::array<R, N + 1> coefficients{}; // c_0, ..., c_N
+
+  constexpr R evaluate(R x) const
+  {
+    // Clenshaw's Recurrence for Chebyshev T:
+    // y_k = 2x y_{k+1} - y_{k+2} + c_k
+    // P(x) = y_0 - x y_1
+    // ... wait, standard form for Chebyshev T is:
+    // b_k = 2x b_{k+1} - b_{k+2} + c_k
+    // P(x) = 0.5 * (c_0 + b_0 - b_2) ... there are variants.
+    //
+    // Using standard Clenshaw for sum c_k T_k(x):
+    // b_{N+2} = b_{N+1} = 0
+    // for k = N down to 1:
+    //   b_k = 2x b_{k+1} - b_{k+2} + c_k
+    // P(x) = x b_1 - b_2 + c_0
+
+    R b_kplus1 = 0;
+    R b_kplus2 = 0;
+    R two_x = 2 * x;
+
+    for (int k = N; k >= 1; --k)
+    {
+      R b_k = two_x * b_kplus1 - b_kplus2 + coefficients[k];
+      b_kplus2 = b_kplus1;
+      b_kplus1 = b_k;
+    }
+
+    // Final step
+    return x * b_kplus1 - b_kplus2 + coefficients[0];
+  }
+};
+
+// ============================================================
+
 } // namespace lam::orthogonal
 
 // Runtime Reference Implementations
@@ -206,16 +250,45 @@ int main()
 #endif
   };
 
+  constexpr auto T20 = lam::orthogonal::chebyshev_t_n<R, 20>();
+  constexpr auto T50 = lam::orthogonal::chebyshev_t_n<R, 50>();
+
   run_check("T", 3, T3, ref_t);
   run_check("U", 3, U3, ref_u);
+  run_check("T", 20, T20, ref_t);
+  run_check("T", 50, T50, ref_t);
+
+  std::println("\n=== Stable Basis Prototype Check (T_50) ===");
+  // c_50 = 1, all others 0
+  constexpr lam::orthogonal::chebyshev_basis<double, 50> T50_basis = []() {
+    lam::orthogonal::chebyshev_basis<double, 50> b;
+    b.coefficients[50] = 1.0;
+    return b;
+  }();
+
+  auto T50_stable = [&](double x) { return T50_basis.evaluate(x); };
+
+  std::println("--- T (n=50, Stable Basis) ---");
+  for (double xval : test_points)
+  {
+    double lam_val = T50_stable(xval);
+#ifdef HAS_BOOST_MATH
+    double ref_val = boost::math::chebyshev_t(50, xval);
+#else
+    double ref_val = reference_chebyshev_t(50, xval);
+#endif
+    double diff = lam_val - ref_val;
+    double ulps = 0.0;
+    if (std::abs(ref_val) > std::numeric_limits<double>::min())
+      ulps = std::abs(diff) / (std::abs(ref_val) * eps);
+
+    std::println("x={:>5.2f} lam={:>10.5f} ref={:>10.5f} ulps={:>5.1f}", xval, lam_val, ref_val, ulps);
+  }
 
   // Benchmarking
   constexpr int iterations = 10'000'000;
   using Clock = std::chrono::steady_clock;
   volatile double sink = 0.0;
-  constexpr auto T20 = lam::orthogonal::chebyshev_t_n<R, 20>();
-
-  std::println("\n=== Performance Benchmark (T_20, 10M evals) ===");
 
   auto benchmark = [&](auto&& name, auto&& func) {
     auto start = Clock::now();
