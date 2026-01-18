@@ -1,5 +1,6 @@
 /*
  *  benchmark_threading_crossover.cpp
+ *    see github.com/colinrford/polynomial_nttp for AGPL-3.0 License
  *
  *    Determines the crossover point where threaded addition (std::jthread)
  *    becomes faster than naive serial addition for int types.
@@ -11,7 +12,6 @@
 #include <thread>
 #include <vector>
 
-// Naive Serial Addition
 template<typename T>
 void naive_add(const std::vector<T>& a, const std::vector<T>& b, std::vector<T>& res)
 {
@@ -22,7 +22,6 @@ void naive_add(const std::vector<T>& a, const std::vector<T>& b, std::vector<T>&
   }
 }
 
-// Threaded Addition (Copy of implementation logic)
 template<typename T>
 void threaded_add(const std::vector<T>& a, const std::vector<T>& b, std::vector<T>& res)
 {
@@ -80,38 +79,37 @@ void run_benchmark(std::size_t N)
     iterations = 10000;
 
   // Measure Naive
-  auto start_naive = std::chrono::high_resolution_clock::now();
+  auto start_naive = std::chrono::steady_clock::now();
   for (int i = 0; i < iterations; ++i)
   {
     naive_add(a, b, res);
     volatile auto sink = res[0];
   }
-  auto end_naive = std::chrono::high_resolution_clock::now();
+  auto end_naive = std::chrono::steady_clock::now();
 
   auto dur_naive =
     std::chrono::duration_cast<std::chrono::nanoseconds>(end_naive - start_naive).count() / (double)iterations;
 
   // Measure Threaded (jthread)
-  auto start_thread = std::chrono::high_resolution_clock::now();
+  auto start_thread = std::chrono::steady_clock::now();
   for (int i = 0; i < iterations; ++i)
   {
     threaded_add(a, b, res);
     volatile auto sink = res[0];
   }
-  auto end_thread = std::chrono::high_resolution_clock::now();
+  auto end_thread = std::chrono::steady_clock::now();
 
   auto dur_thread =
     std::chrono::duration_cast<std::chrono::nanoseconds>(end_thread - start_thread).count() / (double)iterations;
 
 #ifdef LAM_USE_TBB
-  // Measure TBB
-  auto start_tbb = std::chrono::high_resolution_clock::now();
+  auto start_tbb = std::chrono::steady_clock::now();
   for (int i = 0; i < iterations; ++i)
   {
     tbb_add(a, b, res);
     volatile auto sink = res[0];
   }
-  auto end_tbb = std::chrono::high_resolution_clock::now();
+  auto end_tbb = std::chrono::steady_clock::now();
 
   auto dur_tbb = std::chrono::duration_cast<std::chrono::nanoseconds>(end_tbb - start_tbb).count() / (double)iterations;
 

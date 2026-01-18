@@ -5,12 +5,8 @@
  *    Micro-benchmark for complex polynomial evaluation, measuring potential speedups
  *    from Accelerate/BLAS optimized paths versus generic Horner's method.
  */
-#include <chrono>
-#include <complex>
-#include <print>
-#include <random>
-#include <vector>
 
+import std;
 import lam.polynomial_nttp;
 
 using namespace lam::polynomial;
@@ -20,7 +16,6 @@ void run_benchmark()
 {
   univariate::polynomial_nttp<std::complex<double>, N> poly;
 
-  // Deterministic pseudo-random fill
   for (std::size_t i = 0; i <= N; ++i)
   {
     poly.coefficients[i] = {static_cast<double>(i % 10), static_cast<double>((i * 2) % 7)};
@@ -29,25 +24,22 @@ void run_benchmark()
   std::complex<double> x{0.99, 0.01};
   constexpr int iterations = 50000;
 
-  // Warmup
   std::complex<double> sink = poly(x);
 
-  // 1. Generic Horner
-  auto start = std::chrono::high_resolution_clock::now();
+  auto start = std::chrono::steady_clock::now();
   for (int i = 0; i < iterations; ++i)
   {
     sink += poly.evaluate_horner(x);
   }
-  auto end = std::chrono::high_resolution_clock::now();
+  auto end = std::chrono::steady_clock::now();
   auto horner_dur = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 
-  // 2. Accelerate (Optimized)
-  start = std::chrono::high_resolution_clock::now();
+  start = std::chrono::steady_clock::now();
   for (int i = 0; i < iterations; ++i)
   {
     sink += poly.evaluate_accelerate(x);
   }
-  end = std::chrono::high_resolution_clock::now();
+  end = std::chrono::steady_clock::now();
   auto accel_dur = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 
   // Metrics Calculation
@@ -55,8 +47,6 @@ void run_benchmark()
   double total_flops = 8.0 * N * iterations;
   double gflops = (total_flops / (accel_dur / 1e6)) / 1e9;
 
-  // Bandwidth: We read N+1 complex coefficients (16 bytes) per iteration + x (16 bytes)
-  // All in L1 cache likely, but still measures "throughput" of data
   double total_bytes = (double)(N + 1) * 16.0 * iterations;
   double gb_s = (total_bytes / (accel_dur / 1e6)) / 1e9;
 

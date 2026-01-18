@@ -20,7 +20,6 @@ import lam.polynomial_nttp;
 #include <boost/math/tools/polynomial.hpp>
 #endif
 
-// Generate a polynomial with coefficients 1/i! for testing (exp series)
 template<typename R, std::size_t N>
 constexpr auto make_test_polynomial()
 {
@@ -58,7 +57,6 @@ void benchmark_degree(int iterations, int num_values)
   std::println("  Degree {:3}: {:7} µs ({:.2f}M evals/sec)", N, duration.count(), evals_per_sec / 1e6);
 
 #ifdef HAS_BOOST_MATH
-  // Boost Benchmark
   std::vector<double> coeffs_vec(poly.coefficients.begin(), poly.coefficients.end());
   boost::math::tools::polynomial<double> boost_poly(coeffs_vec.data(), coeffs_vec.size() - 1);
 
@@ -73,7 +71,7 @@ void benchmark_degree(int iterations, int num_values)
       sink_boost = b_val;
 
       if (iter == 0)
-      { // Check accuracy on first iteration
+      {
         double my_val = poly(x);
         double diff = std::abs(my_val - b_val);
         if (diff > max_diff)
@@ -103,7 +101,6 @@ int main()
   std::println("    [Boost DISABLED]");
 #endif
 
-  // Verify correctness
   std::println("--- Correctness Check ---");
   constexpr auto poly = make_test_polynomial<double, 20>();
   constexpr double at_one = poly(1.0);
@@ -114,11 +111,9 @@ int main()
   static_assert(poly(0.0) == 1.0);
   std::println("  ✓ Compile-time evaluation verified");
 
-  // Verify Backend Consistency (Accelerate/BLAS vs Parallel Fallback)
-  // We explicitly call evaluate_parallel (assuming it's public) and compare to operator()
   std::println("\n--- Backend Consistency Check ---");
   double val_parallel = poly.evaluate_parallel(1.0);
-  double val_backend = poly(1.0); // Uses currently active backend
+  double val_backend = poly(1.0);
   std::println("  Fallback : {}", val_parallel);
   std::println("  Backend  : {}", val_backend);
   double consistency_diff = std::abs(val_parallel - val_backend);

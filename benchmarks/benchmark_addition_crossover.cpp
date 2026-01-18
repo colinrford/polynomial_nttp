@@ -16,7 +16,6 @@
 #include <Accelerate/Accelerate.h>
 #endif
 
-// Naive O(N) Addition
 template<typename T>
 void naive_add(const std::vector<T>& a, const std::vector<T>& b, std::vector<T>& res)
 {
@@ -27,7 +26,6 @@ void naive_add(const std::vector<T>& a, const std::vector<T>& b, std::vector<T>&
   }
 }
 
-// Accelerated Addition
 template<typename T>
 void accelerated_add(const std::vector<T>& a, const std::vector<T>& b, std::vector<T>& res)
 {
@@ -42,7 +40,6 @@ void accelerated_add(const std::vector<T>& a, const std::vector<T>& b, std::vect
   }
   else if constexpr (std::is_same_v<T, std::complex<double>>)
   {
-    // 2*N doubles
     vDSP_vaddD(reinterpret_cast<const double*>(a.data()), 1, reinterpret_cast<const double*>(b.data()), 1,
                reinterpret_cast<double*>(res.data()), 1, a.size() * 2);
   }
@@ -57,30 +54,27 @@ void run_benchmark(std::size_t N)
   using T = double;
   std::vector<T> a(N, 1.0), b(N, 2.0), res(N);
 
-  // Warmup & Iteration Count Heuristic
   int iterations = 100000;
   if (N > 1000)
     iterations = 10000;
   if (N > 100000)
     iterations = 1000;
 
-  // Measure Naive
-  auto start_naive = std::chrono::high_resolution_clock::now();
+  auto start_naive = std::chrono::steady_clock::now();
   for (int i = 0; i < iterations; ++i)
   {
     naive_add(a, b, res);
     volatile auto sink = res[0];
   }
-  auto end_naive = std::chrono::high_resolution_clock::now();
+  auto end_naive = std::chrono::steady_clock::now();
 
-  // Measure Accelerated
-  auto start_acc = std::chrono::high_resolution_clock::now();
+  auto start_acc = std::chrono::steady_clock::now();
   for (int i = 0; i < iterations; ++i)
   {
     accelerated_add(a, b, res);
     volatile auto sink = res[0];
   }
-  auto end_acc = std::chrono::high_resolution_clock::now();
+  auto end_acc = std::chrono::steady_clock::now();
 
   auto dur_naive =
     std::chrono::duration_cast<std::chrono::nanoseconds>(end_naive - start_naive).count() / (double)iterations;
