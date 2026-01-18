@@ -15,6 +15,7 @@ set(CMAKE_CXX_EXTENSIONS OFF CACHE BOOL "Use compiler extensions" FORCE)
 set(CMAKE_CXX_STANDARD_REQUIRED True) #is this needed?
 set(CMAKE_CXX_MODULE_STD ON)
 set(CMAKE_CXX_SCAN_FOR_MODULES ON)
+add_compile_options(-Wno-experimental-header-units -Wno-module-import-in-extern-c -Wno-dev)
 
 project(lam_polynomial_nttp VERSION 0.2.260118 LANGUAGES CXX)
 
@@ -59,6 +60,7 @@ include(Sanitizers)
 include(BlasSetup)
 
 option(LAM_USE_TBB "Enable TBB for bulk operations" OFF)
+option(LAM_BUILD_THOUSAND_DIVISIONS "Enable the heavy compile-time stress test thousand_divisions" OFF)
 if(LAM_USE_TBB)
   find_package(TBB REQUIRED)
   message(STATUS "Found TBB: ${TBB_DIR} (Version ${TBB_VERSION})")

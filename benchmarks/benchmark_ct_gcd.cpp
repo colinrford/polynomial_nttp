@@ -13,7 +13,7 @@ consteval auto make_poly_pattern()
   lam::polynomial::univariate::polynomial_nttp<double, Size> p{};
   for (std::size_t i = 0; i <= Size; ++i)
   {
-    p.coefficients[i] = (double)((i % 17) + 1); // Avoid zeros
+    p.coefficients[i] = static_cast<double>((i % 17) + 1);
   }
   return p;
 }

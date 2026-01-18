@@ -5,7 +5,7 @@
 import std;
 import lam.polynomial_nttp;
 
-constexpr std::size_t N = 1024;
+constexpr std::size_t N = 256;
 
 template<std::size_t Size>
 consteval auto make_poly_pattern()
@@ -13,7 +13,7 @@ consteval auto make_poly_pattern()
   lam::polynomial::univariate::polynomial_nttp<double, Size> p{};
   for (std::size_t i = 0; i <= Size; ++i)
   {
-    p.coefficients[i] = (double)((i % 17) + 1);
+    p.coefficients[i] = static_cast<double>((i % 17) + 1);
   }
   return p;
 }

@@ -37,7 +37,7 @@ std::vector<std::complex<double>> fft_multiply(const std::vector<T>& a, const st
 
   auto prepare = [&](const std::vector<T>& in) {
     std::vector<std::complex<double>> out(n, {0, 0});
-    for (size_t i = 0; i < in.size(); ++i)
+    for (std::size_t i = 0; i < in.size(); ++i)
     {
       if constexpr (std::is_same_v<T, std::complex<double>>)
         out[i] = in[i];
@@ -53,7 +53,7 @@ std::vector<std::complex<double>> fft_multiply(const std::vector<T>& a, const st
   fa = univariate::fft::fft(std::move(fa), false);
   fb = univariate::fft::fft(std::move(fb), false);
 
-  for (size_t i = 0; i < n; ++i)
+  for (std::size_t i = 0; i < n; ++i)
     fa[i] *= fb[i];
 
   fa = univariate::fft::fft(std::move(fa), true);
@@ -65,7 +65,7 @@ void run_benchmark(std::size_t N)
 {
   using T = std::complex<double>;
   std::vector<T> a(N), b(N);
-  for (size_t i = 0; i < N; ++i)
+  for (std::size_t i = 0; i < N; ++i)
   {
     a[i] = {1.0, 1.0};
     b[i] = {1.0, -1.0};
@@ -107,7 +107,7 @@ int main()
   std::print("=== Multiplication Crossover Benchmark ===\n");
   std::print("(Comparing Naive O(N^2) vs Accelerate FFT O(log N))\n\n");
 
-  std::vector<size_t> sizes = {16, 32, 64, 80, 96, 128, 256, 512, 1024, 2048, 4096, 16384};
+  std::vector<std::size_t> sizes = {16, 32, 64, 80, 96, 128, 256, 512, 1024, 2048, 4096, 16384};
 
   for (auto n : sizes)
   {

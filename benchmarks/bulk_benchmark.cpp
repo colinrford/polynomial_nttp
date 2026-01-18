@@ -97,7 +97,7 @@ void run_complex_benchmark(std::size_t M)
   std::vector<R> inputs(M);
   std::vector<R> outputs(M);
 
-  for (size_t i = 0; i < M; ++i)
+  for (std::size_t i = 0; i < M; ++i)
     inputs[i] = {static_cast<double>(i % 100) * 0.1, static_cast<double>(i % 100) * 0.1};
 
   std::array<R, N + 1> coeffs;
@@ -121,7 +121,7 @@ void run_complex_scalar_benchmark(std::size_t M)
   using R = std::complex<double>;
   std::vector<R> inputs(M);
   std::vector<R> outputs(M);
-  for (size_t i = 0; i < M; ++i)
+  for (std::size_t i = 0; i < M; ++i)
     inputs[i] = {static_cast<double>(i % 100) * 0.1, static_cast<double>(i % 100) * 0.1};
   std::array<R, N + 1> coeffs;
   for (auto& c : coeffs)
@@ -129,7 +129,7 @@ void run_complex_scalar_benchmark(std::size_t M)
   lam::polynomial::polynomial_nttp<R, N> poly(coeffs);
 
   auto start = std::chrono::steady_clock::now();
-  for (size_t i = 0; i < M; ++i)
+  for (std::size_t i = 0; i < M; ++i)
   {
     outputs[i] = poly.evaluate_horner(inputs[i]);
   }
@@ -148,7 +148,7 @@ void run_boost_complex_benchmark(std::size_t M)
   using R = std::complex<double>;
   std::vector<R> inputs(M);
   std::vector<R> outputs(M);
-  for (size_t i = 0; i < M; ++i)
+  for (std::size_t i = 0; i < M; ++i)
     inputs[i] = {static_cast<double>(i % 100) * 0.1, static_cast<double>(i % 100) * 0.1};
 
   std::vector<R> coeffs(N + 1);
@@ -169,11 +169,11 @@ void run_boost_complex_benchmark(std::size_t M)
   }
   else
   {
-    for (size_t i = 0; i < M; ++i)
+    for (std::size_t i = 0; i < M; ++i)
       outputs[i] = poly.evaluate(inputs[i]);
   }
 #else
-  for (size_t i = 0; i < M; ++i)
+  for (std::size_t i = 0; i < M; ++i)
     outputs[i] = poly.evaluate(inputs[i]);
 #endif
   auto end = std::chrono::steady_clock::now();

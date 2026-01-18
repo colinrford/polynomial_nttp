@@ -16,7 +16,7 @@ void bench_operator(const char* label)
 {
   using T = std::complex<double>;
   std::array<T, N + 1> coeffs;
-  for (size_t i = 0; i <= N; ++i)
+  for (std::size_t i = 0; i <= N; ++i)
     coeffs[i] = {1.0, 1.0};
 
   polynomial_nttp<T, N> p(coeffs);
