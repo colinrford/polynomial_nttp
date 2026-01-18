@@ -51,99 +51,72 @@ constexpr auto operator+(const polynomial_nttp<R, M>& p, const polynomial_nttp<R
     bool accelerated = false;
     if constexpr (is_accelerated_type && max_degree >= threshold)
     {
-#ifdef LAM_USE_ACCELERATE
-      std::size_t count = max_degree + 1;
-      // Copy the larger polynomial first to initialize result (since vadd is out-of-place or in-place)
-      // Actually vDSP_vaddD(A, IA, B, IB, C, IC, N) -> C = A + B
-      // This is perfect.
-      // We need to handle padding though?
-      // Wait, p[i] returns 0 if out of bounds. But vDSP operates on arrays.
-      // We can't just pass p.coefficients directly if they are different sizes because vDSP will read past end.
-      // We must copy inputs to aligned buffers? That defeats the purpose.
-      // Optimization:
-      // If M == N: direct vDSP call.
-      // If M != N:
-      //   Copy larger poly to result.
-      //   Add smaller poly to result's prefix.
-
-      const auto& larger = (M >= N) ? p : q;
-      const auto& smaller = (M >= N) ? q : p;
-
-      // Copy larger to result
-      if constexpr (std::is_same_v<R, double>)
-        stdr::copy(larger.coefficients, p_plus_q.coefficients.begin());
-      else if constexpr (std::is_same_v<R, float>)
-        stdr::copy(larger.coefficients, p_plus_q.coefficients.begin());
-      else if constexpr (std::is_same_v<R, std::complex<double>>)
-        stdr::copy(larger.coefficients, p_plus_q.coefficients.begin());
-      else if constexpr (std::is_same_v<R, std::complex<float>>)
-        stdr::copy(larger.coefficients, p_plus_q.coefficients.begin());
-
-      std::size_t min_count = std::min(M, N) + 1;
-
-      if constexpr (std::is_same_v<R, double>)
-      {
-        acceleration::vDSP_vaddD(smaller.coefficients.data(), 1, p_plus_q.coefficients.data(), 1,
-                                 p_plus_q.coefficients.data(), 1, min_count);
-        accelerated = true;
-      }
-      else if constexpr (std::is_same_v<R, float>)
-      {
-        acceleration::vDSP_vadd(smaller.coefficients.data(), 1, p_plus_q.coefficients.data(), 1,
-                                p_plus_q.coefficients.data(), 1, min_count);
-        accelerated = true;
-      }
-      // For complex, layout is compatible with 2*N doubles/floats
-      else if constexpr (std::is_same_v<R, std::complex<double>>)
-      {
-        acceleration::vDSP_vaddD(reinterpret_cast<const double*>(smaller.coefficients.data()), 1,
-                                 reinterpret_cast<double*>(p_plus_q.coefficients.data()), 1,
-                                 reinterpret_cast<double*>(p_plus_q.coefficients.data()), 1, min_count * 2);
-        accelerated = true;
-      }
-      else if constexpr (std::is_same_v<R, std::complex<float>>)
-      {
-        acceleration::vDSP_vadd(reinterpret_cast<const float*>(smaller.coefficients.data()), 1,
-                                reinterpret_cast<float*>(p_plus_q.coefficients.data()), 1,
-                                reinterpret_cast<float*>(p_plus_q.coefficients.data()), 1, min_count * 2);
-        accelerated = true;
-      }
-#endif
-      // Fallback for BLAS (cblas_daxpy: Y = alpha*X + Y)
-      // X = smaller, Y = result (initially larger), alpha = 1.0
-#ifdef LAM_USE_BLAS
-      if (!accelerated)
-      {
-        const auto& larger = (M >= N) ? p : q;
-        const auto& smaller = (M >= N) ? q : p;
-
-        stdr::copy(larger.coefficients, p_plus_q.coefficients.begin());
+      auto perform_acceleration = [&](const auto& larger_poly, const auto& smaller_poly) {
+        stdr::copy(larger_poly.coefficients, p_plus_q.coefficients.begin());
         std::size_t min_count = std::min(M, N) + 1;
 
+#ifdef LAM_USE_ACCELERATE
         if constexpr (std::is_same_v<R, double>)
         {
-          acceleration::cblas_daxpy(min_count, 1.0, smaller.coefficients.data(), 1, p_plus_q.coefficients.data(), 1);
+          acceleration::vDSP_vaddD(smaller_poly.coefficients.data(), 1, p_plus_q.coefficients.data(), 1,
+                                   p_plus_q.coefficients.data(), 1, min_count);
           accelerated = true;
         }
         else if constexpr (std::is_same_v<R, float>)
         {
-          acceleration::cblas_saxpy(min_count, 1.0f, smaller.coefficients.data(), 1, p_plus_q.coefficients.data(), 1);
+          acceleration::vDSP_vadd(smaller_poly.coefficients.data(), 1, p_plus_q.coefficients.data(), 1,
+                                  p_plus_q.coefficients.data(), 1, min_count);
           accelerated = true;
         }
         else if constexpr (std::is_same_v<R, std::complex<double>>)
         {
-          double one[] = {1.0, 0.0};
-          acceleration::cblas_zaxpy(min_count, one, smaller.coefficients.data(), 1, p_plus_q.coefficients.data(), 1);
+          acceleration::vDSP_vaddD(reinterpret_cast<const double*>(smaller_poly.coefficients.data()), 1,
+                                   reinterpret_cast<double*>(p_plus_q.coefficients.data()), 1,
+                                   reinterpret_cast<double*>(p_plus_q.coefficients.data()), 1, min_count * 2);
           accelerated = true;
         }
         else if constexpr (std::is_same_v<R, std::complex<float>>)
         {
-          float one[] = {1.0f, 0.0f};
-          acceleration::cblas_caxpy(min_count, one, smaller.coefficients.data(), 1, p_plus_q.coefficients.data(), 1);
+          acceleration::vDSP_vadd(reinterpret_cast<const float*>(smaller_poly.coefficients.data()), 1,
+                                  reinterpret_cast<float*>(p_plus_q.coefficients.data()), 1,
+                                  reinterpret_cast<float*>(p_plus_q.coefficients.data()), 1, min_count * 2);
           accelerated = true;
         }
-      }
 #endif
+
+#ifdef LAM_USE_BLAS
+        if (!accelerated)
+        {
+           if constexpr (std::is_same_v<R, double>)
+           {
+             acceleration::cblas_daxpy(min_count, 1.0, smaller_poly.coefficients.data(), 1, p_plus_q.coefficients.data(), 1);
+             accelerated = true;
+           }
+           else if constexpr (std::is_same_v<R, float>)
+           {
+             acceleration::cblas_saxpy(min_count, 1.0f, smaller_poly.coefficients.data(), 1, p_plus_q.coefficients.data(), 1);
+             accelerated = true;
+           }
+           else if constexpr (std::is_same_v<R, std::complex<double>>)
+           {
+             double one[] = {1.0, 0.0};
+             acceleration::cblas_zaxpy(min_count, one, smaller_poly.coefficients.data(), 1, p_plus_q.coefficients.data(), 1);
+             accelerated = true;
+           }
+           else if constexpr (std::is_same_v<R, std::complex<float>>)
+           {
+             float one[] = {1.0f, 0.0f};
+             acceleration::cblas_caxpy(min_count, one, smaller_poly.coefficients.data(), 1, p_plus_q.coefficients.data(), 1);
+             accelerated = true;
+           }
+        }
+#endif
+      };
+
+      if constexpr (M >= N)
+        perform_acceleration(p, q);
+      else
+        perform_acceleration(q, p);
     }
 
     if (!accelerated)
