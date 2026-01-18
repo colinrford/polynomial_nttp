@@ -17,15 +17,12 @@
 #include <boost/math/tools/polynomial.hpp>
 #endif
 
-// Guard TBB include if not already done by module?
-// No, module does internal things. We need it here for the MANUAL boost loop.
 #ifdef LAM_USE_TBB
 #include <tbb/parallel_for.h>
 #endif
 
 import lam.polynomial_nttp;
 
-// Generate random points
 std::vector<double> generate_random_points(std::size_t n)
 {
   std::random_device rd;
@@ -36,7 +33,6 @@ std::vector<double> generate_random_points(std::size_t n)
   return v;
 }
 
-// Benchmark runner for a specific degree
 template<std::size_t N>
 void run_benchmark(const std::vector<double>& inputs, std::vector<double>& outputs)
 {
@@ -45,7 +41,6 @@ void run_benchmark(const std::vector<double>& inputs, std::vector<double>& outpu
   for (int i = 0; i <= N; ++i)
     poly.coefficients[i] = 1.0;
 
-  // Warmup
   poly.evaluate_bulk(std::span{inputs}.subspan(0, 100), std::span{outputs}.subspan(0, 100));
 
   auto start = std::chrono::steady_clock::now();
@@ -63,7 +58,6 @@ template<std::size_t N>
 void run_boost_benchmark(const std::vector<double>& inputs, std::vector<double>& outputs)
 {
   using R = double;
-  // Create Boost polynomial (all 1.0)
   std::vector<R> coeffs(N + 1, 1.0);
   boost::math::tools::polynomial<R> poly(coeffs.data(), N);
 
@@ -103,11 +97,9 @@ void run_complex_benchmark(std::size_t M)
   std::vector<R> inputs(M);
   std::vector<R> outputs(M);
 
-  // Fill inputs
   for (size_t i = 0; i < M; ++i)
     inputs[i] = {static_cast<double>(i % 100) * 0.1, static_cast<double>(i % 100) * 0.1};
 
-  // Create poly with random complex coeffs
   std::array<R, N + 1> coeffs;
   for (auto& c : coeffs)
     c = {1.0, 1.0};
@@ -136,7 +128,6 @@ void run_complex_scalar_benchmark(std::size_t M)
     c = {1.0, 1.0};
   lam::polynomial::polynomial_nttp<R, N> poly(coeffs);
 
-  // Force scalar path by calling evaluate_horner manually inside a loop
   auto start = std::chrono::steady_clock::now();
   for (size_t i = 0; i < M; ++i)
   {
@@ -166,7 +157,6 @@ void run_boost_complex_benchmark(std::size_t M)
   boost::math::tools::polynomial<R> poly(coeffs.data(), N);
 
   auto start = std::chrono::steady_clock::now();
-  // TBB Parallel wrapper for Boost
 #ifdef LAM_USE_TBB
   if constexpr (lam::polynomial::config::use_tbb)
   {
@@ -199,9 +189,7 @@ int main()
 {
   constexpr std::size_t M = lam::polynomial::config::is_tsan_build ? 100'000 : 10'000'000;
 
-  // Warmup
   std::println("Warming up...");
-  // Check Configuration
   std::print("=== Bulk Evaluation Benchmark (M={}) [", M);
   if constexpr (lam::polynomial::config::use_tbb)
     std::print("TBB:ON ");

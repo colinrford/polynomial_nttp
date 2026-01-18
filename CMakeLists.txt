@@ -18,6 +18,10 @@ set(CMAKE_CXX_SCAN_FOR_MODULES ON)
 
 project(lam_polynomial_nttp VERSION 0.2.260118 LANGUAGES CXX)
 
+# Support centralized cmake modules for in-tree builds
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../cmake")
+  list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../cmake")
+endif()
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(PolynomialHelpers)
 
@@ -54,7 +58,7 @@ endif()
 include(Sanitizers)
 include(BlasSetup)
 
-option(LAM_USE_TBB "Enable Intel TBB for bulk operations" OFF)
+option(LAM_USE_TBB "Enable TBB for bulk operations" OFF)
 if(LAM_USE_TBB)
   find_package(TBB REQUIRED)
   message(STATUS "Found TBB: ${TBB_DIR} (Version ${TBB_VERSION})")
@@ -83,10 +87,13 @@ configure_file(
   ${CMAKE_CURRENT_BINARY_DIR}/polynomial_nttp_config.cppm
 )
 
-find_package(lam_concepts REQUIRED)
+if(NOT TARGET lam::concepts)
+  find_package(lam_concepts REQUIRED)
+endif()
 
 add_library(polynomial_nttp STATIC)
 add_library(lam_polynomial_nttp::polynomial_nttp ALIAS polynomial_nttp)
+add_library(lam::polynomial_nttp ALIAS polynomial_nttp)
 target_sources(polynomial_nttp
   PUBLIC
   FILE_SET CXX_MODULES

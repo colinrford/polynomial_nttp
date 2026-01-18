@@ -5,15 +5,9 @@
  *    Benchmarks the latency/throughput of basic arithmetic operators (+, -, *)
  *    for small-degree polynomials to ensure minimal abstraction overhead.
  */
-#include <chrono>
-#include <complex>
-#include <print>
-#include <vector>
 
+import std;
 import lam.polynomial_nttp;
-
-// benchmark_operator_speed.cpp
-// Verifies that operator* automatically picks the fast path
 
 using namespace lam::polynomial;
 
@@ -33,13 +27,13 @@ void bench_operator(const char* label)
   volatile auto sink1 = res_warmup[0];
 
   int iterations = 100;
-  auto start = std::chrono::high_resolution_clock::now();
+  auto start = std::chrono::steady_clock::now();
   for (int i = 0; i < iterations; ++i)
   {
     auto res = p * q;
     volatile auto sink = res[0];
   }
-  auto end = std::chrono::high_resolution_clock::now();
+  auto end = std::chrono::steady_clock::now();
 
   double avg_us = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() / (double)iterations;
   std::println("Degree N={:<4} | {:<20} | Time: {:>8.1f} us", N, label, avg_us);
