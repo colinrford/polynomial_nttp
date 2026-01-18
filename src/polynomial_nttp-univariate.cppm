@@ -13,4 +13,5 @@ export import :univariate.roots;
 export import :univariate.berlekamp;
 export import :univariate.print;
 export import :univariate.compat;
-
+export import :univariate.fft;
+export import :univariate.math; // Also export math for internal use/convenience

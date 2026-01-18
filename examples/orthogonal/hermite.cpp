@@ -225,6 +225,8 @@ int main()
   run_check(3, H3);
   run_check(5, H5);
   run_check(10, H10);
+  constexpr auto H50 = lam::orthogonal::hermite_n<R, 50>();
+  run_check(50, H50);
 
   std::println("\n=== Performance Benchmark (N=20, 10,000,000 evals) ===");
   using Clock = std::chrono::steady_clock;

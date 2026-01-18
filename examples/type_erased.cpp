@@ -11,19 +11,16 @@ import lam.polynomial_nttp;
 namespace stdr = std::ranges;
 namespace stdv = std::views;
 // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
-const auto indexing_set = [](auto n) {
-  return stdv::iota(static_cast<decltype(n)>(0), n);
-};
+const auto indexing_set = [](auto n) { return stdv::iota(static_cast<decltype(n)>(0), n); };
 
-const auto indexing_set_from_to = [](auto m, auto n) {
-  return stdv::iota(static_cast<decltype(n)>(m), n);
-};
+const auto indexing_set_from_to = [](auto m, auto n) { return stdv::iota(static_cast<decltype(n)>(m), n); };
 
-constexpr double factorial(std::size_t n)
-{ return n == 0 ? 1. : static_cast<double>(n) * factorial(n - 1); }
+constexpr double factorial(std::size_t n) { return n == 0 ? 1. : static_cast<double>(n) * factorial(n - 1); }
 
 constexpr double neg_one_multiplier(std::size_t index_i)
-{ return index_i == 0 ? 1. : -1. * neg_one_multiplier(index_i - 1); }
+{
+  return index_i == 0 ? 1. : -1. * neg_one_multiplier(index_i - 1);
+}
 
 constexpr auto sin_impl_test()
 {
@@ -41,8 +38,7 @@ constexpr auto sin_impl_test()
   }();
 }
 
-constexpr double sin_test(double x)
-{ return sin_impl_test()(x); }
+constexpr double sin_test(double x) { return sin_impl_test()(x); }
 
 constexpr auto cos_impl_test()
 {
@@ -60,8 +56,7 @@ constexpr auto cos_impl_test()
   }();
 }
 
-constexpr double cos_test(double x)
-{ return cos_impl_test()(x); }
+constexpr double cos_test(double x) { return cos_impl_test()(x); }
 
 constexpr auto exp_impl_test()
 {
@@ -78,8 +73,7 @@ constexpr auto exp_impl_test()
   }();
 }
 
-constexpr double exp_test(double x)
-{ return exp_impl_test()(x); }
+constexpr double exp_test(double x) { return exp_impl_test()(x); }
 
 constexpr double sqrt_iterator(double of, double x_k)
 {
@@ -120,20 +114,20 @@ constexpr double sqrt_fast(double of)
     return std::nan("");
   if (of == 0.)
     return 0.;
-  
+
   // Magic constant for double precision sqrt initial guess.
   // The idea: for IEEE 754 doubles, (bits >> 1) + magic ≈ sqrt.
   // 0x1FF7A3BEA91D9B1B is tuned for minimal initial error.
   constexpr std::uint64_t magic = 0x1FF7A3BEA91D9B1BULL;
   auto bits = std::bit_cast<std::uint64_t>(of);
   double guess = std::bit_cast<double>((bits >> 1) + magic);
-  
+
   // Only ~4 Newton-Raphson iterations needed with this good initial guess
   guess = sqrt_iterator(of, guess);
   guess = sqrt_iterator(of, guess);
   guess = sqrt_iterator(of, guess);
   guess = sqrt_iterator(of, guess);
-  
+
   // Final ULP refinement for correct rounding
   if (guess * guess < of)
   {
@@ -201,14 +195,10 @@ int main()
   for (auto&& p : type_erased_polynomials)
   {
     std::println("type_erased_counter =\t{}", type_erased_counter);
-    const auto current_test_function = which_type_erased_polynomial(
-                                         type_erased_counter
-                                       );
+    const auto current_test_function = which_type_erased_polynomial(type_erased_counter);
     for (int i = 0; i < last; ++i)
     {
-      double increment = -one_half
-                        + static_cast<double>(last - i)
-                        / static_cast<double>(last);
+      double increment = -one_half + static_cast<double>(last - i) / static_cast<double>(last);
       if (std::isnan(p(increment)))
       {
         std::print("\tencountered NaN at {}, ", i);
@@ -218,10 +208,7 @@ int main()
       auto diff = std::abs(current_test_function(increment) - p(increment));
       if (diff > 0) // only print nonzero differences
       {
-        std::println("\tpolynomial: {};\tposition: {};\tdifference: {}",
-                      type_erased_counter,
-                      increment,
-                      diff);
+        std::println("\tpolynomial: {};\tposition: {};\tdifference: {}", type_erased_counter, increment, diff);
       }
     }
     ++type_erased_counter;
@@ -237,7 +224,7 @@ int main()
   int ulp_1_off = 0;
   double max_diff = 0.0;
   double max_diff_at = 0.0;
-  
+
   std::println("\n--- sqrt comparison test ({} rationals in [{}, {}]) ---", N, range_start, range_end);
   for (int i = 0; i < N; ++i)
   {
@@ -245,19 +232,19 @@ int main()
     double mine = sqrt_test(val);
     double standard = std::sqrt(val);
     double diff = std::abs(mine - standard);
-    
+
     if (diff == 0.0)
       ++exact_matches;
     else if (diff <= std::numeric_limits<double>::epsilon() * standard)
       ++ulp_1_off;
-    
+
     if (diff > max_diff)
     {
       max_diff = diff;
       max_diff_at = val;
     }
   }
-  
+
   std::println("Exact matches: {}/{}", exact_matches, N);
   std::println("Within 1 ULP:  {}/{}", exact_matches + ulp_1_off, N);
   std::println("Max difference: {} (at sqrt({}))", max_diff, max_diff_at);
@@ -300,9 +287,9 @@ int main()
   std::println("sqrt_test: {} ms", duration_mine.count());
   std::println("sqrt_fast: {} ms", duration_fast.count());
   std::println("std::sqrt: {} ms", duration_std.count());
-  std::println("Ratio sqrt_test/std: {:.2f}x", 
+  std::println("Ratio sqrt_test/std: {:.2f}x",
                static_cast<double>(duration_mine.count()) / static_cast<double>(duration_std.count()));
-  std::println("Ratio sqrt_fast/std: {:.2f}x", 
+  std::println("Ratio sqrt_fast/std: {:.2f}x",
                static_cast<double>(duration_fast.count()) / static_cast<double>(duration_std.count()));
 
   // Quick accuracy check for sqrt_fast

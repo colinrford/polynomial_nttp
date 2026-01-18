@@ -33,15 +33,18 @@ struct std::formatter<lam::polynomial_nttp<R, N>>
           precision = precision * 10 + (*it - '0');
           ++it;
         }
-      } else if (*it == '+')
+      }
+      else if (*it == '+')
       {
         show_plus_sign = true;
         ++it;
-      } else if (*it >= 'a' && *it <= 'z')
+      }
+      else if (*it >= 'a' && *it <= 'z')
       {
         variable = *it;
         ++it;
-      } else
+      }
+      else
         ++it;
     }
     return it;
@@ -69,7 +72,8 @@ struct std::formatter<lam::polynomial_nttp<R, N>>
           out = std::format_to(out, " - ");
           coeff = -coeff;
         }
-      } else if (coeff < R(0))
+      }
+      else if (coeff < R(0))
       {
         out = std::format_to(out, "-");
         coeff = -coeff;
@@ -94,7 +98,8 @@ struct std::formatter<lam::polynomial_nttp<R, N>>
           out = std::format_to(out, "{}", variable);
         else
           out = std::format_to(out, "{}{}", format_coeff(coeff), variable);
-      } else
+      }
+      else
       {
         if (coeff_is_one) // Higher degree terms
           out = std::format_to(out, "{}^{}", variable, i);

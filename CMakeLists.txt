@@ -16,7 +16,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True) #is this needed?
 set(CMAKE_CXX_MODULE_STD ON)
 set(CMAKE_CXX_SCAN_FOR_MODULES ON)
 
-project(lam_polynomial_nttp VERSION 0.2.260113 LANGUAGES CXX)
+project(lam_polynomial_nttp VERSION 0.2.260118 LANGUAGES CXX)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(PolynomialHelpers)
@@ -39,24 +39,47 @@ endif()
 
 enable_testing()
 
-#find_program(CLANG_TIDY_EXE "clang-tidy")
-#if(CLANG_TIDY_EXE)
-#  set(CMAKE_CXX_CLANG_TIDY ${CLANG_TIDY_EXE} "-checks=-*,bugprone-*")
-#endif()
-
 if(CMAKE_BUILD_TYPE AND CMAKE_BUILD_TYPE MATCHES "^[Dd][Ee][Bb][Uu][Gg]$")
   set(IS_DEBUG "true")
 else()
   set(IS_DEBUG "false")
 endif()
 
-option(ENABLE_COVERAGE "Enable coverage build" OFF)
 if(ENABLE_COVERAGE)
     message(STATUS "Coverage enabled")
     add_compile_options(-fprofile-instr-generate -fcoverage-mapping)
     add_link_options(-fprofile-instr-generate)
 endif()
 
+include(Sanitizers)
+include(BlasSetup)
+
+option(LAM_USE_TBB "Enable Intel TBB for bulk operations" OFF)
+if(LAM_USE_TBB)
+  find_package(TBB REQUIRED)
+  message(STATUS "Found TBB: ${TBB_DIR} (Version ${TBB_VERSION})")
+  set(LAM_USE_TBB_BOOL "true")
+  add_compile_definitions(LAM_USE_TBB)
+else()
+  set(LAM_USE_TBB_BOOL "false")
+endif()
+
+macro(map_bool_to_string VAR RESULT)
+  if(${VAR})
+    set(${RESULT} "true")
+  else()
+    set(${RESULT} "false")
+  endif()
+endmacro()
+
+map_bool_to_string(LAM_USE_ACCELERATE LAM_USE_ACCELERATE_BOOL)
+map_bool_to_string(LAM_ENABLE_TSAN IS_TSAN_BUILD)
+# LAM_USE_BLAS_BOOL is set by BlasSetup.cmake (true/false) already, but let's be safe if it's not
+if(NOT DEFINED LAM_USE_BLAS_BOOL)
+    map_bool_to_string(LAM_USE_BLAS LAM_USE_BLAS_BOOL)
+endif()
+
+# Configure Config Header
 configure_file(
   polynomial_nttp_config.cppm.in
   ${CMAKE_CURRENT_BINARY_DIR}/polynomial_nttp_config.cppm
@@ -65,7 +88,7 @@ configure_file(
 find_package(lam_concepts REQUIRED)
 
 add_library(polynomial_nttp STATIC)
-add_library(lam::polynomial_nttp ALIAS polynomial_nttp)
+add_library(lam_polynomial_nttp::polynomial_nttp ALIAS polynomial_nttp)
 target_sources(polynomial_nttp
   PUBLIC
   FILE_SET CXX_MODULES
@@ -79,15 +102,27 @@ target_sources(polynomial_nttp
         src/polynomial_nttp-univariate-print.cppm
         src/polynomial_nttp-univariate-compatibility.cppm
         src/polynomial_nttp-univariate.cppm
+        src/polynomial_nttp-univariate-math.cppm 
+        src/polynomial_nttp-univariate-fft.cppm
+        src/polynomial_nttp-univariate-acceleration.cppm
         ${CMAKE_CURRENT_BINARY_DIR}/polynomial_nttp_config.cppm
 )
-target_link_libraries(polynomial_nttp lam::concepts)
+target_sources(polynomial_nttp PRIVATE src/polynomial_nttp-univariate-fft.cpp)
+target_link_libraries(polynomial_nttp PUBLIC lam::concepts)
+
+lam_link_blas(polynomial_nttp)
+
+if(LAM_USE_TBB)
+  target_link_libraries(polynomial_nttp PRIVATE TBB::tbb)
+endif()
+
 target_compile_features(polynomial_nttp PUBLIC cxx_std_23)
 set_target_properties(polynomial_nttp PROPERTIES CXX_SCAN_FOR_MODULES ON)
 set_target_properties(polynomial_nttp PROPERTIES OUTPUT_NAME "lam_polynomial_nttp")
 
 add_subdirectory(tests)
 add_subdirectory(examples)
+add_subdirectory(benchmarks)
 
 include(GNUInstallDirs)
 
@@ -101,7 +136,7 @@ install(TARGETS polynomial_nttp
 
 install(EXPORT polynomial_nttpTargets
   FILE polynomial_nttpTargets.cmake
-  NAMESPACE lam::
+  NAMESPACE lam_polynomial_nttp::
   DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/lam_polynomial_nttp
 )
 
@@ -111,6 +146,10 @@ file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/lam_polynomial_nttpConfig.cmake" [[
 include(CMakeFindDependencyMacro)
 find_dependency(lam_concepts)
 include("${CMAKE_CURRENT_LIST_DIR}/polynomial_nttpTargets.cmake")
+# Backward compatibility alias
+if(TARGET lam_polynomial_nttp::polynomial_nttp AND NOT TARGET lam::polynomial_nttp)
+  add_library(lam::polynomial_nttp ALIAS lam_polynomial_nttp::polynomial_nttp)
+endif()
 ]])
 
 write_basic_package_version_file(

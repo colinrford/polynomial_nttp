@@ -10,12 +10,12 @@
  *    Laguerre recurrence: L_{n+1}(x) = ((2n+1-x)L_n(x) - n*L_{n-1}(x)) / (n+1)
  */
 
-#include <print>
 #include <array>
-#include <vector>
-#include <limits>
-#include <cmath>
 #include <chrono>
+#include <cmath>
+#include <limits>
+#include <print>
+#include <vector>
 
 import lam.polynomial_nttp;
 
@@ -51,7 +51,7 @@ constexpr R compensated_horner(const lam::polynomial_nttp<R, N>& poly, R x)
 {
   R s = poly[N];
   R r = 0;
-  
+
   for (int i = static_cast<int>(N) - 1; i >= 0; --i)
   {
     auto [p, pi] = two_prod(s, x);
@@ -71,7 +71,7 @@ namespace lam::orthogonal
 //   L_1(x) = 1 - x
 //   L_{n+1}(x) = ((2n+1 - x) * L_n(x) - n * L_{n-1}(x)) / (n+1)
 template<typename R, std::size_t N>
-struct laguerre_memo 
+struct laguerre_memo
 {
   static constexpr auto value = []() {
     if constexpr (N == 0) // L_0(x) = 1
@@ -108,26 +108,36 @@ struct laguerre_memo
 
 template<typename R, std::size_t N>
 constexpr auto laguerre_n()
-{ return laguerre_memo<R, N>::value; }
+{
+  return laguerre_memo<R, N>::value;
+}
 
 // Helper to generate a tuple of Laguerre polynomials L_0 through L_{N-1}
 template<typename R, std::size_t... Is>
 constexpr auto make_laguerre_tuple_impl(std::index_sequence<Is...>)
-{ return std::make_tuple(laguerre_n<R, Is>()...); }
+{
+  return std::make_tuple(laguerre_n<R, Is>()...);
+}
 
 // Generate tuple containing the first N Laguerre polynomials
 template<typename R, std::size_t N>
 constexpr auto first_n_laguerre()
-{ return make_laguerre_tuple_impl<R>(std::make_index_sequence<N>{}); }
+{
+  return make_laguerre_tuple_impl<R>(std::make_index_sequence<N>{});
+}
 
 // Helper to print tuple elements with their index using std::formatter
 template<typename Tuple, std::size_t... Is>
 void print_laguerre_tuple_impl(const Tuple& t, std::index_sequence<Is...>)
-{ (std::println("L_{} = {}", Is, std::get<Is>(t)), ...); }
+{
+  (std::println("L_{} = {}", Is, std::get<Is>(t)), ...);
+}
 
 template<std::size_t N>
 void print_laguerre_tuple(const auto& t)
-{ print_laguerre_tuple_impl(t, std::make_index_sequence<N>{}); }
+{
+  print_laguerre_tuple_impl(t, std::make_index_sequence<N>{});
+}
 
 } // namespace lam::orthogonal
 
@@ -135,9 +145,9 @@ void print_laguerre_tuple(const auto& t)
 // (Used as std::laguerre is unavailable in this environment)
 double reference_laguerre(unsigned n, double x)
 {
-  if (n == 0) 
+  if (n == 0)
     return 1.0;
-  if (n == 1) 
+  if (n == 1)
     return 1.0 - x;
 
   double L_prev2 = 1.0;     // L_0
@@ -224,7 +234,7 @@ int main()
 
   // Compare against reference implementation
   std::println("\n=== Comparison with reference_laguerre (runtime) ===\n");
-  
+
   double eps = std::numeric_limits<double>::epsilon();
   std::println("Machine epsilon: {:.4e}", eps);
   std::println("Note: 1 ULP is roughly epsilon * |value|\n");
@@ -235,7 +245,7 @@ int main()
   std::println("{:-<85}", "");
 
   auto run_check = [&](unsigned n, auto p) {
-    for (double xval : test_points) 
+    for (double xval : test_points)
     {
       double lam_val = p(xval);
 #ifdef HAS_BOOST_MATH
@@ -244,13 +254,13 @@ int main()
       double ref_val = reference_laguerre(n, xval);
 #endif
       double diff = lam_val - ref_val;
-      
+
       double ulps = 0.0;
-      if (ref_val != 0.0) 
+      if (ref_val != 0.0)
         ulps = std::abs(diff) / (std::abs(ref_val) * eps);
-      else if (diff != 0.0) 
+      else if (diff != 0.0)
         ulps = std::abs(diff) / std::numeric_limits<double>::min();
-      
+
       std::println("{:>4} {:>10.2f} {:>20.12f} {:>20.12f} {:>15.2e} {:>10.1f}", n, xval, lam_val, ref_val, diff, ulps);
     }
     std::println("");
@@ -262,6 +272,8 @@ int main()
   run_check(3, L3);
   run_check(4, L4);
   run_check(5, L5);
+  constexpr auto L50 = lam::orthogonal::laguerre_n<R, 50>();
+  run_check(50, L50);
 
   std::println("\n--- Summary ---");
   std::println("lam::laguerre: compile-time coefficients, Horner's evaluation");
@@ -277,56 +289,57 @@ int main()
   volatile double sink = 0.0; // prevent optimization
 
   auto benchmark = [&](auto&& name, auto&& func) {
-      auto start = Clock::now();
-      for (int i = 0; i < iterations; ++i) {
-          double x = 1.0 + (i % 100) * 0.01; 
-          sink = func(x); 
-      }
-      auto end = Clock::now();
-      std::chrono::duration<double> diff = end - start;
-      std::println("{:<15}: {:.3f} s  ({:.1f} M/s)", name, diff.count(), iterations / diff.count() / 1e6);
+    auto start = Clock::now();
+    for (int i = 0; i < iterations; ++i)
+    {
+      double x = 1.0 + (i % 100) * 0.01;
+      sink = func(x);
+    }
+    auto end = Clock::now();
+    std::chrono::duration<double> diff = end - start;
+    std::println("{:<15}: {:.3f} s  ({:.1f} M/s)", name, diff.count(), iterations / diff.count() / 1e6);
   };
 
-  benchmark("lam::laguerre", [&](double x){ return L5(x); });
-  benchmark("reference", [&](double x){ 
+  benchmark("lam::laguerre", [&](double x) { return L5(x); });
+  benchmark("reference", [&](double x) {
 #ifdef HAS_BOOST_MATH
-      return boost::math::laguerre(5, x);
+    return boost::math::laguerre(5, x);
 #else
       return reference_laguerre(5, x);
 #endif
   });
 
   std::println("\n=== Performance Benchmark (N=10, 10,000,000 evals) ===");
-  benchmark("lam::laguerre", [&](double x){ return L10(x); });
-  benchmark("reference", [&](double x){ 
+  benchmark("lam::laguerre", [&](double x) { return L10(x); });
+  benchmark("reference", [&](double x) {
 #ifdef HAS_BOOST_MATH
-      return boost::math::laguerre(10, x);
+    return boost::math::laguerre(10, x);
 #else
       return reference_laguerre(10, x);
 #endif
   });
 
   std::println("\n=== Performance Benchmark (N=20, 10,000,000 evals) ===");
-  benchmark("lam::laguerre", [&](double x){ return L20(x); });
-  benchmark("reference", [&](double x){ 
+  benchmark("lam::laguerre", [&](double x) { return L20(x); });
+  benchmark("reference", [&](double x) {
 #ifdef HAS_BOOST_MATH
-      return boost::math::laguerre(20, x);
+    return boost::math::laguerre(20, x);
 #else
       return reference_laguerre(20, x);
 #endif
   });
-  
-  benchmark("compensated", [&](double x){ return compensated_horner(L20, x); });
-  
+
+  benchmark("compensated", [&](double x) { return compensated_horner(L20, x); });
+
   // Stability check for N=20
   std::println("\n--- Stability Check (N=20, x=10.0) ---");
   double val_20 = L20(10.0);
   double comp_20 = compensated_horner(L20, 10.0);
-  #ifdef HAS_BOOST_MATH
+#ifdef HAS_BOOST_MATH
   double ref_20 = boost::math::laguerre(20, 10.0);
-  #else
+#else
   double ref_20 = reference_laguerre(20, 10.0);
-  #endif
+#endif
   std::println("lam:  {:.16e}", val_20);
   std::println("comp: {:.16e}", comp_20);
   std::println("ref:  {:.16e}", ref_20);

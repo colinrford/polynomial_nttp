@@ -17,7 +17,7 @@ function(add_polynomial_executable NAME)
   endif()
   
   target_include_directories(${NAME} PRIVATE ${CMAKE_BINARY_DIR} ${PROJECT_SOURCE_DIR}/src)
-  target_link_libraries(${NAME} PRIVATE lam::polynomial_nttp ${ARG_LIBS})
+  target_link_libraries(${NAME} PRIVATE lam_polynomial_nttp::polynomial_nttp ${ARG_LIBS})
   target_compile_features(${NAME} PRIVATE cxx_std_23)
   set_target_properties(${NAME} PROPERTIES CXX_SCAN_FOR_MODULES ON)
 endfunction()

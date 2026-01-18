@@ -58,8 +58,7 @@ constexpr bool is_zero_poly(const polynomial_nttp<K, N>& p)
 
 // GCD for polynomials of the same static degree
 // Returns monic GCD (leading coefficient = 1)
-export 
-template<field_element_c_weak K, std::size_t N>
+export template<field_element_c_weak K, std::size_t N>
 constexpr auto poly_gcd(polynomial_nttp<K, N> a, polynomial_nttp<K, N> b) -> polynomial_nttp<K, N>
 {
   // Euclidean algorithm
@@ -122,27 +121,30 @@ constexpr auto power_mod(const polynomial_nttp<K, N>& base, std::size_t exp, con
   // Helper lambda to reduce a polynomial mod modulus
   auto reduce_mod = [&modulus](const auto& poly) -> polynomial_nttp<K, N> {
     polynomial_nttp<K, N> result{};
-    
+
     // Copy lower-degree coefficients
     auto poly_size = poly.coefficients.size();
     for (std::size_t i = 0; i < poly_size && i <= N; ++i)
       result.coefficients[i] = poly[i];
-    
+
     K lead_mod = modulus[effective_degree(modulus)];
     auto deg_mod = effective_degree(modulus);
-    
+
     // First reduce any coefficients above N (from the 2N product)
-    for (std::size_t i = poly_size - 1; i > N; --i) {
-      if (is_negligible(poly[i])) continue;
+    for (std::size_t i = poly_size - 1; i > N; --i)
+    {
+      if (is_negligible(poly[i]))
+        continue;
       // Reduce x^i by substituting x^(deg_mod) = -(other terms)/lead
       K coeff = poly[i] / lead_mod;
       std::size_t shift = i - deg_mod;
-      for (std::size_t j = 0; j < deg_mod; ++j) {
+      for (std::size_t j = 0; j < deg_mod; ++j)
+      {
         if (j + shift <= N)
           result.coefficients[j + shift] = result[j + shift] - coeff * modulus[j];
       }
     }
-    
+
     // Now reduce within result
     while (effective_degree(result) >= deg_mod && !is_zero_poly(result))
     {
@@ -157,7 +159,7 @@ constexpr auto power_mod(const polynomial_nttp<K, N>& base, std::size_t exp, con
         if (i + shift <= N)
           result.coefficients[i + shift] = result[i + shift] - coeff * modulus[i];
     }
-    
+
     return result;
   };
 
@@ -171,13 +173,13 @@ constexpr auto power_mod(const polynomial_nttp<K, N>& base, std::size_t exp, con
     if (exp & 1)
     {
       // result = result * current mod modulus
-      auto product = result * current;  // This is polynomial_nttp<K, 2N>
+      auto product = result * current; // This is polynomial_nttp<K, 2N>
       result = reduce_mod(product);
     }
 
     // current = current^2 mod modulus
     {
-      auto product = current * current;  // This is polynomial_nttp<K, 2N>
+      auto product = current * current; // This is polynomial_nttp<K, 2N>
       current = reduce_mod(product);
     }
 
@@ -193,8 +195,7 @@ constexpr auto power_mod(const polynomial_nttp<K, N>& base, std::size_t exp, con
 
 // Build Berlekamp matrix B where B[i] = coefficients of x^(i*p) mod f
 // P = field characteristic
-export 
-template<field_element_c_weak K, std::size_t P, std::size_t N>
+export template<field_element_c_weak K, std::size_t P, std::size_t N>
 constexpr auto build_berlekamp_matrix(const polynomial_nttp<K, N>& f) -> std::array<std::array<K, N>, N>
 {
   std::array<std::array<K, N>, N> B{};
@@ -222,8 +223,7 @@ constexpr auto build_berlekamp_matrix(const polynomial_nttp<K, N>& f) -> std::ar
 
 // Compute null space basis of (B - I)
 // Returns: (basis vectors, dimension of null space)
-export 
-template<field_element_c_weak K, std::size_t N>
+export template<field_element_c_weak K, std::size_t N>
 constexpr auto berlekamp_null_space(std::array<std::array<K, N>, N> B)
   -> std::pair<std::array<std::array<K, N>, N>, std::size_t>
 {
@@ -318,8 +318,7 @@ constexpr auto berlekamp_null_space(std::array<std::array<K, N>, N> B)
 
 // P = field size (prime characteristic)
 // zero and one are used to construct field elements (avoids requiring K(int))
-export 
-template<field_element_c_weak K, std::size_t P, std::size_t N>
+export template<field_element_c_weak K, std::size_t P, std::size_t N>
 constexpr auto berlekamp_factor(const polynomial_nttp<K, N>& f, K zero, K one)
   -> std::pair<std::array<polynomial_nttp<K, N>, N>, std::size_t>
 {
@@ -414,7 +413,7 @@ constexpr auto berlekamp_factor(const polynomial_nttp<K, N>& f, K zero, K one)
           split = true;
           break;
         }
-        c = c + one;  // Increment to next field element
+        c = c + one; // Increment to next field element
       }
 
       if (!split)
@@ -438,8 +437,7 @@ constexpr auto berlekamp_factor(const polynomial_nttp<K, N>& f, K zero, K one)
 
 // P = field size (prime characteristic)
 // zero and one are used to construct field elements
-export 
-template<field_element_c_weak K, std::size_t P, std::size_t N>
+export template<field_element_c_weak K, std::size_t P, std::size_t N>
 constexpr auto roots_berlekamp(const polynomial_nttp<K, N>& f, K zero, K one) -> roots_result<K, N>
 {
   roots_result<K, N> result;
