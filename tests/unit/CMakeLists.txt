@@ -113,6 +113,12 @@ add_polynomial_test(concepts_check
 
 add_polynomial_test(roots SOURCE roots/roots.cpp)
 
+# ============================================================
+# Coverage Gap Tests
+# ============================================================
+
+add_polynomial_test(coverage_gap_fillers SOURCE coverage_gap_fillers.cpp)
+
 # ctbignum-based tests
 find_package(lam_ctbignum QUIET)
 if(TARGET lam::ctbignum)

@@ -119,39 +119,43 @@ consteval auto sunspot_bench_32k()
 
 // Helper to generate a deterministic polynomial at compile time
 template<std::size_t N>
-consteval auto make_poly_pattern() {
-    lam::polynomial::univariate::polynomial_nttp<double, N> p{};
-    for(size_t i=0; i<=N; ++i) {
-        p.coefficients[i] = (double)((i % 17) + 1); // Avoid zeros
-    }
-    return p;
+consteval auto make_poly_pattern()
+{
+  lam::polynomial::univariate::polynomial_nttp<double, N> p{};
+  for (size_t i = 0; i <= N; ++i)
+  {
+    p.coefficients[i] = (double)((i % 17) + 1); // Avoid zeros
+  }
+  return p;
 }
 
 #if BENCH_MODE == 4
 // Division uses NTTPs, so operands must be static constexpr or similar validity scope
 constexpr auto div_a = make_poly_pattern<BENCH_N>();
 // Create a divisor of smaller degree approx N/2
-constexpr auto div_b = make_poly_pattern<BENCH_N/2>();
+constexpr auto div_b = make_poly_pattern<BENCH_N / 2>();
 
-consteval auto division_bench() {
-    // division_prototype returns pair<quotient, remainder>
-    constexpr auto res = lam::division_prototype<double, BENCH_N, div_a, BENCH_N/2, div_b>();
-    // Access result to ensure evaluation
-    return res.second[0]; // First coeff of remainder
+consteval auto division_bench()
+{
+  // division_prototype returns pair<quotient, remainder>
+  constexpr auto res = lam::division_prototype<double, BENCH_N, div_a, BENCH_N / 2, div_b>();
+  // Access result to ensure evaluation
+  return res.second[0]; // First coeff of remainder
 }
 #endif
 
 #if BENCH_MODE == 5
-consteval auto gcd_bench() {
-    constexpr size_t N = BENCH_N;
-    constexpr auto a = make_poly_pattern<N>();
-    // Make b slightly different to avoid trivial GCD
-    auto b = make_poly_pattern<N>(); 
-    b.coefficients[0] += 1.0; 
-    
-    // poly_gcd returns polynomial_nttp
-    auto res = lam::polynomial::poly_gcd(a, b);
-    return res[0];
+consteval auto gcd_bench()
+{
+  constexpr size_t N = BENCH_N;
+  constexpr auto a = make_poly_pattern<N>();
+  // Make b slightly different to avoid trivial GCD
+  auto b = make_poly_pattern<N>();
+  b.coefficients[0] += 1.0;
+
+  // poly_gcd returns polynomial_nttp
+  auto res = lam::polynomial::poly_gcd(a, b);
+  return res[0];
 }
 #endif
 
@@ -178,7 +182,8 @@ int main()
   constexpr auto& data = lam::examples::sunspot_data;
   constexpr size_t N = 16384;
   exact += data[0] * data[0];
-  for(size_t k=1; k<N; ++k) exact += data[k] * data[N-k];
+  for (size_t k = 1; k < N; ++k)
+    exact += data[k] * data[N - k];
   std::cout << "Exact Result (Runtime):    " << exact << std::endl;
   std::cout << "Difference:                " << (res.real() - exact) << std::endl;
 
@@ -188,13 +193,13 @@ int main()
 #endif
 
 #if BENCH_MODE == 4
-// --- 4. Division (NTTP) ---
-    constexpr auto res = division_bench();
-    std::cout << "Division Result (N=" << BENCH_N << "): " << res << std::endl;
+  // --- 4. Division (NTTP) ---
+  constexpr auto res = division_bench();
+  std::cout << "Division Result (N=" << BENCH_N << "): " << res << std::endl;
 #elif BENCH_MODE == 5
-// --- 5. GCD (Function) ---
-    constexpr auto res = gcd_bench();
-    std::cout << "GCD Result (N=" << BENCH_N << "): " << res << std::endl;
+  // --- 5. GCD (Function) ---
+  constexpr auto res = gcd_bench();
+  std::cout << "GCD Result (N=" << BENCH_N << "): " << res << std::endl;
 #endif
   return 0;
 }

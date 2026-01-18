@@ -1,7 +1,12 @@
+/*
+ *  thousand_divisions.cpp - written by Colin Ford
+ *    see github.com/colinrford/polynomial_nttp for AGPL-3.0 License, and
+ *                                              for more info
+ *
+ *  Stress test for polynomial_nttp division.
+ */
 import std;
 import lam.polynomial_nttp;
-
-// #include "polynomial_nttp.cpp" - Removed/Replaced with module import
 
 namespace fs = std::filesystem;
 namespace math = lam::polynomial::univariate;
@@ -111,7 +116,7 @@ int main()
   remainder_deg_0_file.open(remainder_deg_0_file_string);
   // remainder_deg_1_file.open(remainder_deg_1_file_string);
   // remainder_deg_2_file.open(remainder_deg_2_file_string);
-// relaxed key variable to const to avoid strict constexpr tuple issues in main logic
+  // relaxed key variable to const to avoid strict constexpr tuple issues in main logic
   const auto quotients_and_remainders = divide_thousand_polynomials();
   // constexpr auto quotients = quotients_and_remainders.first;
   // constexpr auto deg_2_quotients = std::get<0>(quotients);

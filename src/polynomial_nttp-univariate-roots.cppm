@@ -126,8 +126,10 @@ constexpr std::optional<K> generic_cbrt(K val)
     return cbrt(val);
   }
 
-  if (std::is_constant_evaluated())
+  if consteval
+  {
     return cbrt_fixed_point_solver(val);
+  }
   else
   {
     if constexpr (std::is_floating_point_v<K>)
@@ -194,7 +196,7 @@ constexpr auto roots_degree_2(const polynomial_nttp<K, 2>& p) -> roots_result<K,
       return sqrt(val);
     }
 
-    if (std::is_constant_evaluated())
+    if consteval
     {
       if constexpr (std::is_floating_point_v<K>)
         if (val < K(0))
@@ -399,10 +401,14 @@ constexpr auto roots_degree_3(const polynomial_nttp<K, 3>& p) -> roots_result<K,
       // We can ALWAYS use it now thanks to math:: helpers for compile-time!
 
       K m;
-      if (std::is_constant_evaluated())
+      if consteval
+      {
         m = K(2) * sqrt_fixed_point_solver(-p_coef / K(3));
+      }
       else
+      {
         m = K(2) * std::sqrt(-p_coef / K(3));
+      }
 
       auto cos_arg = (K(3) * q_coef) / (p_coef * m);
       if (cos_arg > K(1))
@@ -413,7 +419,7 @@ constexpr auto roots_degree_3(const polynomial_nttp<K, 3>& p) -> roots_result<K,
       K theta;
       constexpr K pi = K(3.14159265358979323846);
 
-      if (std::is_constant_evaluated())
+      if consteval
       {
         theta = math::acos(cos_arg);
         result.push(m * math::cos(theta / K(3)) - shift, 1);
@@ -494,7 +500,7 @@ constexpr auto roots_degree_4(const polynomial_nttp<K, 4>& p) -> roots_result<K,
     {
       return sqrt(val);
     }
-    if (std::is_constant_evaluated())
+    if consteval
     {
       if constexpr (std::is_floating_point_v<K>)
         if (val < K(0))
@@ -704,7 +710,6 @@ template<field_element_c_weak K, std::size_t N>
 constexpr roots_result<K, N> roots_via_newton(const polynomial_nttp<K, N>& p)
 {
   roots_result<K, N> result;
-
   // Use Newton-Raphson to find one root
   auto r_opt = root_newton_raphson_multi(p);
   if (!r_opt)
@@ -714,12 +719,10 @@ constexpr roots_result<K, N> roots_via_newton(const polynomial_nttp<K, N>& p)
   std::size_t mult = compute_multiplicity(p, root);
 
   result.push(root, mult);
-
   // Deflate the polynomial by (x - root)^mult
   if constexpr (N > 1)
   {
     auto quotient = deflate(p, root);
-
     // Deflate additional times for multiplicity > 1
     if constexpr (N > 2)
     {
@@ -754,15 +757,13 @@ export template<field_element_c_weak K, std::size_t N>
 constexpr roots_result<K, N> roots(const polynomial_nttp<K, N>& p)
 {
   roots_result<K, N> result;
-
   // ============================================================
   // Finite Field Dispatch (Prime Characteristic)
   // ============================================================
   if constexpr (univariate::finite_field_traits<K>::is_finite_field)
   {
     constexpr auto P = univariate::finite_field_traits<K>::modulus;
-    return lam::polynomial::univariate::berlekamp::roots_berlekamp<K, P, N>(
-      p, K(0), K(1));
+    return lam::polynomial::univariate::berlekamp::roots_berlekamp<K, P, N>(p, K(0), K(1));
   }
 
   if constexpr (N == 0)
@@ -780,8 +781,7 @@ constexpr roots_result<K, N> roots(const polynomial_nttp<K, N>& p)
     return result;
   }
   else if constexpr (N == 3)
-  {
-    // N=3: Analytic solution (Cardano/Trigonometric)
+  { // N = 3: Analytic solution (Cardano / Trigonometric)
     // Works at runtime and compile-time (via constexpr math:: helpers)
     auto deg3 = roots_degree_3(p);
     result.append(deg3);
@@ -804,20 +804,20 @@ constexpr roots_result<K, N> roots(const polynomial_nttp<K, N>& p)
 
 namespace lam::polynomial
 {
-  export using univariate::roots::root_with_multiplicity;
-  export using univariate::roots::roots_result;
-  export using univariate::roots::roots_degree_1;
-  export using univariate::roots::roots_degree_2;
-  export using univariate::roots::roots_degree_3;
-  export using univariate::roots::roots_degree_4;
-  export using univariate::roots::roots_brute_force;
-  export using univariate::roots::roots;
-}
+export using univariate::roots::root_with_multiplicity;
+export using univariate::roots::roots_result;
+export using univariate::roots::roots_degree_1;
+export using univariate::roots::roots_degree_2;
+export using univariate::roots::roots_degree_3;
+export using univariate::roots::roots_degree_4;
+export using univariate::roots::roots_brute_force;
+export using univariate::roots::roots;
+} // namespace lam::polynomial
 
 // Export to lam for the simplest access
 namespace lam
 {
-  export using polynomial::univariate::roots::roots;
-  export using polynomial::univariate::roots::roots_result;
-  export using polynomial::univariate::roots::root_with_multiplicity;
-}
+export using polynomial::univariate::roots::roots;
+export using polynomial::univariate::roots::roots_result;
+export using polynomial::univariate::roots::root_with_multiplicity;
+} // namespace lam

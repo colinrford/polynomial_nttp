@@ -1,5 +1,7 @@
 /*
  *  embed_wav_demo.cpp
+ *    see github.com/colinrford/polynomial_nttp for AGPL-3.0 License, and
+ *                                              for more info
  *  Demonstrates loading a WAV file at compile-time using #embed and processing it.
  */
 

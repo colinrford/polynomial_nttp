@@ -127,7 +127,7 @@ int main()
   std::print("=== Multiplication Crossover Benchmark ===\n");
   std::print("(Comparing Naive O(N^2) vs Accelerate FFT O(log N))\n\n");
 
-  std::vector<size_t> sizes = {16, 32, 64, 80, 96, 128, 256, 512, 1024, 2048, 4096};
+  std::vector<size_t> sizes = {16, 32, 64, 80, 96, 128, 256, 512, 1024, 2048, 4096, 16384};
 
   for (auto n : sizes)
   {

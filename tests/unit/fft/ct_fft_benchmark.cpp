@@ -1,6 +1,8 @@
 /*
  *  ct_fft_benchmark.cpp
- *  Benchmarks default compile-time limits for FFT.
+ *    see github.com/colinrford/polynomial_nttp for AGPL-3.0 License, and
+ *                                              for more info
+ *  an FFT benchmark for compile-time evaluation
  */
 
 import std;
@@ -19,23 +21,18 @@ consteval bool test_fft_size()
 
 int main()
 {
-  // 256 is safe
   constexpr bool res256 = test_fft_size<256>();
   static_assert(res256);
 
-  // 1024 is safe
   constexpr bool res1024 = test_fft_size<1024>();
   static_assert(res1024);
-
-  // 4096 usually hits default steps limit, so we don't test it here to avoid CI failure
-  // unless user boosted -fconstexpr-steps.
-
+  // 4096 usually hits default steps limit
   if constexpr (res256 && res1024)
   {
-    return 0; // pass
+    return 0;
   }
   else
   {
-    return 1; // fail
+    return 1;
   }
 }

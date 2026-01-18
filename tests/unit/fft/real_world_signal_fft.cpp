@@ -1,5 +1,8 @@
 /*
  *  real_world_signal_fft.cpp
+ *    see github.com/colinrford/polynomial_nttp for AGPL-3.0 License, and
+ *                                              for more info
+ *
  *  Verifies FFT correctness on real-world data (16384 Sunspot Numbers) at compile-time.
  */
 
@@ -46,7 +49,6 @@ consteval double verify_energy_conservation()
 
 int main()
 {
-  // Static verification: The compiler MUST be able to run this.
   constexpr double error = verify_energy_conservation();
   std::print("Energy conservation error: {}\n", error);
 

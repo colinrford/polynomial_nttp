@@ -197,7 +197,7 @@ void run_boost_complex_benchmark(std::size_t M)
 
 int main()
 {
-  constexpr std::size_t M = 10'000'000; // 10 Million points
+  constexpr std::size_t M = lam::polynomial::config::is_tsan_build ? 100'000 : 10'000'000;
 
   // Warmup
   std::println("Warming up...");

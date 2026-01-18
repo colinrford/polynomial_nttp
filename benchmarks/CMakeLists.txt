@@ -6,6 +6,8 @@ add_polynomial_executable(eval_benchmark)
 add_polynomial_executable(bulk_benchmark)
 add_polynomial_executable(benchmark_complex_speed)
 add_polynomial_executable(benchmark_multiplication_crossover)
+add_polynomial_executable(benchmark_addition_crossover)
+add_polynomial_executable(benchmark_threading_crossover)
 add_polynomial_executable(benchmark_operator_speed)
 
 # Compile-Time Benchmarks
@@ -49,6 +51,21 @@ target_compile_definitions(benchmark_ct_gcd PRIVATE BENCH_MODE=5 BENCH_N=256)
 target_compile_options(benchmark_ct_gcd PRIVATE -fconstexpr-steps=100000000)
 target_compile_features(benchmark_ct_gcd PRIVATE cxx_std_23)
 
+# Enable module scanning for all targets using C++23 modules
+foreach(t 
+    benchmark_ct_naive 
+    benchmark_ct_fft 
+    benchmark_ct_sunspots 
+    benchmark_ct_32k 
+    benchmark_ct_div 
+    benchmark_ct_gcd
+    benchmark_multiplication_crossover
+)
+  if(TARGET ${t})
+    set_target_properties(${t} PROPERTIES CXX_SCAN_FOR_MODULES ON)
+  endif()
+endforeach()
+
 # Boost Integration for Benchmarks
 if(Boost_FOUND)
   target_link_libraries(eval_benchmark PRIVATE Boost::headers)
@@ -59,7 +76,11 @@ if(Boost_FOUND)
 endif()
 
 # TBB Integration for Benchmarks
+# TBB Integration for Benchmarks
 if(TBB_FOUND)
   target_link_libraries(bulk_benchmark PRIVATE TBB::tbb)
   target_compile_definitions(bulk_benchmark PRIVATE LAM_USE_TBB)
+  
+  target_link_libraries(benchmark_threading_crossover PRIVATE TBB::tbb)
+  target_compile_definitions(benchmark_threading_crossover PRIVATE LAM_USE_TBB)
 endif()

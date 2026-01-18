@@ -16,7 +16,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True) #is this needed?
 set(CMAKE_CXX_MODULE_STD ON)
 set(CMAKE_CXX_SCAN_FOR_MODULES ON)
 
-project(lam_polynomial_nttp VERSION 0.2.260116 LANGUAGES CXX)
+project(lam_polynomial_nttp VERSION 0.2.260118 LANGUAGES CXX)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(PolynomialHelpers)
@@ -39,11 +39,6 @@ endif()
 
 enable_testing()
 
-#find_program(CLANG_TIDY_EXE "clang-tidy")
-#if(CLANG_TIDY_EXE)
-#  set(CMAKE_CXX_CLANG_TIDY ${CLANG_TIDY_EXE} "-checks=-*,bugprone-*")
-#endif()
-
 if(CMAKE_BUILD_TYPE AND CMAKE_BUILD_TYPE MATCHES "^[Dd][Ee][Bb][Uu][Gg]$")
   set(IS_DEBUG "true")
 else()
@@ -56,34 +51,10 @@ if(ENABLE_COVERAGE)
     add_link_options(-fprofile-instr-generate)
 endif()
 
-# Accelerate / BLAS Configuration
-option(LAM_USE_ACCELERATE "Enable Apple Accelerate backend" OFF)
-option(LAM_USE_BLAS "Enable Generic BLAS backend" OFF)
+include(Sanitizers)
+include(BlasSetup)
+
 option(LAM_USE_TBB "Enable Intel TBB for bulk operations" OFF)
-
-if(LAM_USE_ACCELERATE)
-  find_library(ACCELERATE_FRAMEWORK Accelerate REQUIRED)
-  message(STATUS "Found Accelerate: ${ACCELERATE_FRAMEWORK}")
-  set(LAM_USE_ACCELERATE_BOOL "true")
-  set(LAM_ACCELERATE_BACKEND "Apple Accelerate")
-  add_compile_definitions(LAM_USE_ACCELERATE)
-else()
-  set(LAM_USE_ACCELERATE_BOOL "false")
-  set(LAM_ACCELERATE_BACKEND "None")
-endif()
-
-if(LAM_USE_BLAS)
-  find_package(BLAS REQUIRED)
-  message(STATUS "Found BLAS: ${BLAS_LIBRARIES}")
-  set(LAM_USE_BLAS_BOOL "true")
-  set(LAM_BLAS_BACKEND "Generic BLAS")
-  # Note: BLAS_LIBRARIES will be linked later
-  add_compile_definitions(LAM_USE_BLAS)
-else()
-  set(LAM_USE_BLAS_BOOL "false")
-  set(LAM_BLAS_BACKEND "None")
-endif()
-
 if(LAM_USE_TBB)
   find_package(TBB REQUIRED)
   message(STATUS "Found TBB: ${TBB_DIR} (Version ${TBB_VERSION})")
@@ -93,6 +64,22 @@ else()
   set(LAM_USE_TBB_BOOL "false")
 endif()
 
+macro(map_bool_to_string VAR RESULT)
+  if(${VAR})
+    set(${RESULT} "true")
+  else()
+    set(${RESULT} "false")
+  endif()
+endmacro()
+
+map_bool_to_string(LAM_USE_ACCELERATE LAM_USE_ACCELERATE_BOOL)
+map_bool_to_string(LAM_ENABLE_TSAN IS_TSAN_BUILD)
+# LAM_USE_BLAS_BOOL is set by BlasSetup.cmake (true/false) already, but let's be safe if it's not
+if(NOT DEFINED LAM_USE_BLAS_BOOL)
+    map_bool_to_string(LAM_USE_BLAS LAM_USE_BLAS_BOOL)
+endif()
+
+# Configure Config Header
 configure_file(
   polynomial_nttp_config.cppm.in
   ${CMAKE_CURRENT_BINARY_DIR}/polynomial_nttp_config.cppm
@@ -102,8 +89,6 @@ find_package(lam_concepts REQUIRED)
 
 add_library(polynomial_nttp STATIC)
 add_library(lam_polynomial_nttp::polynomial_nttp ALIAS polynomial_nttp)
-# Alias for internal usage (tests/examples expect this)
-add_library(lam::polynomial_nttp ALIAS polynomial_nttp)
 target_sources(polynomial_nttp
   PUBLIC
   FILE_SET CXX_MODULES
@@ -119,18 +104,13 @@ target_sources(polynomial_nttp
         src/polynomial_nttp-univariate.cppm
         src/polynomial_nttp-univariate-math.cppm 
         src/polynomial_nttp-univariate-fft.cppm
+        src/polynomial_nttp-univariate-acceleration.cppm
         ${CMAKE_CURRENT_BINARY_DIR}/polynomial_nttp_config.cppm
 )
 target_sources(polynomial_nttp PRIVATE src/polynomial_nttp-univariate-fft.cpp)
 target_link_libraries(polynomial_nttp PUBLIC lam::concepts)
 
-if(LAM_USE_ACCELERATE)
-  target_link_libraries(polynomial_nttp PRIVATE ${ACCELERATE_FRAMEWORK})
-endif()
-
-if(LAM_USE_BLAS)
-  target_link_libraries(polynomial_nttp PRIVATE ${BLAS_LIBRARIES})
-endif()
+lam_link_blas(polynomial_nttp)
 
 if(LAM_USE_TBB)
   target_link_libraries(polynomial_nttp PRIVATE TBB::tbb)

@@ -1,5 +1,7 @@
 /*
  *  audio_filtering_demo.cpp
+ *    see github.com/colinrford/polynomial_nttp for AGPL-3.0 License, and
+ *                                              for more info
  *  Demonstrates using FFT for digital audio signal processing.
  *
  *  Features:

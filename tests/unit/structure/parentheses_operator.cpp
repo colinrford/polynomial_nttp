@@ -157,6 +157,39 @@ int main()
     }
   }
 
+  // D. Runtime N=0 (Scalar)
+  {
+    polynomial_nttp<double, 0> scalar{42.0};
+    check_approx(scalar(100.0), 42.0, "Runtime N=0");
+  }
+
+  // E. Runtime Non-Optimized Type (int, Large N) - Force fallback path
+  {
+    constexpr std::size_t N = 100;
+    polynomial_nttp<int, N> poly_int;
+    for (std::size_t i = 0; i <= N; ++i)
+      poly_int.coefficients[i] = 1;
+    // Sum_{i=0}^{100} 1 * x^i at x=1 => 101
+    int val = poly_int(1);
+    if (val != 101)
+    {
+      std::print("FAIL: Large Degree Int (Fallback Check) Got: {}, Expected: 101\n", val);
+      std::exit(1);
+    }
+  }
+
+  // F. Runtime Non-Optimized Type (float, Large N) - Force fallback path
+  {
+    constexpr std::size_t N = 100;
+    polynomial_nttp<float, N> poly_float;
+    for (std::size_t i = 0; i <= N; ++i)
+      poly_float.coefficients[i] = 1.0f;
+    // Sum_{i=0}^{100} 1 * x^i at x=1 => 101
+    float val = poly_float(1.0f);
+    check_approx(val, 101.0f, "Large Degree Float (Fallback Check)");
+  }
+
+
   std::print("All tests passed.\n");
   return 0;
 }
