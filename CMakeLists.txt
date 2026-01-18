@@ -74,12 +74,10 @@ endmacro()
 
 map_bool_to_string(LAM_USE_ACCELERATE LAM_USE_ACCELERATE_BOOL)
 map_bool_to_string(LAM_ENABLE_TSAN IS_TSAN_BUILD)
-# LAM_USE_BLAS_BOOL is set by BlasSetup.cmake (true/false) already, but let's be safe if it's not
 if(NOT DEFINED LAM_USE_BLAS_BOOL)
     map_bool_to_string(LAM_USE_BLAS LAM_USE_BLAS_BOOL)
 endif()
 
-# Configure Config Header
 configure_file(
   polynomial_nttp_config.cppm.in
   ${CMAKE_CURRENT_BINARY_DIR}/polynomial_nttp_config.cppm
@@ -148,7 +146,13 @@ find_dependency(lam_concepts)
 include("${CMAKE_CURRENT_LIST_DIR}/polynomial_nttpTargets.cmake")
 # Backward compatibility alias
 if(TARGET lam_polynomial_nttp::polynomial_nttp AND NOT TARGET lam::polynomial_nttp)
-  add_library(lam::polynomial_nttp ALIAS lam_polynomial_nttp::polynomial_nttp)
+  get_target_property(_aliased lam_polynomial_nttp::polynomial_nttp ALIASED_TARGET)
+  if(_aliased)
+    add_library(lam::polynomial_nttp ALIAS ${_aliased})
+  else()
+    add_library(lam::polynomial_nttp ALIAS lam_polynomial_nttp::polynomial_nttp)
+  endif()
+  unset(_aliased)
 endif()
 ]])
 

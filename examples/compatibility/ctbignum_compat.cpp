@@ -30,15 +30,15 @@ int main()
     std::println("Verifying structural and algebraic compatibility...");
 
     // Run the generic check
-    compat::verify_structure(one, two, three);
-    compat::verify_algebra(one);
-    compat::verify_field_algebra(one, two);
+    compat::verify_exact_structure(one, two, three);
+    compat::verify_exact_algebra(one);
+    compat::verify_exact_field_algebra(one, two);
 
     // Sophisticated finite field tests
-    compat::verify_poly_evaluation(zero, one, two, three);
-    compat::verify_poly_mult_coeffs(zero, one);
-    compat::verify_algebraic_identity(zero, one);
-    compat::verify_higher_degree(zero, one, two, three);
+    compat::verify_exact_poly_evaluation(zero, one, two, three);
+    compat::verify_exact_poly_mult_coeffs(zero, one);
+    compat::verify_exact_algebraic_identity(zero, one);
+    compat::verify_exact_higher_degree(zero, one, two, three);
 
     // Check concepts
     static_assert(lam::concepts::experimental::ring_element_c_weak<GF>, "Zq must satisfy ring_element_c_weak");
@@ -67,18 +67,18 @@ constexpr bool test_ctbignum_constexpr()
   constexpr auto mod = 17_Z;
   using GF = decltype(Zq(mod));
 
-  compat::verify_structure(GF(1_Z), GF(2_Z), GF(3_Z));
-  compat::verify_algebra(GF(1_Z));
-  compat::verify_field_algebra(GF(1_Z), GF(2_Z));
+  compat::verify_exact_structure(GF(1_Z), GF(2_Z), GF(3_Z));
+  compat::verify_exact_algebra(GF(1_Z));
+  compat::verify_exact_field_algebra(GF(1_Z), GF(2_Z));
 
   // GF(17) specific: verify 1/2 = 9
-  compat::verify_field_inverse_value(GF(1_Z), GF(2_Z), GF(9_Z));
+  compat::verify_exact_field_inverse_value(GF(1_Z), GF(2_Z), GF(9_Z));
 
   // Sophisticated finite field tests at compile time
-  compat::verify_poly_evaluation(GF(0_Z), GF(1_Z), GF(2_Z), GF(3_Z));
-  compat::verify_poly_mult_coeffs(GF(0_Z), GF(1_Z));
-  compat::verify_algebraic_identity(GF(0_Z), GF(1_Z));
-  compat::verify_higher_degree(GF(0_Z), GF(1_Z), GF(2_Z), GF(3_Z));
+  compat::verify_exact_poly_evaluation(GF(0_Z), GF(1_Z), GF(2_Z), GF(3_Z));
+  compat::verify_exact_poly_mult_coeffs(GF(0_Z), GF(1_Z));
+  compat::verify_exact_algebraic_identity(GF(0_Z), GF(1_Z));
+  compat::verify_exact_higher_degree(GF(0_Z), GF(1_Z), GF(2_Z), GF(3_Z));
 
   // Check concepts
   static_assert(lam::concepts::experimental::ring_element_c_weak<GF>);
@@ -195,7 +195,7 @@ constexpr bool test_linear_roots_gf2()
 
   // In GF(2): 1 + 1 = 0, so -1 = 1
   // Polynomial: x + 1 = 0 → x = 1
-  return compat::verify_linear_roots(one, one, one);
+  return compat::verify_exact_linear_roots(one, one, one);
 }
 
 // GF(7) - Characteristic 7
@@ -214,7 +214,7 @@ constexpr bool test_linear_roots_gf7()
   constexpr GF7 five = GF7(5_Z);
 
   // 5x + 3 = 0 → x = 5 (interesting: 5*5 = 25 mod 7 = 4, and 4 + 3 = 7 = 0)
-  return compat::verify_linear_roots(five, three, five);
+  return compat::verify_exact_linear_roots(five, three, five);
 }
 
 // GF(11) - Characteristic 11
@@ -233,7 +233,7 @@ constexpr bool test_linear_roots_gf11()
   constexpr GF11 nine = GF11(9_Z);
   constexpr GF11 six = GF11(6_Z);
 
-  return compat::verify_linear_roots(four, nine, six);
+  return compat::verify_exact_linear_roots(four, nine, six);
 }
 
 // GF(13) - Characteristic 13
@@ -252,7 +252,7 @@ constexpr bool test_linear_roots_gf13()
   constexpr GF13 five = GF13(5_Z);
   constexpr GF13 eight = GF13(8_Z);
 
-  return compat::verify_linear_roots(eight, five, one);
+  return compat::verify_exact_linear_roots(eight, five, one);
 }
 
 // Compile-time verification of all finite field root tests
