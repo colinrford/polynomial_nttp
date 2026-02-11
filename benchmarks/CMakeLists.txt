@@ -19,34 +19,36 @@ if(TARGET lam::ctbignum)
     set(_ctbignum_target lam::ctbignum)
   endif()
   set_property(TARGET ${_ctbignum_target} APPEND PROPERTY INTERFACE_COMPILE_FEATURES cxx_std_23)
-endif()
 
-add_polynomial_executable(benchmark_operator_speed)
-add_polynomial_executable(benchmark_ntt_vs_naive LIBS lam::ctbignum)
-add_polynomial_executable(benchmark_ntt_pure LIBS lam::ctbignum)
-add_polynomial_executable(benchmark_parallel_ntt LIBS lam::ctbignum lam::interop)
+  add_polynomial_executable(benchmark_operator_speed)
+  add_polynomial_executable(benchmark_ntt_vs_naive LIBS lam::ctbignum)
+  add_polynomial_executable(benchmark_ntt_pure LIBS lam::ctbignum)
 
-# NTL Benchmark (if available)
-find_path(NTL_INCLUDE_DIR NAMES NTL/ZZ.h PATHS /usr/local/include /opt/homebrew/include)
-find_library(NTL_LIBRARY NAMES ntl PATHS /usr/local/lib /opt/homebrew/lib)
+  if(TARGET lam::interop)
+    add_polynomial_executable(benchmark_parallel_ntt LIBS lam::ctbignum lam::interop)
+  endif()
 
-if(NTL_INCLUDE_DIR AND NTL_LIBRARY)
-  message(STATUS "NTL found: enabling NTL benchmark")
-  add_polynomial_executable(benchmark_ntt_vs_ntl
-    SOURCE benchmark_ntt_vs_ntl.cpp ntl_benchmark_impl.cpp
+  # NTL Benchmark (if available)
+  find_path(NTL_INCLUDE_DIR NAMES NTL/ZZ.h PATHS /usr/local/include /opt/homebrew/include)
+  find_library(NTL_LIBRARY NAMES ntl PATHS /usr/local/lib /opt/homebrew/lib)
+
+  if(NTL_INCLUDE_DIR AND NTL_LIBRARY)
+    message(STATUS "NTL found: enabling NTL benchmark")
+    add_polynomial_executable(benchmark_ntt_vs_ntl
+      SOURCE benchmark_ntt_vs_ntl.cpp ntl_benchmark_impl.cpp
+      LIBS lam::ctbignum
+    )
+    target_include_directories(benchmark_ntt_vs_ntl PRIVATE ${NTL_INCLUDE_DIR})
+    target_link_libraries(benchmark_ntt_vs_ntl PRIVATE ${NTL_LIBRARY})
+  else()
+    message(STATUS "NTL not found")
+  endif()
+
+  add_polynomial_executable(benchmark_ntt_vector_vs_array
+    SOURCE benchmark_ntt_vector_vs_array.cpp
     LIBS lam::ctbignum
   )
-  target_include_directories(benchmark_ntt_vs_ntl PRIVATE ${NTL_INCLUDE_DIR})
-  target_link_libraries(benchmark_ntt_vs_ntl PRIVATE ${NTL_LIBRARY})
-  # NTL might need GMP if compiled with it, usually NTL handles its own deps or static linking
-else()
-  message(STATUS "NTL not found")
 endif()
-
-add_polynomial_executable(benchmark_ntt_vector_vs_array
-  SOURCE benchmark_ntt_vector_vs_array.cpp
-  LIBS lam::ctbignum
-)
 
 # Compile-Time Benchmarks
 
@@ -105,7 +107,6 @@ if(Boost_FOUND)
   target_compile_definitions(bulk_benchmark PRIVATE HAS_BOOST_MATH)
 endif()
 
-# TBB Integration for Benchmarks
 # TBB Integration for Benchmarks
 if(TBB_FOUND)
   target_link_libraries(bulk_benchmark PRIVATE TBB::tbb)
