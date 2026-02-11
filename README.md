@@ -41,7 +41,7 @@ $a_i$, $i = 0, \ldots, n$) in a Euclidean Algorithm which both i) overloads
 deeply saddens the author, but at least its still possible to achieve the
 second point ii).
 
-## `division_prototype()` (find it in [`src/polynomial_nttp-univariate-algebra.cppm`, line `261`](https://github.com/colinrford/polynomial_nttp/blob/main/src/polynomial_nttp-univariate-algebra.cppm#L261))
+## `division_prototype()` (find it in [`src/polynomial_nttp-univariate-algebra.cppm`, line `641`](https://github.com/colinrford/polynomial_nttp/blob/main/src/polynomial_nttp-univariate-algebra.cppm#L641))
 So, why was this implementation ~~doomed~~ forced from the outset (i.e. the
 author's choice to use `std::array`) to rely on NTTPs to achieve simple
 polynomial division at compile time? Well, that's just it, apparently, since
