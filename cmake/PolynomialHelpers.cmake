@@ -2,7 +2,7 @@
 
 # Define a function to add a polynomial_nttp executable
 function(add_polynomial_executable NAME)
-  cmake_parse_arguments(ARG "" "SOURCE" "LIBS;MODULE_FILES" ${ARGN})
+  cmake_parse_arguments(ARG "" "" "SOURCE;LIBS;MODULE_FILES" ${ARGN})
   
   # Use NAME.cpp as default source if not specified
   if(NOT ARG_SOURCE)

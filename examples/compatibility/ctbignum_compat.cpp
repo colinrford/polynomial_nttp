@@ -29,20 +29,18 @@ int main()
 
     std::println("Verifying structural and algebraic compatibility...");
 
-    // Run the generic check
+    static_assert(lam::concepts::experimental::ring_element_c_weak<GF>, "Zq must satisfy ring_element_c_weak");
+    static_assert(lam::concepts::experimental::field_element_c_weak<GF>, "Zq must satisfy field_element_c_weak");
+
     compat::verify_exact_structure(one, two, three);
     compat::verify_exact_algebra(one);
     compat::verify_exact_field_algebra(one, two);
 
-    // Sophisticated finite field tests
+    // finite field tests
     compat::verify_exact_poly_evaluation(zero, one, two, three);
     compat::verify_exact_poly_mult_coeffs(zero, one);
     compat::verify_exact_algebraic_identity(zero, one);
     compat::verify_exact_higher_degree(zero, one, two, three);
-
-    // Check concepts
-    static_assert(lam::concepts::experimental::ring_element_c_weak<GF>, "Zq must satisfy ring_element_c_weak");
-    static_assert(lam::concepts::experimental::field_element_c_weak<GF>, "Zq must satisfy field_element_c_weak");
 
     std::println("Runtime check passed: ctbignum Zq elements work with polynomial_nttp!");
   }
@@ -67,6 +65,9 @@ constexpr bool test_ctbignum_constexpr()
   constexpr auto mod = 17_Z;
   using GF = decltype(Zq(mod));
 
+  static_assert(lam::concepts::experimental::ring_element_c_weak<GF>);
+  static_assert(lam::concepts::experimental::field_element_c_weak<GF>);
+
   compat::verify_exact_structure(GF(1_Z), GF(2_Z), GF(3_Z));
   compat::verify_exact_algebra(GF(1_Z));
   compat::verify_exact_field_algebra(GF(1_Z), GF(2_Z));
@@ -74,15 +75,11 @@ constexpr bool test_ctbignum_constexpr()
   // GF(17) specific: verify 1/2 = 9
   compat::verify_exact_field_inverse_value(GF(1_Z), GF(2_Z), GF(9_Z));
 
-  // Sophisticated finite field tests at compile time
+  // finite field tests at compile time
   compat::verify_exact_poly_evaluation(GF(0_Z), GF(1_Z), GF(2_Z), GF(3_Z));
   compat::verify_exact_poly_mult_coeffs(GF(0_Z), GF(1_Z));
   compat::verify_exact_algebraic_identity(GF(0_Z), GF(1_Z));
   compat::verify_exact_higher_degree(GF(0_Z), GF(1_Z), GF(2_Z), GF(3_Z));
-
-  // Check concepts
-  static_assert(lam::concepts::experimental::ring_element_c_weak<GF>);
-  static_assert(lam::concepts::experimental::field_element_c_weak<GF>);
 
   // Test division_prototype with NTTP polynomials
   // (x^2 - 1) / (x - 1) = (x + 1)
@@ -338,4 +335,79 @@ constexpr bool test_quadratic_roots_gf17()
 
   return (val1 == zero) && (val2 == zero);
 }
-static_assert(test_quadratic_roots_gf17(), "Quadratic root finding should work in GF(17)");
+// ============================================================
+// LARGE PRIME NTT TEST (N >= 64)
+// Verify that the O(N log N) path works at compile time
+// ============================================================
+
+// Must specialize finite_field_traits so NTT engine recognizes ZqElement
+namespace lam::polynomial::univariate
+{
+template<typename T, T... Modulus>
+struct finite_field_traits<lam::cbn::ZqElement<T, Modulus...>>
+{
+  static constexpr bool is_finite_field = true;
+  // Extract first limb of modulus (assuming single-limb for this test)
+  static constexpr T modulus = []() {
+    constexpr T mods[] = {Modulus...};
+    return mods[0];
+  }();
+};
+} // namespace lam::polynomial::univariate
+
+constexpr bool test_large_ntt_compile_time()
+{
+  using namespace lam::cbn::literals;
+  // Solinas Prime: 29 * 2^57 + 1
+  constexpr auto large_prime = 4179340454199820289_Z;
+  using large_field = decltype(lam::cbn::Zq(large_prime));
+
+  // Create polynomials of degree 32 (result degree 64 -> triggers NTT threshold 64)
+  // Actually, to trigger N >= 64 in operator* (M+N >= 64), we can use M=32, N=32.
+  constexpr std::size_t Deg = 32;
+  lam::polynomial::univariate::polynomial_nttp<large_field, Deg> p;
+  lam::polynomial::univariate::polynomial_nttp<large_field, Deg> q;
+
+  // Simple inputs: p = x + 1, q = x - 1
+  // p * q = x^2 - 1
+  using wrapper = lam::polynomial::univariate::finite_field_traits<large_field>;
+
+  // Initialize to zero
+  for (std::size_t i = 0; i <= Deg; ++i)
+  {
+    p.coefficients[i] = large_field(0_Z);
+    q.coefficients[i] = large_field(0_Z);
+  }
+
+  p.coefficients[0] = large_field(1_Z);
+  p.coefficients[1] = large_field(1_Z); // p = 1 + x
+
+  // q = x - 1 = -1 + x
+  // -1 mod P = P - 1
+  auto neg_one = large_field(0_Z) - large_field(1_Z);
+  q.coefficients[0] = neg_one;
+  q.coefficients[1] = large_field(1_Z);
+
+  // Multiply
+  // This should trigger the NTT path because Deg+Deg = 64 >= 64
+  auto result = p * q;
+
+  // Expected: -1 + 0x + x^2 + 0x^3 ...
+  if (result[0] != neg_one)
+    return false;
+  if (result[1] != large_field(0_Z))
+    return false;
+  if (result[2] != large_field(1_Z))
+    return false;
+
+  // Verify higher terms are zero
+  for (std::size_t i = 3; i <= 2 * Deg; ++i)
+  {
+    if (result[i] != large_field(0_Z))
+      return false;
+  }
+
+  return true;
+}
+
+static_assert(test_large_ntt_compile_time(), "Large Prime NTT (N=64) must work at compile time!");

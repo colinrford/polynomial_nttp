@@ -38,7 +38,7 @@ int main()
   exact += data[0] * data[0];
   for (std::size_t k = 1; k < N; ++k)
     exact += data[k] * data[N - k];
-    
+
   std::println("Exact Result (Runtime):    {}", exact);
   std::println("Difference:                {}", (res.real() - exact));
   return 0;

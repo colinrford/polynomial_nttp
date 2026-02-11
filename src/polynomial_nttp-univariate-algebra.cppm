@@ -17,6 +17,7 @@ import std;
 import lam.concepts;
 import :univariate.structure;
 import :univariate.fft;
+import :univariate.ntt;
 import :univariate.acceleration;
 import :config;
 
@@ -415,8 +416,40 @@ constexpr auto operator*(const polynomial_nttp<R, M>& p, const polynomial_nttp<R
   // Only for double or complex<double> where we have optimized FFT
   constexpr bool is_compatible_type = std::is_same_v<R, double> || std::is_same_v<R, std::complex<double>>;
   constexpr std::size_t fft_threshold = 32;
+  constexpr std::size_t ntt_threshold = 64;
 
-  if constexpr (is_compatible_type && (M + N) >= fft_threshold)
+  if constexpr (finite_field_traits<R>::is_finite_field && (M + N) >= ntt_threshold)
+  {
+      // Compile-time or Runtime NTT
+      std::size_t n_ntt = std::bit_ceil(M + N + 1);
+      
+      // We can use std::vector in constexpr C++20
+      std::vector<R> lhs(n_ntt, R(0));
+      std::vector<R> rhs(n_ntt, R(0));
+
+      // Copy inputs
+      for (std::size_t i = 0; i <= M; ++i) lhs[i] = p[i];
+      for (std::size_t i = 0; i <= N; ++i) rhs[i] = q[i];
+
+      // Forward Transform
+      ntt::ntt_transform(lhs, false);
+      ntt::ntt_transform(rhs, false);
+
+      // Convolution (Pointwise Multiply)
+      for (std::size_t i = 0; i < n_ntt; ++i)
+          lhs[i] = finite_field_traits<R>::mul(lhs[i], rhs[i]);
+
+      // Inverse Transform
+      ntt::ntt_transform(lhs, true);
+
+      // Extract Result
+      polynomial_nttp<R, M + N> result{};
+      for (std::size_t i = 0; i <= M + N; ++i)
+          result.coefficients[i] = lhs[i];
+      
+      return result;
+  }
+  else if constexpr (is_compatible_type && (M + N) >= fft_threshold)
   {
     if consteval
     {

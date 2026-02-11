@@ -42,6 +42,12 @@ struct finite_field_traits
 {
   static constexpr bool is_finite_field = false;
   static constexpr std::size_t modulus = 0;
+
+  // Customization points for optimized arithmetic
+  // By default, uses the global mul_mod
+  static constexpr auto mul(const K& a, const K& b) { return a * b; }
+  static constexpr auto add(const K& a, const K& b) { return a + b; }
+  static constexpr auto sub(const K& a, const K& b) { return a - b; }
 };
 
 export template<typename T>
