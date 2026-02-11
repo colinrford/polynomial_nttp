@@ -14,3 +14,8 @@ set_target_properties(test_polynomial_acceleration PROPERTIES CXX_SCAN_FOR_MODUL
 add_subdirectory(unit)
 add_subdirectory(stress)
 
+
+add_executable(check_ntt_logic manual/check_ntt_logic.cpp)
+target_link_libraries(check_ntt_logic polynomial_nttp lam::concepts lam_ctbignum)
+target_compile_features(check_ntt_logic PRIVATE cxx_std_23)
+set_target_properties(check_ntt_logic PROPERTIES CXX_SCAN_FOR_MODULES ON)

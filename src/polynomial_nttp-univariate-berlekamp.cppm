@@ -105,42 +105,42 @@ constexpr auto power_mod(const polynomial_nttp<K, N>& base, std::size_t exp, con
   -> polynomial_nttp<K, N>
 {
   auto reduce_mod = [&modulus](const auto& poly) -> polynomial_nttp<K, N> {
-    polynomial_nttp<K, N> result{};
-
-    auto poly_size = poly.coefficients.size();
-    for (std::size_t i = 0; i < poly_size && i <= N; ++i)
-      result.coefficients[i] = poly[i];
-
+    // Copy coefficients to dynamic vector to handle high degrees properly
+    std::vector<K> rem(poly.coefficients.begin(), poly.coefficients.end());
+    
     K lead_mod = modulus[effective_degree(modulus)];
-    auto deg_mod = effective_degree(modulus);
+    std::size_t deg_mod = effective_degree(modulus);
 
-    for (std::size_t i = poly_size - 1; i > N; --i)
+    while (true)
     {
-      if (is_negligible(poly[i]))
-        continue;
-      K coeff = poly[i] / lead_mod;
-      std::size_t shift = i - deg_mod;
-      for (std::size_t j = 0; j < deg_mod; ++j)
+      // Find effective degree of remainder
+      std::size_t deg_r = 0;
+      bool is_zero = true;
+      for (std::size_t i = rem.size(); i-- > 0;)
       {
-        if (j + shift <= N)
-          result.coefficients[j + shift] = result[j + shift] - coeff * modulus[j];
+        if (!is_negligible(rem[i]))
+        {
+          deg_r = i;
+          is_zero = false;
+          break;
+        }
       }
-    }
 
-    while (effective_degree(result) >= deg_mod && !is_zero_poly(result))
-    {
-      auto deg_r = effective_degree(result);
-      if (deg_r < deg_mod)
+      if (is_zero || deg_r < deg_mod)
         break;
 
-      K coeff = result[deg_r] / lead_mod;
+      K coeff = rem[deg_r] / lead_mod;
       std::size_t shift = deg_r - deg_mod;
 
       for (std::size_t i = 0; i <= deg_mod; ++i)
-        if (i + shift <= N)
-          result.coefficients[i + shift] = result[i + shift] - coeff * modulus[i];
+      {
+         rem[i + shift] = rem[i + shift] - coeff * modulus[i];
+      }
     }
 
+    polynomial_nttp<K, N> result{};
+    for (std::size_t i = 0; i <= N && i < rem.size(); ++i)
+      result.coefficients[i] = rem[i];
     return result;
   };
 
@@ -388,9 +388,32 @@ export template<field_element_c_weak K, std::size_t P, std::size_t N>
 constexpr auto roots_berlekamp(const polynomial_nttp<K, N>& f, K zero, K one) -> roots_result<K, N>
 {
   roots_result<K, N> result;
+  
+  // Check for inseparable polynomial: f'(x) == 0
+  // This implies f(x) = g(x^P)
+  auto deg_f = effective_degree(f);
+  if (deg_f >= P)
+  {
+    auto df = derivative(f);
+    if (is_zero_poly(df))
+    {
+      polynomial_nttp<K, N> g{};
+      for (std::size_t i = 0; i * P <= deg_f; ++i)
+      {
+        g.coefficients[i] = f[i * P];
+      }
+      
+      auto sub_roots = roots_berlekamp<K, P, N>(g, zero, one);
+      
+      for (std::size_t i = 0; i < sub_roots.count; ++i)
+      {
+        result.push(sub_roots[i].value, sub_roots[i].multiplicity * P);
+      }
+      return result;
+    }
+  }
 
   auto [factors, count] = berlekamp_factor<K, P, N>(f, zero, one);
-  std::println("DEBUG: berlekamp_factor found {} factors", count);
 
   for (std::size_t i = 0; i < count; ++i)
   {

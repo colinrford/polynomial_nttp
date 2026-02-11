@@ -34,4 +34,13 @@ export namespace lam::polynomial::config
 
   // Sanitizer Status
   inline constexpr bool is_tsan_build = @IS_TSAN_BUILD@;
+
+  // 128-bit Integer Support
+  #cmakedefine LAM_HAS_INT128
+  inline constexpr bool has_int128 = 
+  #ifdef LAM_HAS_INT128
+      true;
+  #else
+      false;
+  #endif
 }

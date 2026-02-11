@@ -17,7 +17,7 @@ set(CMAKE_CXX_MODULE_STD ON)
 set(CMAKE_CXX_SCAN_FOR_MODULES ON)
 add_compile_options(-Wno-experimental-header-units -Wno-module-import-in-extern-c)
 
-project(lam_polynomial_nttp VERSION 0.2.260118 LANGUAGES CXX)
+project(lam_polynomial_nttp VERSION 0.2.260210 LANGUAGES CXX)
 
 # Support centralized cmake modules for in-tree builds
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../cmake")
@@ -84,6 +84,16 @@ if(NOT DEFINED LAM_USE_BLAS_BOOL)
     map_bool_to_string(LAM_USE_BLAS LAM_USE_BLAS_BOOL)
 endif()
 
+include(CheckCXXSourceCompiles)
+check_cxx_source_compiles("
+  int main() {
+    unsigned __int128 a = 1;
+    unsigned __int128 b = 2;
+    unsigned __int128 c = a * b;
+    return 0;
+  }
+" LAM_HAS_INT128)
+
 configure_file(
   polynomial_nttp_config.cppm.in
   ${CMAKE_CURRENT_BINARY_DIR}/polynomial_nttp_config.cppm
@@ -111,6 +121,7 @@ target_sources(polynomial_nttp
         src/polynomial_nttp-univariate.cppm
         src/polynomial_nttp-univariate-math.cppm 
         src/polynomial_nttp-univariate-fft.cppm
+        src/polynomial_nttp-univariate-ntt.cppm
         src/polynomial_nttp-univariate-acceleration.cppm
         ${CMAKE_CURRENT_BINARY_DIR}/polynomial_nttp_config.cppm
 )

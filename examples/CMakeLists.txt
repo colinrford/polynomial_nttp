@@ -62,7 +62,14 @@ add_polynomial_executable(ctbignum_compatibility
   LIBS lam::ctbignum
 )
 
+target_compile_options(ctbignum_compatibility PRIVATE -fconstexpr-steps=150000000 -fbracket-depth=1024)
+
 add_polynomial_executable(roots_brute_force 
   SOURCE compatibility/roots_brute_force.cpp 
+  LIBS lam::ctbignum
+)
+
+add_polynomial_executable(root_finding_demo 
+  SOURCE root_finding_demo.cpp 
   LIBS lam::ctbignum
 )
