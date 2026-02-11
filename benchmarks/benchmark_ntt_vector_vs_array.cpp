@@ -18,11 +18,15 @@ namespace lam::polynomial::univariate
 template<typename T, T... Modulus>
 struct finite_field_traits<lam::cbn::ZqElement<T, Modulus...>>
 {
+  using K = lam::cbn::ZqElement<T, Modulus...>;
   static constexpr bool is_finite_field = true;
   static constexpr T modulus = []() {
     constexpr T mods[] = {Modulus...};
     return mods[0];
   }();
+  static constexpr K mul(const K& a, const K& b) { return a * b; }
+  static constexpr K add(const K& a, const K& b) { return a + b; }
+  static constexpr K sub(const K& a, const K& b) { return a - b; }
 };
 } // namespace lam::polynomial::univariate
 
