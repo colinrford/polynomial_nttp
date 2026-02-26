@@ -38,9 +38,7 @@ constexpr K sqrt_iterator(K of, K x_k)
 // Generic cbrt iterator step: x_{k+1} = (2*x_k + S / x_k²) / 3
 template<field_element_c_weak K>
 constexpr K cbrt_iterator(K of, K x_k)
-{
-  return (K(2) * x_k + of / (x_k * x_k)) / K(3);
-}
+{ return (K(2) * x_k + of / (x_k * x_k)) / K(3); }
 
 // Fixed point solver for sqrt using Newton-Raphson (Compile-time friendly)
 template<field_element_c_weak K>
@@ -141,7 +139,8 @@ constexpr std::optional<K> generic_cbrt(K val)
 
 // Brute force root solver for small fields or specific ranges
 // Useful for Characteristic 2 and 3 where analytic formulas fail or small fields
-export template<typename K, std::size_t N, typename Range>
+export 
+template<typename K, std::size_t N, typename Range>
 constexpr auto roots_brute_force(const polynomial_nttp<K, N>& p, Range&& range) -> roots_result<K, N>
 {
   roots_result<K, N> result;
@@ -171,8 +170,10 @@ concept has_optional_sqrt = requires(T x) {
   { sqrt(x) } -> std::same_as<std::optional<T>>;
 };
 
+// TODO: comb through
 // Solver for ax^2 + bx + c = 0 with flexible sqrt dispatch
-export template<field_element_c_weak K>
+export 
+template<field_element_c_weak K>
 constexpr auto roots_degree_2(const polynomial_nttp<K, 2>& p) -> roots_result<K, 2>
 {
   roots_result<K, 2> result;
@@ -304,9 +305,7 @@ constexpr Real cos(Real x)
 
 template<typename Real>
 constexpr Real sin(Real x)
-{
-  return cos(x - PI_2<Real>);
-}
+{ return cos(x - PI_2<Real>); }
 
 template<typename Real>
 constexpr Real acos(Real x)
@@ -339,8 +338,10 @@ constexpr Real acos(Real x)
 }
 } // namespace math
 
+// TODO: comb through
 // Solver for ax³ + bx² + cx + d = 0 using Cardano's formula
-export template<field_element_c_weak K>
+export 
+template<field_element_c_weak K>
 constexpr auto roots_degree_3(const polynomial_nttp<K, 3>& p) -> roots_result<K, 3>
 {
   roots_result<K, 3> result;
@@ -397,9 +398,6 @@ constexpr auto roots_degree_3(const polynomial_nttp<K, 3>& p) -> roots_result<K,
   {
     if (discriminant > K(0) && p_coef < K(0))
     {
-      // Check if we can use Trig method
-      // We can ALWAYS use it now thanks to math:: helpers for compile-time!
-
       K m;
       if consteval
       {
@@ -465,8 +463,10 @@ constexpr auto roots_degree_3(const polynomial_nttp<K, 3>& p) -> roots_result<K,
   return result;
 }
 
+// TODO: comb through
 // Solver for quartic using Ferrari's Method
-export template<field_element_c_weak K>
+export 
+template<field_element_c_weak K>
 constexpr auto roots_degree_4(const polynomial_nttp<K, 4>& p) -> roots_result<K, 4>
 {
   roots_result<K, 4> result;
@@ -618,6 +618,7 @@ constexpr auto roots_degree_4(const polynomial_nttp<K, 4>& p) -> roots_result<K,
   return result;
 }
 
+// TODO: comb through
 template<field_element_c_weak K, std::size_t N>
 constexpr auto root_newton_raphson(const polynomial_nttp<K, N>& p, K initial_guess = K(0)) -> std::optional<K>
 {
@@ -667,6 +668,7 @@ constexpr auto root_newton_raphson_multi(const polynomial_nttp<K, N>& p) -> std:
   return std::nullopt;
 }
 
+// TODO: comb through
 // Check if a root has higher multiplicity by testing derivative
 template<field_element_c_weak K, std::size_t N>
 constexpr std::size_t compute_multiplicity(const polynomial_nttp<K, N>& p, K root)
@@ -690,6 +692,7 @@ constexpr std::size_t compute_multiplicity(const polynomial_nttp<K, N>& p, K roo
   return mult;
 }
 
+// TODO: comb through
 // Synthetic division: divide p by (x - root)
 template<field_element_c_weak K, std::size_t N>
 constexpr polynomial_nttp<K, N - 1> deflate(const polynomial_nttp<K, N>& p, K root)
@@ -752,8 +755,10 @@ constexpr roots_result<K, N> roots_via_newton(const polynomial_nttp<K, N>& p)
   return result;
 }
 
+// TODO: comb through
 // Generic Dispatcher with Deflation and Multiplicity Tracking
-export template<field_element_c_weak K, std::size_t N>
+export 
+template<field_element_c_weak K, std::size_t N>
 constexpr roots_result<K, N> roots(const polynomial_nttp<K, N>& p)
 {
   roots_result<K, N> result;
@@ -762,7 +767,7 @@ constexpr roots_result<K, N> roots(const polynomial_nttp<K, N>& p)
   // ============================================================
   if constexpr (univariate::finite_field_traits<K>::is_finite_field)
   {
-    constexpr auto P = univariate::finite_field_traits<K>::modulus;
+    constexpr auto P = univariate::finite_field_traits<K>::field_order;
     return lam::polynomial::univariate::berlekamp::roots_berlekamp<K, P, N>(p, K(0), K(1));
   }
 

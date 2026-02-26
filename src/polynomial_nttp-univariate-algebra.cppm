@@ -88,28 +88,32 @@ constexpr auto operator+(const polynomial_nttp<R, M>& p, const polynomial_nttp<R
 #ifdef LAM_USE_BLAS
         if (!accelerated)
         {
-           if constexpr (std::is_same_v<R, double>)
-           {
-             acceleration::cblas_daxpy(min_count, 1.0, smaller_poly.coefficients.data(), 1, p_plus_q.coefficients.data(), 1);
-             accelerated = true;
-           }
-           else if constexpr (std::is_same_v<R, float>)
-           {
-             acceleration::cblas_saxpy(min_count, 1.0f, smaller_poly.coefficients.data(), 1, p_plus_q.coefficients.data(), 1);
-             accelerated = true;
-           }
-           else if constexpr (std::is_same_v<R, std::complex<double>>)
-           {
-             double one[] = {1.0, 0.0};
-             acceleration::cblas_zaxpy(min_count, one, smaller_poly.coefficients.data(), 1, p_plus_q.coefficients.data(), 1);
-             accelerated = true;
-           }
-           else if constexpr (std::is_same_v<R, std::complex<float>>)
-           {
-             float one[] = {1.0f, 0.0f};
-             acceleration::cblas_caxpy(min_count, one, smaller_poly.coefficients.data(), 1, p_plus_q.coefficients.data(), 1);
-             accelerated = true;
-           }
+          if constexpr (std::is_same_v<R, double>)
+          {
+            acceleration::cblas_daxpy(min_count, 1.0, smaller_poly.coefficients.data(), 1, p_plus_q.coefficients.data(),
+                                      1);
+            accelerated = true;
+          }
+          else if constexpr (std::is_same_v<R, float>)
+          {
+            acceleration::cblas_saxpy(min_count, 1.0f, smaller_poly.coefficients.data(), 1,
+                                      p_plus_q.coefficients.data(), 1);
+            accelerated = true;
+          }
+          else if constexpr (std::is_same_v<R, std::complex<double>>)
+          {
+            double one[] = {1.0, 0.0};
+            acceleration::cblas_zaxpy(min_count, one, smaller_poly.coefficients.data(), 1, p_plus_q.coefficients.data(),
+                                      1);
+            accelerated = true;
+          }
+          else if constexpr (std::is_same_v<R, std::complex<float>>)
+          {
+            float one[] = {1.0f, 0.0f};
+            acceleration::cblas_caxpy(min_count, one, smaller_poly.coefficients.data(), 1, p_plus_q.coefficients.data(),
+                                      1);
+            accelerated = true;
+          }
         }
 #endif
       };
@@ -420,34 +424,36 @@ constexpr auto operator*(const polynomial_nttp<R, M>& p, const polynomial_nttp<R
 
   if constexpr (finite_field_traits<R>::is_finite_field && (M + N) >= ntt_threshold)
   {
-      // Compile-time or Runtime NTT
-      std::size_t n_ntt = std::bit_ceil(M + N + 1);
-      
-      // We can use std::vector in constexpr C++20
-      std::vector<R> lhs(n_ntt, R(0));
-      std::vector<R> rhs(n_ntt, R(0));
+    // Compile-time or Runtime NTT
+    std::size_t n_ntt = std::bit_ceil(M + N + 1);
 
-      // Copy inputs
-      for (std::size_t i = 0; i <= M; ++i) lhs[i] = p[i];
-      for (std::size_t i = 0; i <= N; ++i) rhs[i] = q[i];
+    // We can use std::vector in constexpr C++20
+    std::vector<R> lhs(n_ntt, R(0));
+    std::vector<R> rhs(n_ntt, R(0));
 
-      // Forward Transform
-      ntt::ntt_transform(lhs, false);
-      ntt::ntt_transform(rhs, false);
+    // Copy inputs
+    for (std::size_t i = 0; i <= M; ++i)
+      lhs[i] = p[i];
+    for (std::size_t i = 0; i <= N; ++i)
+      rhs[i] = q[i];
 
-      // Convolution (Pointwise Multiply)
-      for (std::size_t i = 0; i < n_ntt; ++i)
-          lhs[i] = finite_field_traits<R>::mul(lhs[i], rhs[i]);
+    // Forward Transform
+    ntt::ntt_transform(lhs, false);
+    ntt::ntt_transform(rhs, false);
 
-      // Inverse Transform
-      ntt::ntt_transform(lhs, true);
+    // Convolution (Pointwise Multiply)
+    for (std::size_t i = 0; i < n_ntt; ++i)
+      lhs[i] = finite_field_traits<R>::mul(lhs[i], rhs[i]);
 
-      // Extract Result
-      polynomial_nttp<R, M + N> result{};
-      for (std::size_t i = 0; i <= M + N; ++i)
-          result.coefficients[i] = lhs[i];
-      
-      return result;
+    // Inverse Transform
+    ntt::ntt_transform(lhs, true);
+
+    // Extract Result
+    polynomial_nttp<R, M + N> result{};
+    for (std::size_t i = 0; i <= M + N; ++i)
+      result.coefficients[i] = lhs[i];
+
+    return result;
   }
   else if constexpr (is_compatible_type && (M + N) >= fft_threshold)
   {
@@ -583,15 +589,11 @@ const auto indexing_set_from_to = [](auto m, auto n) { return stdv::iota(static_
  */
 export template<ring_element_c_weak R = double, std::size_t N>
 constexpr auto norm([[maybe_unused]] const polynomial_nttp<R, N>& p) noexcept
-{
-  return N;
-}
+{ return N; }
 /* returns the leading coefficient, even if it is zero! */
 export template<ring_element_c_weak R = double, std::size_t N>
 constexpr R leading(const polynomial_nttp<R, N>& p) noexcept
-{
-  return p.coefficients[N];
-}
+{ return p.coefficients[N]; }
 /* returns the leading nonzero coefficient, UNFINISHED */
 /*
 //export
@@ -752,6 +754,241 @@ constexpr polynomial_nttp<R, N + 1> antiderivative(const polynomial_nttp<R, N>& 
   }();
 }
 
+/*  poly_rem — polynomial remainder modulo a compile-time modulus
+ *
+ *  Computes a mod Mod, where Mod is encoded as an NTTP.  The return type
+ *  polynomial_nttp<R, N - 1> is the canonical representation of the quotient
+ *  ring R[x]/(Mod): any representative has degree strictly less than N.
+ *
+ *  Three structural cases selected at compile time:
+ *    N == 0 : Mod is a constant; remainder is defined as 0 by convention,
+ *             consistent with division_prototype's handling of zero divisors.
+ *    M <  N : dividend already lies in the reduced space; copy into result
+ *             and zero-fill the upper slots.
+ *    M >= N : synthetic division over a working copy of the dividend.
+ *             The leading coefficient of Mod is a compile-time constant,
+ *             so each elimination step divides by a known value.
+ *
+ *  Behaviour when Mod has a zero leading coefficient (Mod.coefficients[N] == 0)
+ *  is undefined for M >= N, matching the convention of division_prototype.
+ */
+export template<field_element_c_weak R, std::size_t N, polynomial_nttp<R, N> Mod, std::size_t M>
+constexpr auto poly_rem(const polynomial_nttp<R, M>& a)
+{
+  if constexpr (N == 0)
+  {
+    return polynomial_nttp<R, 0>{};
+  }
+  else if constexpr (M < N)
+  {
+    polynomial_nttp<R, N - 1> result{};
+    for (std::size_t i = 0; i <= M; ++i)
+      result.coefficients[i] = a.coefficients[i];
+    return result;
+  }
+  else
+  {
+    // working copy of dividend in an oversized array
+    std::array<R, M + 1> rem{};
+    for (std::size_t i = 0; i <= M; ++i)
+      rem[i] = a.coefficients[i];
+
+    constexpr R lead = Mod.coefficients[N];
+
+    // eliminate from degree M down to degree N using the post-decrement idiom
+    // to avoid unsigned underflow: i-- returns the old value for the check,
+    // and the loop body sees the already-decremented i
+    for (std::size_t i = M + 1; i-- > N;)
+    {
+      R factor = rem[i] / lead;
+      for (std::size_t j = 0; j <= N; ++j)
+        rem[i - N + j] = rem[i - N + j] - factor * Mod.coefficients[j];
+    }
+
+    polynomial_nttp<R, N - 1> result{};
+    for (std::size_t i = 0; i < N; ++i)
+      result.coefficients[i] = rem[i];
+    return result;
+  }
+}
+
+/*  poly_divmod_result — internal aggregate for divmod_runtime
+ *
+ *  Not exported; used only within poly_inv.
+ */
+template<ring_element_c_weak R, std::size_t W>
+struct poly_divmod_result
+{
+  std::array<R, W> q{};
+  std::size_t deg_q{0};
+  std::array<R, W> r{};
+  std::size_t deg_r{0};
+};
+
+/*  divmod_runtime — non-exported helper for poly_inv
+ *
+ *  Runtime-degree polynomial division on fixed-width arrays of size W.
+ *  Used by poly_inv's iterative XGCD where the divisor changes at each step
+ *  and cannot be a NTTP.  All intermediate polynomials in the XGCD for
+ *  an irreducible of degree N fit within W = N + 1 coefficients.
+ *
+ *  If deg_den > deg_num the divisor has higher degree than the dividend;
+ *  returns quotient = 0 and remainder = num unchanged, consistent with
+ *  division_prototype's behaviour for that case.
+ *
+ *  Behaviour is undefined when deg_den == 0 and den[0] == R(0) (zero
+ *  constant divisor); matches the convention used throughout this module.
+ */
+template<ring_element_c_weak R, std::size_t W>
+constexpr poly_divmod_result<R, W> divmod_runtime(const std::array<R, W>& num, std::size_t deg_num,
+                                                  const std::array<R, W>& den, std::size_t deg_den)
+{
+  poly_divmod_result<R, W> result;
+  result.r = num;
+
+  if (deg_den > deg_num)
+  {
+    result.deg_r = deg_num;
+    return result;
+  }
+
+  R lead = den[deg_den];
+  result.deg_q = deg_num - deg_den;
+
+  for (std::size_t i = deg_num + 1; i-- > deg_den;)
+  {
+    R factor = result.r[i] / lead;
+    result.q[i - deg_den] = factor;
+    for (std::size_t j = 0; j <= deg_den; ++j)
+      result.r[i - deg_den + j] = result.r[i - deg_den + j] - factor * den[j];
+  }
+
+  // find the actual degree of the remainder: highest nonzero coefficient
+  // strictly below deg_den
+  result.deg_r = 0;
+  for (std::size_t i = deg_den; i-- > 0;)
+  {
+    if (result.r[i] != R(0))
+    {
+      result.deg_r = i;
+      break;
+    }
+  }
+  return result;
+}
+
+/*  poly_inv — multiplicative inverse in R[x]/(Mod)
+ *
+ *  Computes the inverse of a in the quotient ring R[x]/(Mod) via an
+ *  iterative extended Euclidean algorithm (XGCD).
+ *
+ *  R must model a field with exact arithmetic.  The algorithm is primarily
+ *  meaningful for finite field coefficient types where the zero-check
+ *  (r != R(0)) is exact; for approximate types the termination condition
+ *  may be unreliable.
+ *
+ *  Behaviour when a == 0 is undefined, consistent with the convention that
+ *  division by zero is not handled as a failure — the algorithm will run
+ *  to completion and produce an incorrect result silently, matching the
+ *  treatment of zero divisors in division_prototype.
+ *
+ *  N == 0: degenerate; returns polynomial_nttp<R, 0>{} by convention.
+ *
+ *  Working storage: all intermediate polynomials (remainders, Bezout
+ *  coefficients, and their products) have degree ≤ N and fit within
+ *  W = N + 1 coefficients by the standard XGCD degree bounds.
+ */
+export template<field_element_c_weak R, std::size_t N, polynomial_nttp<R, N> Mod>
+constexpr auto poly_inv(const polynomial_nttp<R, N - 1>& a)
+{
+  if constexpr (N == 0)
+  {
+    return polynomial_nttp<R, 0>{};
+  }
+  else
+  {
+    constexpr std::size_t W = N + 1;
+
+    std::array<R, W> r0{}, r1{}, s0{}, s1{};
+    std::size_t deg_r0 = N, deg_r1 = 0;
+
+    // r0 = Mod (degree N)
+    for (std::size_t i = 0; i <= N; ++i)
+      r0[i] = Mod.coefficients[i];
+
+    // r1 = a (zero-padded to W slots)
+    for (std::size_t i = 0; i < N; ++i)
+      r1[i] = a.coefficients[i];
+
+    // actual degree of r1: scan from N-1 downward
+    for (std::size_t i = N; i-- > 0;)
+    {
+      if (r1[i] != R(0))
+      {
+        deg_r1 = i;
+        break;
+      }
+    }
+
+    // s0 = 0, s1 = 1 (both degree 0)
+    s1[0] = R(1);
+    std::size_t deg_s1 = 0;
+
+    while (true)
+    {
+      // check whether r1 is the zero polynomial
+      bool r1_zero = true;
+      for (std::size_t i = 0; i <= deg_r1; ++i)
+        if (r1[i] != R(0))
+        {
+          r1_zero = false;
+          break;
+        }
+      if (r1_zero)
+        break;
+
+      auto dm = divmod_runtime<R, W>(r0, deg_r0, r1, deg_r1);
+
+      // s2 = s0 - q * s1
+      // by XGCD degree bounds, deg(q * s1) <= N, which fits within W slots
+      std::array<R, W> prod{}, s2{};
+      for (std::size_t i = 0; i <= dm.deg_q; ++i)
+        for (std::size_t j = 0; j <= deg_s1; ++j)
+          prod[i + j] = prod[i + j] + dm.q[i] * s1[j];
+
+      for (std::size_t i = 0; i < W; ++i)
+        s2[i] = s0[i] - prod[i];
+
+      // actual degree of s2
+      std::size_t deg_s2 = 0;
+      for (std::size_t i = W; i-- > 0;)
+      {
+        if (s2[i] != R(0))
+        {
+          deg_s2 = i;
+          break;
+        }
+      }
+
+      r0 = r1;
+      deg_r0 = deg_r1;
+      r1 = dm.r;
+      deg_r1 = dm.deg_r;
+      s0 = s1;
+      s1 = s2;
+      deg_s1 = deg_s2;
+    }
+
+    // r0 is the GCD — a nonzero scalar for irreducible Mod and nonzero a
+    // normalize Bezout coefficient: s0 / r0[0]
+    R gcd_val = r0[0];
+    polynomial_nttp<R, N - 1> result{};
+    for (std::size_t i = 0; i < N; ++i)
+      result.coefficients[i] = s0[i] / gcd_val;
+    return result;
+  }
+}
+
 } // end namespace lam::polynomial::univariate::algebra
 
 namespace lam
@@ -762,4 +999,6 @@ export using polynomial::univariate::algebra::make_monomial;
 export using polynomial::univariate::algebra::division_prototype;
 export using polynomial::univariate::algebra::derivative;
 export using polynomial::univariate::algebra::antiderivative;
+export using polynomial::univariate::algebra::poly_rem;
+export using polynomial::univariate::algebra::poly_inv;
 } // end namespace lam

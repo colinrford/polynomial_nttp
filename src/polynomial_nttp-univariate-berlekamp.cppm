@@ -107,7 +107,7 @@ constexpr auto power_mod(const polynomial_nttp<K, N>& base, std::size_t exp, con
   auto reduce_mod = [&modulus](const auto& poly) -> polynomial_nttp<K, N> {
     // Copy coefficients to dynamic vector to handle high degrees properly
     std::vector<K> rem(poly.coefficients.begin(), poly.coefficients.end());
-    
+
     K lead_mod = modulus[effective_degree(modulus)];
     std::size_t deg_mod = effective_degree(modulus);
 
@@ -134,7 +134,7 @@ constexpr auto power_mod(const polynomial_nttp<K, N>& base, std::size_t exp, con
 
       for (std::size_t i = 0; i <= deg_mod; ++i)
       {
-         rem[i + shift] = rem[i + shift] - coeff * modulus[i];
+        rem[i + shift] = rem[i + shift] - coeff * modulus[i];
       }
     }
 
@@ -388,7 +388,7 @@ export template<field_element_c_weak K, std::size_t P, std::size_t N>
 constexpr auto roots_berlekamp(const polynomial_nttp<K, N>& f, K zero, K one) -> roots_result<K, N>
 {
   roots_result<K, N> result;
-  
+
   // Check for inseparable polynomial: f'(x) == 0
   // This implies f(x) = g(x^P)
   auto deg_f = effective_degree(f);
@@ -402,9 +402,9 @@ constexpr auto roots_berlekamp(const polynomial_nttp<K, N>& f, K zero, K one) ->
       {
         g.coefficients[i] = f[i * P];
       }
-      
+
       auto sub_roots = roots_berlekamp<K, P, N>(g, zero, one);
-      
+
       for (std::size_t i = 0; i < sub_roots.count; ++i)
       {
         result.push(sub_roots[i].value, sub_roots[i].multiplicity * P);

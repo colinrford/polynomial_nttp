@@ -41,7 +41,7 @@ export template<typename K>
 struct finite_field_traits
 {
   static constexpr bool is_finite_field = false;
-  static constexpr std::size_t modulus = 0;
+  static constexpr std::size_t field_order = 0;
 
   // Customization points for optimized arithmetic
   // By default, uses the global mul_mod
@@ -105,13 +105,30 @@ constexpr bool is_approx_equal(const T& a, const T& b, std::optional<double> abs
   }
 }
 
-export template<typename T>
-constexpr bool is_negligible(const T& val, std::optional<double> abs_tol = std::nullopt)
+// Custom relative tolerance check to survive Runge's Phenomenon / scale variance.
+// Error = |expected - actual| / max(|expected|, |actual|)
+export 
+template <std::floating_point T>
+constexpr bool is_relatively_approx_equal(T expected, T actual, T tolerance = 1e-9) 
 {
-  return is_approx_equal(val, T(0), abs_tol);
+  if (expected == actual) 
+    return true;
+  T diff = expected > actual ? expected - actual : actual - expected;
+  T abs_e = expected > 0 ? expected : -expected;
+  T abs_a = actual > 0 ? actual : -actual;
+  T max_val = abs_e > abs_a ? abs_e : abs_a;
+  if (max_val == 0) 
+    return diff < tolerance; // Fallback for 0 against near 0
+  return (diff / max_val) < tolerance;
 }
 
-export template<ring_element_c_weak R = double, std::size_t N = 0>
+export 
+template<typename T>
+constexpr bool is_negligible(const T& val, std::optional<double> abs_tol = std::nullopt)
+{ return is_approx_equal(val, T(0), abs_tol); }
+
+export 
+template<ring_element_c_weak R = double, std::size_t N = 0>
 struct polynomial_nttp
 {
   using coefficient_t = R; // std::type_identity_t<R>?
@@ -123,14 +140,10 @@ struct polynomial_nttp
   // possibly allegedly std::fill may not perform this sometimes?
   // could be it's only a thing with std::vector
   constexpr polynomial_nttp() noexcept
-  {
-    stdr::fill(stdr::begin(coefficients), stdr::end(coefficients), coefficient_t(0));
-  }
+  { stdr::fill(stdr::begin(coefficients), stdr::end(coefficients), coefficient_t(0)); }
 
   constexpr polynomial_nttp(std::initializer_list<coefficient_t> li) noexcept
-  {
-    std::copy(li.begin(), li.end(), coefficients.begin());
-  }
+  { std::copy(li.begin(), li.end(), coefficients.begin()); }
 
   explicit constexpr polynomial_nttp(std::array<coefficient_t, N + 1> coeffs) noexcept : coefficients(coeffs) {}
 
@@ -142,6 +155,8 @@ struct polynomial_nttp
     }
     coefficients[0] = constant;
   }
+
+  static constexpr polynomial_nttp zero() noexcept { return polynomial_nttp{}; }
 
   using begin_type = decltype(stdr::begin(coefficients));
   using end_type = decltype(stdr::end(coefficients));
@@ -163,14 +178,10 @@ struct polynomial_nttp
   constexpr auto crend() const { return std::forward<crend_type>(stdr::crend(coefficients)); }
 
   constexpr coefficient_t operator[](index_t index) noexcept
-  {
-    return index <= N ? coefficients.at(index) : coefficient_t(0);
-  }
+  { return index <= N ? coefficients.at(index) : coefficient_t(0); }
 
   constexpr coefficient_t operator[](index_t index) const noexcept
-  {
-    return index <= N ? coefficients.at(index) : coefficient_t(0);
-  }
+  { return index <= N ? coefficients.at(index) : coefficient_t(0); }
 
   // Accelerated evaluation (Apple vDSP)
   // Uses vDSP_vsmaD for efficient Strided Multiply-Add
@@ -683,7 +694,8 @@ struct polynomial_nttp
 // ============================================================
 
 // Root with algebraic multiplicity
-export template<typename K>
+export 
+template<typename K>
 struct root_with_multiplicity
 {
   K value;
@@ -693,7 +705,8 @@ struct root_with_multiplicity
 };
 
 // Fixed-capacity roots container for compile-time and runtime use
-export template<typename K, std::size_t max_roots>
+export 
+template<typename K, std::size_t max_roots>
 struct roots_result
 {
   std::array<root_with_multiplicity<K>, max_roots> data{};
@@ -724,14 +737,10 @@ struct roots_result
 
   // Conversion to vector (for runtime convenience)
   operator std::vector<root_with_multiplicity<K>>() const
-  {
-    return std::vector<root_with_multiplicity<K>>{begin(), end()};
-  }
+  { return std::vector<root_with_multiplicity<K>>{begin(), end()}; }
 
   constexpr std::vector<root_with_multiplicity<K>> to_vector() const
-  {
-    return std::vector<root_with_multiplicity<K>>{begin(), end()};
-  }
+  { return std::vector<root_with_multiplicity<K>>{begin(), end()}; }
 
   // Extract just the root values
   constexpr std::array<K, max_roots> values() const
