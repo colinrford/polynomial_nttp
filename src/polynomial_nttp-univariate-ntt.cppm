@@ -24,69 +24,75 @@ namespace lam::polynomial::univariate::ntt
 // Modular Arithmetic Helpers (Constexpr)
 // =============================================================================
 
-// =============================================================================
-// Modular Arithmetic Helpers (Constexpr)
-// =============================================================================
-
-export constexpr std::uint64_t reduce_solinas(unsigned __int128 x)
+export 
+constexpr std::uint64_t reduce_solinas(unsigned __int128 x)
 {
-    constexpr std::uint64_t P = 0xFFFFFFFF00000001ULL;
+  constexpr std::uint64_t P = 0xFFFFFFFF00000001ULL;
 
-    // Split 128-bit x into four 32-bit chunks: a3, a2, a1, a0
-    std::uint64_t lo = static_cast<std::uint64_t>(x);
-    std::uint64_t hi = static_cast<std::uint64_t>(x >> 64);
-    
-    std::uint64_t a0 = lo & 0xFFFFFFFF;
-    std::uint64_t a1 = lo >> 32;
-    std::uint64_t a2 = hi & 0xFFFFFFFF;
-    std::uint64_t a3 = hi >> 32;
+  // Split 128-bit x into four 32-bit chunks: a3, a2, a1, a0
+  std::uint64_t lo = static_cast<std::uint64_t>(x);
+  std::uint64_t hi = static_cast<std::uint64_t>(x >> 64);
 
-    // Formula: Result = (a1 + a2) * 2^32 + a0 - a2 - a3
-    // S = (a1 + a2) << 32 + a0
-    // M = a2 + a3
-    // res = S - M
-    
-    unsigned __int128 S = (static_cast<unsigned __int128>(a1 + a2) << 32) + a0;
-    unsigned __int128 M = a2 + a3;
+  std::uint64_t a0 = lo & 0xFFFFFFFF;
+  std::uint64_t a1 = lo >> 32;
+  std::uint64_t a2 = hi & 0xFFFFFFFF;
+  std::uint64_t a3 = hi >> 32;
 
-    // Handle subtraction (modulo P)
-    // If S < M, we need to wrap around. Since we want mod P, we add P.
-    // However, P = 2^64 - 2^32 + 1.
-    // It is simpler to add a multiple of P large enough, or just use signed logic conceptually.
-    // Since M is small (~66 bits max? No, 32+32=33 bits max), adding P once is enough.
-    
-    if (S < M) {
-        S += P; // Borrow from the field modulus
-    }
-    S -= M;
+  // Formula: Result = (a1 + a2) * 2^32 + a0 - a2 - a3
+  // S = (a1 + a2) << 32 + a0
+  // M = a2 + a3
+  // res = S - M
 
-    // Final reduction steps
-    // S is now approx 65 bits. We reduce until it fits in [0, P-1].
-    while (S >= P) {
-        S -= P;
-    }
+  unsigned __int128 S = (static_cast<unsigned __int128>(a1 + a2) << 32) + a0;
+  unsigned __int128 M = a2 + a3;
 
-    return static_cast<std::uint64_t>(S);
+  // Handle subtraction (modulo P)
+  // If S < M, we need to wrap around. Since we want mod P, we add P.
+  // However, P = 2^64 - 2^32 + 1.
+  // It is simpler to add a multiple of P large enough, or just use signed logic conceptually.
+  // Since M is small (~66 bits max? No, 32+32=33 bits max), adding P once is enough.
+
+  if (S < M)
+  {
+    S += P; // Borrow from the field modulus
+  }
+  S -= M;
+
+  // Final reduction steps
+  // S is now approx 65 bits. We reduce until it fits in [0, P-1].
+  while (S >= P)
+  {
+    S -= P;
+  }
+
+  return static_cast<std::uint64_t>(S);
 }
 
 // Template-dispatched modular multiplication
 // When M is known at compile-time, the compiler generates optimized Barrett reduction
-export template<std::uint64_t M>
+export 
+template<std::uint64_t M>
 constexpr std::uint64_t mul_mod(std::uint64_t a, std::uint64_t b)
 {
-    if constexpr (M == 0) {
-        // Handle runtime or non-field case gracefully (should not happen in NTT loop)
-        return 0; 
-    } else if constexpr (M == 0xFFFFFFFF00000001ULL) {
-        return reduce_solinas(static_cast<unsigned __int128>(a) * b);
-    } else {
-        return static_cast<std::uint64_t>((static_cast<unsigned __int128>(a) * b) % M);
-    }
+  if constexpr (M == 0)
+  {
+    // Handle runtime or non-field case gracefully (should not happen in NTT loop)
+    return 0;
+  }
+  else if constexpr (M == 0xFFFFFFFF00000001ULL)
+  {
+    return reduce_solinas(static_cast<unsigned __int128>(a) * b);
+  }
+  else
+  {
+    return static_cast<std::uint64_t>((static_cast<unsigned __int128>(a) * b) % M);
+  }
 }
 
 // Portable modular multiplication: (a * b) % m
 // Uses tiered optimizations based on modulus properties
-export constexpr auto mul_mod(std::unsigned_integral auto a, std::unsigned_integral auto b,
+export 
+constexpr auto mul_mod(std::unsigned_integral auto a, std::unsigned_integral auto b,
                               std::unsigned_integral auto m)
 {
   using T = std::common_type_t<decltype(a), decltype(b), decltype(m)>;
@@ -97,20 +103,22 @@ export constexpr auto mul_mod(std::unsigned_integral auto a, std::unsigned_integ
   // this is effectively specialization.
 
   // Use specialized Solinas path if applicable
-  if constexpr (std::is_same_v<T, std::uint64_t>) {
-    if (m == 0xFFFFFFFF00000001ULL) {
-        return static_cast<T>(reduce_solinas(static_cast<unsigned __int128>(a) * b));
+  if constexpr (std::is_same_v<T, std::uint64_t>)
+  {
+    if (m == 0xFFFFFFFF00000001ULL)
+    {
+      return static_cast<T>(reduce_solinas(static_cast<unsigned __int128>(a) * b));
     }
   }
 
   // Fallback: Use hardware 128-bit multiply + modulo
   if constexpr (config::has_int128)
   {
-      if constexpr (sizeof(T) <= 8) 
-      {
-         unsigned __int128 res = static_cast<unsigned __int128>(a) * static_cast<unsigned __int128>(b);
-         return static_cast<T>(res % m);
-      }
+    if constexpr (sizeof(T) <= 8)
+    {
+      unsigned __int128 res = static_cast<unsigned __int128>(a) * static_cast<unsigned __int128>(b);
+      return static_cast<T>(res % m);
+    }
   }
 
   // Fallback: Double-and-Add Algorithm
@@ -125,13 +133,17 @@ export constexpr auto mul_mod(std::unsigned_integral auto a, std::unsigned_integ
     {
       if (b % 2 == 1)
       {
-        if (res < m - a) res += a;
-        else res -= (m - a);
+        if (res < m - a)
+          res += a;
+        else
+          res -= (m - a);
       }
       if (b > 1)
       {
-        if (a < m - a) a += a;
-        else a -= (m - a);
+        if (a < m - a)
+          a += a;
+        else
+          a -= (m - a);
       }
       b /= 2;
     }
@@ -140,7 +152,8 @@ export constexpr auto mul_mod(std::unsigned_integral auto a, std::unsigned_integ
 }
 
 // Computes (base^exp) % mod
-export constexpr auto power(std::unsigned_integral auto base, std::unsigned_integral auto exp,
+export 
+constexpr auto power(std::unsigned_integral auto base, std::unsigned_integral auto exp,
                             std::unsigned_integral auto mod)
 {
   using T = decltype(base);
@@ -158,16 +171,16 @@ export constexpr auto power(std::unsigned_integral auto base, std::unsigned_inte
 
 // Computes modular inverse using Fermat's Little Theorem (for prime mod)
 // inv(n) = n^(mod-2) % mod
-export constexpr auto mod_inverse(std::unsigned_integral auto n, std::unsigned_integral auto mod)
-{
-  return power(n, mod - 2, mod);
-}
+export 
+constexpr auto mod_inverse(std::unsigned_integral auto n, std::unsigned_integral auto mod)
+{ return power(n, mod - 2, mod); }
 
 // Check if a primitive n-th root of unity exists for modulus p
 // Returns the root if found, 0 otherwise.
 // We search for a generator 'g' such that order of g is at least n.
 // Then w = g^((p-1)/n) has order n.
-export template<typename T>
+export 
+template<typename T>
 constexpr T find_nth_root_of_unity(T n, T p)
 {
   if (n == 0 || p <= 1)
@@ -201,7 +214,8 @@ constexpr T find_nth_root_of_unity(T n, T p)
 
 // Find a primitive root generator 'g' for prime 'p'
 // Returns a generator g such that order(g) = p-1.
-export constexpr auto find_primitive_root(std::unsigned_integral auto p)
+export 
+constexpr auto find_primitive_root(std::unsigned_integral auto p)
 {
   using T = decltype(p);
   // Iterating small integers is standard practice for finding primitive roots
@@ -239,17 +253,20 @@ export constexpr auto find_primitive_root(std::unsigned_integral auto p)
  * - data.size() must be a power of 2
  * - field K must have a modulus P where data.size() divides P-1
  */
-export template<typename Range>
+export 
+template<typename Range>
 constexpr void ntt_transform(Range&& data, bool inverse)
 {
-    using K = std::remove_cvref_t<decltype(data[0])>;
-    using traits = finite_field_traits<K>;
-    // Check for field at compile time
-    if constexpr (!traits::is_finite_field) return; 
-    else {
-        using val_t = std::decay_t<decltype(traits::modulus)>;
-        constexpr val_t P = static_cast<val_t>(traits::modulus);
-        (void)P;
+  using K = std::remove_cvref_t<decltype(data[0])>;
+  using traits = finite_field_traits<K>;
+  // Check for field at compile time
+  if constexpr (!traits::is_finite_field)
+    return;
+  else
+  {
+    using val_t = std::decay_t<decltype(traits::field_order)>;
+    constexpr val_t P = static_cast<val_t>(traits::field_order);
+    (void)P;
 
     std::size_t n = std::ranges::size(data);
 
@@ -289,22 +306,22 @@ constexpr void ntt_transform(Range&& data, bool inverse)
     for (std::size_t len = 2; len <= n; len <<= 1)
     {
       val_t wlen = power(root, static_cast<val_t>(n / len), P);
-      
+
       // Serial Butterfly Loop (simplified for verification)
       for (std::size_t i = 0; i < n; i += len)
       {
-         val_t w = 1;
-         for (std::size_t j = 0; j < len / 2; j++)
-         {
-           K u = data[i + j];
-           // Traits usage!
-           K v = traits::mul(data[i + j + len / 2], K(w));
-           
-           data[i + j] = traits::add(u, v);
-           data[i + j + len / 2] = traits::sub(u, v);
+        val_t w = 1;
+        for (std::size_t j = 0; j < len / 2; j++)
+        {
+          K u = data[i + j];
+          // Traits usage!
+          K v = traits::mul(data[i + j + len / 2], K(w));
 
-           w = mul_mod(w, wlen, P);
-         }
+          data[i + j] = traits::add(u, v);
+          data[i + j + len / 2] = traits::sub(u, v);
+
+          w = mul_mod(w, wlen, P);
+        }
       }
     }
 
