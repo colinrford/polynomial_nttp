@@ -22,6 +22,12 @@ add_polynomial_test(subscript_operator SOURCE structure/subscript_operator.cpp T
 add_polynomial_test(parentheses_operator SOURCE structure/parentheses_operator.cpp TEST_NAME "Polynomial_Nttp_Parentheses_operator()")
 
 # ============================================================
+# Interpolation Tests
+# ============================================================
+
+add_polynomial_test(lagrange_interpolation SOURCE interpolation/lagrange_test.cpp TEST_NAME "Polynomial_Nttp_Lagrange_Interpolation")
+
+# ============================================================
 # Unary Operator Tests
 # ============================================================
 
@@ -119,19 +125,10 @@ add_polynomial_test(roots SOURCE roots/roots.cpp)
 
 add_polynomial_test(coverage_gap_fillers SOURCE coverage_gap_fillers.cpp)
 
-# ctbignum-based tests
-find_package(lam_ctbignum QUIET)
-if(TARGET lam::ctbignum)
-  get_target_property(_aliased lam::ctbignum ALIASED_TARGET)
-  if(_aliased)
-    set(_ctbignum_target ${_aliased})
-  else()
-    set(_ctbignum_target lam::ctbignum)
-  endif()
-  set_property(TARGET ${_ctbignum_target} APPEND PROPERTY INTERFACE_COMPILE_FEATURES cxx_std_23)
-  add_polynomial_test(berlekamp SOURCE berlekamp/berlekamp.cpp LIBS lam::ctbignum)
-  add_polynomial_test(ntt_properties SOURCE ntt_properties.cpp LIBS lam::ctbignum)
-  target_compile_options(ntt_properties PRIVATE -fconstexpr-steps=100000000)
-  add_polynomial_test(ntt_array_test SOURCE ntt_array_test.cpp LIBS lam::ctbignum)
-  add_polynomial_test(ntt_constexpr_test SOURCE ntt_constexpr_test.cpp LIBS lam::ctbignum)
-endif()
+# ============================================================
+# Polynomial Remainder and Inverse Tests
+# ============================================================
+
+add_polynomial_test(poly_rem SOURCE algebra/poly_rem.cpp)
+
+

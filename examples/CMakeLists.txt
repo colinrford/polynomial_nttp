@@ -45,31 +45,4 @@ if(TBB_FOUND)
   # TBB mainly used for bulk benchmarks which moved to benchmarks dir
 endif()
 
-find_package(lam_ctbignum QUIET)
-if(TARGET lam::ctbignum)
-  get_target_property(_aliased lam::ctbignum ALIASED_TARGET)
-  if(_aliased)
-    set(_ctbignum_target ${_aliased})
-  else()
-    set(_ctbignum_target lam::ctbignum)
-  endif()
-  set_property(TARGET ${_ctbignum_target} APPEND PROPERTY INTERFACE_COMPILE_FEATURES cxx_std_23)
 
-  # Use helper for compatibility examples
-  add_polynomial_executable(ctbignum_compatibility 
-    SOURCE compatibility/ctbignum_compat.cpp 
-    LIBS lam::ctbignum
-  )
-
-  target_compile_options(ctbignum_compatibility PRIVATE -fconstexpr-steps=150000000 -fbracket-depth=1024)
-
-  add_polynomial_executable(roots_brute_force 
-    SOURCE compatibility/roots_brute_force.cpp 
-    LIBS lam::ctbignum
-  )
-
-  add_polynomial_executable(root_finding_demo 
-    SOURCE root_finding_demo.cpp 
-    LIBS lam::ctbignum
-  )
-endif()

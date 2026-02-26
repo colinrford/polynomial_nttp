@@ -17,7 +17,7 @@ set(CMAKE_CXX_MODULE_STD ON)
 set(CMAKE_CXX_SCAN_FOR_MODULES ON)
 add_compile_options(-Wno-experimental-header-units -Wno-module-import-in-extern-c)
 
-project(lam_polynomial_nttp VERSION 0.2.260210 LANGUAGES CXX)
+project(lam_polynomial_nttp VERSION 0.2.260226 LANGUAGES CXX)
 
 # Support centralized cmake modules for in-tree builds
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../cmake")
@@ -114,8 +114,10 @@ target_sources(polynomial_nttp
   FILES src/polynomial_nttp.cppm
         src/polynomial_nttp-univariate-structure.cppm
         src/polynomial_nttp-univariate-algebra.cppm
+        src/polynomial_nttp-univariate-finite-field.cppm
         src/polynomial_nttp-univariate-roots.cppm
         src/polynomial_nttp-univariate-berlekamp.cppm
+        src/polynomial_nttp-univariate-interpolation.cppm
         src/polynomial_nttp-univariate-print.cppm
         src/polynomial_nttp-univariate-compatibility.cppm
         src/polynomial_nttp-univariate.cppm

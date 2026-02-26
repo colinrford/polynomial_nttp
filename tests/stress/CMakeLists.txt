@@ -1,27 +1,10 @@
+add_polynomial_executable(wilkinson_stress SOURCE wilkinson.cpp LIBS lam::concepts)
+add_polynomial_executable(mignotte_stress SOURCE mignotte.cpp LIBS lam::concepts)
 
-add_executable(wilkinson_stress wilkinson.cpp)
-target_link_libraries(wilkinson_stress polynomial_nttp lam::concepts)
-target_compile_features(wilkinson_stress PRIVATE cxx_std_23)
-set_target_properties(wilkinson_stress PROPERTIES CXX_SCAN_FOR_MODULES ON)
-
-
-add_executable(mignotte_stress mignotte.cpp)
-target_link_libraries(mignotte_stress polynomial_nttp lam::concepts)
-target_compile_features(mignotte_stress PRIVATE cxx_std_23)
-set_target_properties(mignotte_stress PROPERTIES CXX_SCAN_FOR_MODULES ON)
-
-
-add_executable(cyclotomic_stress cyclotomic.cpp)
-target_link_libraries(cyclotomic_stress polynomial_nttp lam::concepts)
-target_compile_features(cyclotomic_stress PRIVATE cxx_std_23)
-set_target_properties(cyclotomic_stress PROPERTIES CXX_SCAN_FOR_MODULES ON)
-
-add_test(NAME Cyclotomic_Stress_Test COMMAND cyclotomic_stress)
+add_polynomial_test(cyclotomic_stress SOURCE cyclotomic.cpp TEST_NAME Cyclotomic_Stress_Test LIBS lam::concepts)
+add_polynomial_test(lagrange_stress SOURCE lagrange.cpp TEST_NAME Lagrange_Stress_Test LIBS lam::concepts)
 
 if(LAM_BUILD_THOUSAND_DIVISIONS)
-  add_executable(thousand_divisions thousand_divisions.cpp)
-  target_link_libraries(thousand_divisions polynomial_nttp lam::concepts)
-  target_compile_features(thousand_divisions PRIVATE cxx_std_23)
+  add_polynomial_executable(thousand_divisions SOURCE thousand_divisions.cpp LIBS lam::concepts)
   target_compile_options(thousand_divisions PRIVATE -fconstexpr-steps=200000000)
-  set_target_properties(thousand_divisions PROPERTIES CXX_SCAN_FOR_MODULES ON)
 endif()
