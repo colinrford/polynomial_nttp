@@ -2,6 +2,7 @@
  *  benchmark_ct_sunspots.cpp
  *    Benchmarks compilation time for Large Dataset FFT (Sunspots N=16384)
  */
+
 import std;
 import lam.polynomial_nttp;
 

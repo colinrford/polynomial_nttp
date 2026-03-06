@@ -8,18 +8,13 @@
  *    using recursive constexpr functions.
  */
 
-#include <array>
-#include <chrono>
-#include <cmath>
-#include <limits>
-#include <print>
-#include <vector>
-
-import lam.polynomial_nttp;
 
 #ifdef HAS_BOOST_MATH
 #include <boost/math/special_functions/jacobi.hpp>
 #endif
+
+import std;
+import lam.polynomial_nttp;
 
 namespace lam::orthogonal
 {
@@ -82,9 +77,7 @@ struct jacobi_memo
 
 template<typename R, std::size_t N, double Alpha, double Beta>
 constexpr auto jacobi_n()
-{
-  return jacobi_memo<R, N, Alpha, Beta>::value;
-}
+{ return jacobi_memo<R, N, Alpha, Beta>::value; }
 
 } // namespace lam::orthogonal
 

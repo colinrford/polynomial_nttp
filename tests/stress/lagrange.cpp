@@ -12,7 +12,6 @@ import lam.polynomial_nttp;
 using namespace lam::polynomial::univariate;
 
 
-
 // ----------------------------------------------------------------------------
 // Compile-Time Evaluation Check
 // ----------------------------------------------------------------------------

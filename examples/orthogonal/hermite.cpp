@@ -10,18 +10,13 @@
  *    Physicists' Hermite recurrence: H_{n+1}(x) = 2xH_n(x) - 2n H_{n-1}(x)
  */
 
-#include <array>
-#include <chrono>
-#include <cmath>
-#include <limits>
-#include <print>
-#include <vector>
-
-import lam.polynomial_nttp;
 
 #ifdef HAS_BOOST_MATH
 #include <boost/math/special_functions/hermite.hpp>
 #endif
+
+import std;
+import lam.polynomial_nttp;
 
 // Error-free transformation: TwoProductFMA
 template<typename T>
@@ -96,22 +91,16 @@ struct hermite_memo
 
 template<typename R, std::size_t N>
 constexpr auto hermite_n()
-{
-  return hermite_memo<R, N>::value;
-}
+{ return hermite_memo<R, N>::value; }
 
 // Helper to generate a tuple of Hermite polynomials
 template<typename R, std::size_t... Is>
 constexpr auto make_hermite_tuple_impl(std::index_sequence<Is...>)
-{
-  return std::make_tuple(hermite_n<R, Is>()...);
-}
+{ return std::make_tuple(hermite_n<R, Is>()...); }
 
 template<typename R, std::size_t N>
 constexpr auto first_n_hermite()
-{
-  return make_hermite_tuple_impl<R>(std::make_index_sequence<N>{});
-}
+{ return make_hermite_tuple_impl<R>(std::make_index_sequence<N>{}); }
 
 } // namespace lam::orthogonal
 

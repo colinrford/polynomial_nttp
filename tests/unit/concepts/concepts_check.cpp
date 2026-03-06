@@ -5,6 +5,7 @@
  *
  *  Compile-time verification of concepts.
  */
+
 import std;
 import lam.concepts;
 

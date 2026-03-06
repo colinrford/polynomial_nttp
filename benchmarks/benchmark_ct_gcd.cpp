@@ -2,6 +2,7 @@
  *  benchmark_ct_gcd.cpp
  *    see github.com/colinrford/polynomial_nttp for AGPL-3.0 License
  */
+
 import std;
 import lam.polynomial_nttp;
 

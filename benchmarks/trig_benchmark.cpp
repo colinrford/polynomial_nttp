@@ -5,8 +5,47 @@
  *    Benchmark and verification for compile-time trigonometric functions
  *    (sin/cos) using Minimax approximation, ensuring accuracy for root finding.
  */
+#include <algorithm>
+#include <array>
+#include <bit>
+#include <cassert>
+#include <chrono>
+#include <cmath>
+#include <compare>
+#include <complex>
+#include <concepts>
+#include <cstdint>
+#include <execution>
+#include <expected>
+#include <filesystem>
+#include <format>
+#include <fstream>
+#include <initializer_list>
+#include <iomanip>
+#include <iostream>
+#include <map>
+#include <memory>
+#include <memory_resource>
+#include <mutex>
+#include <new>
+#include <numbers>
+#include <numeric>
+#include <optional>
+#include <print>
+#include <random>
+#include <ranges>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <string_view>
+#include <thread>
+#include <tuple>
+#include <type_traits>
+#include <typeinfo>
+#include <utility>
+#include <variant>
+#include <vector>
 
-import std;
 
 namespace constexpr_math
 {

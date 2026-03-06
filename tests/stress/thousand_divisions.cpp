@@ -5,6 +5,7 @@
  *
  *  Stress test for polynomial_nttp division.
  */
+
 import std;
 import lam.polynomial_nttp;
 

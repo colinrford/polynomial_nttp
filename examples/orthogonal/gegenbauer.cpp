@@ -8,18 +8,13 @@
  *    using recursive constexpr functions.
  */
 
-#include <array>
-#include <chrono>
-#include <cmath>
-#include <limits>
-#include <print>
-#include <vector>
-
-import lam.polynomial_nttp;
 
 #ifdef HAS_BOOST_MATH
 #include <boost/math/special_functions/gegenbauer.hpp>
 #endif
+
+import std;
+import lam.polynomial_nttp;
 
 namespace lam::orthogonal
 {
@@ -87,9 +82,7 @@ struct gegenbauer_memo
 
 template<typename R, std::size_t N, double Alpha>
 constexpr auto gegenbauer_n()
-{
-  return gegenbauer_memo<R, N, Alpha>::value;
-}
+{ return gegenbauer_memo<R, N, Alpha>::value; }
 
 } // namespace lam::orthogonal
 

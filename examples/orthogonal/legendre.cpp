@@ -8,18 +8,13 @@
  *    using recursive constexpr functions.
  */
 
-#include <array>
-#include <chrono>
-#include <cmath>
-#include <limits>
-#include <print>
-#include <vector>
-
-import lam.polynomial_nttp;
 
 #ifdef HAS_BOOST_MATH
 #include <boost/math/special_functions/legendre.hpp>
 #endif
+
+import std;
+import lam.polynomial_nttp;
 
 namespace lam::orthogonal
 {
@@ -63,9 +58,7 @@ struct legendre_memo
 
 template<typename R, std::size_t N>
 constexpr auto legendre_n()
-{
-  return legendre_memo<R, N>::value;
-}
+{ return legendre_memo<R, N>::value; }
 
 } // namespace lam::orthogonal
 
