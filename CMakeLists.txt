@@ -15,7 +15,9 @@ set(CMAKE_CXX_EXTENSIONS OFF CACHE BOOL "Use compiler extensions" FORCE)
 set(CMAKE_CXX_STANDARD_REQUIRED True) #is this needed?
 set(CMAKE_CXX_MODULE_STD ON)
 set(CMAKE_CXX_SCAN_FOR_MODULES ON)
-add_compile_options(-Wno-experimental-header-units -Wno-module-import-in-extern-c)
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wno-experimental-header-units -Wno-module-import-in-extern-c)
+endif()
 
 project(lam_polynomial_nttp VERSION 0.2.260306 LANGUAGES CXX)
 
