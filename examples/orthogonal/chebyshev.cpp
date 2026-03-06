@@ -8,18 +8,13 @@
  *    at compile time using recursive constexpr functions.
  */
 
-#include <array>
-#include <chrono>
-#include <cmath>
-#include <limits>
-#include <print>
-#include <vector>
-
-import lam.polynomial_nttp;
 
 #ifdef HAS_BOOST_MATH
 #include <boost/math/special_functions/chebyshev.hpp>
 #endif
+
+import std;
+import lam.polynomial_nttp;
 
 namespace lam::orthogonal
 {
@@ -55,9 +50,7 @@ struct chebyshev_t_memo
 
 template<typename R, std::size_t N>
 constexpr auto chebyshev_t_n()
-{
-  return chebyshev_t_memo<R, N>::value;
-}
+{ return chebyshev_t_memo<R, N>::value; }
 
 // Chebyshev polynomials of the Second Kind: U_n(x)
 // Recurrence:
@@ -90,9 +83,7 @@ struct chebyshev_u_memo
 
 template<typename R, std::size_t N>
 constexpr auto chebyshev_u_n()
-{
-  return chebyshev_u_memo<R, N>::value;
-}
+{ return chebyshev_u_memo<R, N>::value; }
 
 // ============================================================
 // Prototype: Stable Basis Representation

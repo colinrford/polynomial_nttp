@@ -5,7 +5,17 @@
  *  not sure if this is interesting or not but 'twas an idea
  */
 
-import std;
+#include <array>
+#include <bit>
+#include <chrono>
+#include <cmath>
+#include <cstdint>
+#include <functional>
+#include <limits>
+#include <print>
+#include <ranges>
+#include <vector>
+
 import lam.polynomial_nttp;
 
 namespace stdr = std::ranges;
@@ -18,9 +28,7 @@ const auto indexing_set_from_to = [](auto m, auto n) { return stdv::iota(static_
 constexpr double factorial(std::size_t n) { return n == 0 ? 1. : static_cast<double>(n) * factorial(n - 1); }
 
 constexpr double neg_one_multiplier(std::size_t index_i)
-{
-  return index_i == 0 ? 1. : -1. * neg_one_multiplier(index_i - 1);
-}
+{ return index_i == 0 ? 1. : -1. * neg_one_multiplier(index_i - 1); }
 
 constexpr auto sin_impl_test()
 {

@@ -5,6 +5,7 @@
  *
  *  Stress test for polynomial_nttp cyclotomic polynomials.
  */
+
 import std;
 import lam.polynomial_nttp;
 

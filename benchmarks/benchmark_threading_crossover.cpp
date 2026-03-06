@@ -6,10 +6,35 @@
  *    becomes faster than naive serial addition for int types.
  */
 #include <algorithm>
+#include <bit>
+#include <cassert>
 #include <chrono>
+#include <compare>
+#include <complex>
+#include <concepts>
+#include <execution>
+#include <expected>
+#include <filesystem>
+#include <format>
+#include <fstream>
+#include <initializer_list>
+#include <iomanip>
+#include <memory_resource>
+#include <mutex>
+#include <new>
+#include <numbers>
 #include <numeric>
+#include <optional>
 #include <print>
+#include <ranges>
+#include <sstream>
+#include <stdexcept>
+#include <string_view>
 #include <thread>
+#include <type_traits>
+#include <typeinfo>
+#include <utility>
+#include <variant>
 #include <vector>
 
 template<typename T>

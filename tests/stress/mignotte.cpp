@@ -6,6 +6,7 @@
  *
  *  Stress test for polynomial_nttp Mignotte polynomials.
  */
+
 import std;
 import lam.polynomial_nttp;
 

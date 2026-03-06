@@ -19,9 +19,7 @@ consteval std::uint32_t read_u32(const unsigned char* bytes, std::size_t offset)
 
 // Helper: Read u16 little endian
 consteval std::uint16_t read_u16(const unsigned char* bytes, std::size_t offset)
-{
-  return static_cast<std::uint16_t>(bytes[offset]) | (static_cast<std::uint16_t>(bytes[offset + 1]) << 8);
-}
+{ return static_cast<std::uint16_t>(bytes[offset]) | (static_cast<std::uint16_t>(bytes[offset + 1]) << 8); }
 
 // Helper: Read i16 little endian
 consteval std::int16_t read_i16(const unsigned char* bytes, std::size_t offset)

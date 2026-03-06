@@ -9,11 +9,8 @@
  *      - Boost.Math (if enabled)
  */
 
-#include <chrono>
-#include <cmath>
-#include <print>
-#include <vector>
 
+import std;
 import lam.polynomial_nttp;
 
 #ifdef HAS_BOOST_MATH

@@ -6,7 +6,6 @@
  *  (std::complex is not structural, so we mock it to test the generic logic)
  */
 
-import std;
 import lam.polynomial_nttp;
 
 using namespace lam;

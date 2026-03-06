@@ -7,11 +7,6 @@
  *      - SIMD Backends (Accelerate/BLAS)
  *    Comparison against Boost.Math parallel execution.
  */
-#include <algorithm>
-#include <chrono>
-#include <print>
-#include <random>
-#include <vector>
 
 #ifdef HAS_BOOST_MATH
 #include <boost/math/tools/polynomial.hpp>
@@ -21,6 +16,7 @@
 #include <tbb/parallel_for.h>
 #endif
 
+import std;
 import lam.polynomial_nttp;
 
 std::vector<double> generate_random_points(std::size_t n)

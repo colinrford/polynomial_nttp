@@ -5,7 +5,13 @@
  *  Tests designed to hit specific coverage gaps (constexpr fallbacks, unused operators)
  */
 
-import std;
+#include <algorithm>
+#include <cmath>
+#include <complex>
+#include <cstdlib>
+#include <print>
+#include <vector>
+
 import lam.polynomial_nttp;
 
 using namespace lam::polynomial::univariate;
