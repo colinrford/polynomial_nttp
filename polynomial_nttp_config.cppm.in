@@ -35,6 +35,11 @@ export namespace lam::polynomial::config
   // Sanitizer Status
   inline constexpr bool is_tsan_build = @IS_TSAN_BUILD@;
 
+  // Minimum number of work items before spawning threads.
+  // Below this threshold, work is done sequentially to avoid thread overhead.
+  // Platform-dependent: larger values suit systems with high thread-spawn cost.
+  inline constexpr std::size_t parallel_threshold = 1000;
+
   // 128-bit Integer Support
   #cmakedefine LAM_HAS_INT128
   inline constexpr bool has_int128 = 

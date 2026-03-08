@@ -19,7 +19,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wno-experimental-header-units -Wno-module-import-in-extern-c)
 endif()
 
-project(lam_polynomial_nttp VERSION 0.2.260306 LANGUAGES CXX)
+project(lam_polynomial_nttp VERSION 0.2.260308 LANGUAGES CXX)
 
 # Support centralized cmake modules for in-tree builds
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../cmake")
