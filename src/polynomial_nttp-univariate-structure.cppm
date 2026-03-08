@@ -637,7 +637,7 @@ struct polynomial_nttp
     }
 
     // 2. Std Threading Fallback (Runtime Only)
-    // Only use if size is large enough to justify thread overhead (> 1000 items)
+    // Only use if size is large enough to justify thread overhead
     if consteval
     {
       // Constexpr must be serial
@@ -646,7 +646,7 @@ struct polynomial_nttp
     }
     else
     {
-      if (size > 1000)
+      if (size > lam::polynomial::config::parallel_threshold)
       {
         std::size_t num_threads = std::thread::hardware_concurrency();
         if (num_threads == 0)
