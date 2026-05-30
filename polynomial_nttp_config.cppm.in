@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2025-2026 Colin Ford
+
 module;
 
 import std;
@@ -21,6 +24,16 @@ export namespace lam::polynomial::config
   // Debug Status
   inline constexpr bool is_debug = @IS_DEBUG@;
 
+  // Toolchain (captured at configure time from CMake)
+  inline constexpr std::string_view compiler_id      = "@CMAKE_CXX_COMPILER_ID@";
+  inline constexpr std::string_view compiler_version = "@CMAKE_CXX_COMPILER_VERSION@";
+  inline constexpr std::string_view compiler_path    = "@CMAKE_CXX_COMPILER@";
+  inline constexpr std::string_view system_name      = "@CMAKE_SYSTEM_NAME@";
+  inline constexpr std::string_view system_processor = "@CMAKE_SYSTEM_PROCESSOR@";
+  inline constexpr std::string_view generator        = "@CMAKE_GENERATOR@";
+  inline constexpr std::string_view toolchain_file   = "@CMAKE_TOOLCHAIN_FILE@";
+  inline constexpr std::string_view cxx_flags        = R"_lam_cfg_(@CMAKE_CXX_FLAGS@)_lam_cfg_";
+
   // Accelerate Backend Configuration
   inline constexpr bool use_accelerate = @LAM_USE_ACCELERATE_BOOL@;
   inline constexpr std::string_view accelerate_backend = "@LAM_ACCELERATE_BACKEND@";
@@ -41,11 +54,5 @@ export namespace lam::polynomial::config
   inline constexpr std::size_t parallel_threshold = 1000;
 
   // 128-bit Integer Support
-  #cmakedefine LAM_HAS_INT128
-  inline constexpr bool has_int128 = 
-  #ifdef LAM_HAS_INT128
-      true;
-  #else
-      false;
-  #endif
+  inline constexpr bool has_int128 = @LAM_HAS_INT128_BOOL@;
 }
