@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2025-2026 Colin Ford
+
 /*
  *  roots.cpp – written by Colin Ford
  *    see github.com/colinrford/polynomial_nttp for AGPL-3.0 License, and

@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2025-2026 Colin Ford
+
 #include <new> // Workaround for libc++ ambiguous operator new bug
 
 import std;
