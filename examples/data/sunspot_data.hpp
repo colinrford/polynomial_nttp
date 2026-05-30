@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2025-2026 Colin Ford
+
 #pragma once
 // Note: This header assumes std::array and std::size_t are available
 // (e.g., via import std; before including this file)
