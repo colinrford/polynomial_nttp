@@ -13,6 +13,7 @@
 #                              DESCRIPTION <text> LICENSE <spdx>
 #                              [MODULE_SUBDIR <dir>] [REQUIRES <pkg>...])
 #   lam_add_config_dump(<link-target> NAME <name>)
+#   lam_find_dependency(<pkg> [COMPONENT <comp>])
 
 if(_LAM_MODULE_INCLUDED)
   return()
@@ -198,4 +199,35 @@ function(lam_add_config_dump link_target)
   target_link_libraries(${_arg_NAME}_config_dump PRIVATE ${link_target})
   target_compile_features(${_arg_NAME}_config_dump PRIVATE cxx_std_23)
   add_test(NAME ${_arg_NAME}_config_dump COMMAND ${_arg_NAME}_config_dump)
+endfunction()
+
+# -----------------------------------------------------------------------------
+# lam_find_dependency(<pkg> [COMPONENT <comp>])
+#
+# find_package(<pkg>) for a lam dependency, then applies the BMI-synthesis
+# property dance the consumer needs on the imported target. COMPONENT defaults
+# to <pkg> with a leading "lam_" stripped (e.g. lam_concepts -> concepts), so
+# the imported target is <pkg>::<comp> (lam_concepts::concepts).
+#
+# Replaces the per-consumer boilerplate:
+#   if(NOT TARGET lam_x::x) find_package(lam_x REQUIRED) endif()
+#   set_target_properties(lam_x::x PROPERTIES CXX_MODULE_STD ON CXX_EXTENSIONS OFF)
+#
+# Without the property dance the synthesized BMI compile of the imported
+# module fails with "module 'std' not found" or a -std=gnu++23/c++23 mismatch.
+# -----------------------------------------------------------------------------
+function(lam_find_dependency pkg)
+  cmake_parse_arguments(PARSE_ARGV 1 _arg "" "COMPONENT" "")
+  set(_comp "${_arg_COMPONENT}")
+  if(NOT _comp)
+    string(REGEX REPLACE "^lam_" "" _comp "${pkg}")
+  endif()
+  set(_tgt "${pkg}::${_comp}")
+
+  if(NOT TARGET ${_tgt})
+    find_package(${pkg} REQUIRED)
+  endif()
+  if(TARGET ${_tgt})
+    set_target_properties(${_tgt} PROPERTIES CXX_MODULE_STD ON CXX_EXTENSIONS OFF)
+  endif()
 endfunction()

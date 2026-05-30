@@ -1,28 +1,14 @@
 
 cmake_minimum_required(VERSION 3.31.6 FATAL_ERROR)
 
-if(CMAKE_VERSION VERSION_GREATER_EQUAL 4.3.0)
-  set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "451f2fe2-a8a2-47c3-bc32-94786d8fc91b")
-elseif(CMAKE_VERSION VERSION_GREATER_EQUAL 4.0.3)
-  set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "d0edc3af-4c50-42ea-a356-e2862fe7a444")
-elseif(CMAKE_VERSION VERSION_GREATER_EQUAL 4.0.0)
-  set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "a9e1cf81-9932-4810-974b-6eccaf14e457")
-elseif(CMAKE_VERSION VERSION_GREATER_EQUAL 3.31.6)
-  set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "0e5b6991-d74f-4b3d-a41c-cf096e0b2508")
-else()
-  message(FATAL_ERROR "Version lower than 3.31.6 not supported (by me)")
-endif()
+# C++23 module support: import-std UUID ladder + standard CXX settings (shared,
+# vendored). Must precede project(). See cmake/LamCxxModuleStd.cmake.
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/LamCxxModuleStd.cmake)
 
-set(CMAKE_CXX_EXTENSIONS OFF CACHE BOOL "Use compiler extensions" FORCE)
-set(CMAKE_CXX_STANDARD_REQUIRED True) #is this needed?
-set(CMAKE_CXX_MODULE_STD ON)
-set(CMAKE_CXX_SCAN_FOR_MODULES ON)
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wno-experimental-header-units -Wno-module-import-in-extern-c)
 endif()
 
-# Single source of truth for the version: the top-level VERSION file.
-# The Conan recipe reads the same file via set_version(), so the two never drift.
 file(READ "${CMAKE_CURRENT_SOURCE_DIR}/VERSION" _lam_polynomial_nttp_version)
 string(STRIP "${_lam_polynomial_nttp_version}" _lam_polynomial_nttp_version)
 
@@ -32,10 +18,6 @@ project(lam_polynomial_nttp VERSION ${_lam_polynomial_nttp_version} LANGUAGES CX
 set_property(DIRECTORY APPEND PROPERTY
   CMAKE_CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/VERSION")
 
-# Support centralized cmake modules for in-tree builds
-if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../cmake")
-  list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../cmake")
-endif()
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(PolynomialHelpers)
 include(LamModule)
@@ -54,23 +36,14 @@ endif()
 
 include(Sanitizers)
 include(BlasSetup)
+include(LamFeatureDetect)
 
-option(LAM_USE_TBB "Enable TBB for bulk operations" OFF)
+# caution with this because it runs very slowly using c++ modules
 option(LAM_BUILD_THOUSAND_DIVISIONS "Enable the heavy compile-time stress test thousand_divisions" OFF)
-if(LAM_USE_TBB)
-  find_package(TBB)
-  if(TBB_FOUND)
-    message(STATUS "Found TBB: ${TBB_DIR} (Version ${TBB_VERSION})")
-    set(LAM_USE_TBB_BOOL "true")
-    add_compile_definitions(LAM_USE_TBB)
-  else()
-    message(STATUS "TBB not found, disabling TBB support")
-    set(LAM_USE_TBB_BOOL "false")
-    set(LAM_USE_TBB OFF)
-  endif()
-else()
-  set(LAM_USE_TBB_BOOL "false")
-endif()
+
+# TBB detection (shared helper): declares option(LAM_USE_TBB), finds TBB, sets
+# LAM_USE_TBB_BOOL for the config partition, adds the LAM_USE_TBB compile def.
+lam_setup_tbb(LAM_USE_TBB_BOOL DEFAULT OFF DEFINE LAM_USE_TBB)
 
 macro(map_bool_to_string VAR RESULT)
   if(${VAR})
@@ -86,29 +59,10 @@ if(NOT DEFINED LAM_USE_BLAS_BOOL)
     map_bool_to_string(LAM_USE_BLAS LAM_USE_BLAS_BOOL)
 endif()
 
-include(CheckCXXSourceCompiles)
-check_cxx_source_compiles("
-  int main() {
-    unsigned __int128 a = 1;
-    unsigned __int128 b = 2;
-    unsigned __int128 c = a * b;
-    return 0;
-  }
-" LAM_HAS_INT128)
-map_bool_to_string(LAM_HAS_INT128 LAM_HAS_INT128_BOOL)
+# int128 detection (shared helper) — branch-based, robust under import std.
+lam_check_int128(LAM_HAS_INT128_BOOL)
 
-if(NOT TARGET lam_concepts::concepts)
-  find_package(lam_concepts REQUIRED)
-endif()
-# BMI synthesis property dance — set on imported lam_concepts::concepts so the
-# consumer's synthesizer builds the concepts modules with std + strict C++23.
-# Without these, the synthesized BMI compile of installed concepts.cppm fails
-# with "module 'std' not found" or a -std=gnu++23/c++23 mismatch.
-if(TARGET lam_concepts::concepts)
-  set_target_properties(lam_concepts::concepts PROPERTIES
-    CXX_MODULE_STD ON
-    CXX_EXTENSIONS OFF)
-endif()
+lam_find_dependency(lam_concepts)
 
 add_library(polynomial_nttp STATIC)
 add_library(lam_polynomial_nttp::polynomial_nttp ALIAS polynomial_nttp)
