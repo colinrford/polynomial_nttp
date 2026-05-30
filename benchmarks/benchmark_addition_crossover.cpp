@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2025-2026 Colin Ford
+
 /*
  *  benchmark_addition_crossover.cpp
  *    see github.com/colinrford/polynomial_nttp for AGPL-3.0 License
@@ -12,7 +15,7 @@
 #include <vector>
 
 // Standalone vDSP declarations for benchmarking without module internal access
-#ifdef __APPLE__
+#if defined(__APPLE__) && defined(LAM_USE_ACCELERATE)
 #include <Accelerate/Accelerate.h>
 #endif
 
@@ -29,7 +32,7 @@ void naive_add(const std::vector<T>& a, const std::vector<T>& b, std::vector<T>&
 template<typename T>
 void accelerated_add(const std::vector<T>& a, const std::vector<T>& b, std::vector<T>& res)
 {
-#ifdef __APPLE__
+#ifdef LAM_USE_ACCELERATE
   if constexpr (std::is_same_v<T, double>)
   {
     vDSP_vaddD(a.data(), 1, b.data(), 1, res.data(), 1, a.size());

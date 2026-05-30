@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2025-2026 Colin Ford
+
 /*
  *  benchmark_ct_sunspots.cpp
  *    Benchmarks compilation time for Large Dataset FFT (Sunspots N=16384)
