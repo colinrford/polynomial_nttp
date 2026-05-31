@@ -1,8 +1,5 @@
 
 cmake_minimum_required(VERSION 3.31.6 FATAL_ERROR)
-
-# C++23 module support: import-std UUID ladder + standard CXX settings (shared,
-# vendored). Must precede project(). See cmake/LamCxxModuleStd.cmake.
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/LamCxxModuleStd.cmake)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -29,9 +26,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 enable_testing()
 
 if(ENABLE_COVERAGE)
-    message(STATUS "Coverage enabled")
-    add_compile_options(-fprofile-instr-generate -fcoverage-mapping)
-    add_link_options(-fprofile-instr-generate)
+  message(STATUS "Coverage enabled")
+  add_compile_options(-fprofile-instr-generate -fcoverage-mapping)
+  add_link_options(-fprofile-instr-generate)
 endif()
 
 include(Sanitizers)
@@ -41,8 +38,10 @@ include(LamFeatureDetect)
 # caution with this because it runs very slowly using c++ modules
 option(LAM_BUILD_THOUSAND_DIVISIONS "Enable the heavy compile-time stress test thousand_divisions" OFF)
 
-# TBB detection (shared helper): declares option(LAM_USE_TBB), finds TBB, sets
-# LAM_USE_TBB_BOOL for the config partition, adds the LAM_USE_TBB compile def.
+# Dev targets (tests/examples/benchmarks). ON for normal source builds; the
+# Conan recipe passes OFF because those dirs aren't in exports_sources.
+option(LAM_POLYNOMIAL_NTTP_BUILD_TESTS "Build tests, examples, and benchmarks" ON)
+
 lam_setup_tbb(LAM_USE_TBB_BOOL DEFAULT OFF DEFINE LAM_USE_TBB)
 
 macro(map_bool_to_string VAR RESULT)
@@ -56,10 +55,9 @@ endmacro()
 map_bool_to_string(LAM_USE_ACCELERATE LAM_USE_ACCELERATE_BOOL)
 map_bool_to_string(LAM_ENABLE_TSAN IS_TSAN_BUILD)
 if(NOT DEFINED LAM_USE_BLAS_BOOL)
-    map_bool_to_string(LAM_USE_BLAS LAM_USE_BLAS_BOOL)
+  map_bool_to_string(LAM_USE_BLAS LAM_USE_BLAS_BOOL)
 endif()
 
-# int128 detection (shared helper) — branch-based, robust under import std.
 lam_check_int128(LAM_HAS_INT128_BOOL)
 
 lam_find_dependency(lam_concepts)
@@ -100,7 +98,7 @@ target_compile_features(polynomial_nttp PUBLIC cxx_std_23)
 set_target_properties(polynomial_nttp PROPERTIES CXX_SCAN_FOR_MODULES ON)
 set_target_properties(polynomial_nttp PROPERTIES OUTPUT_NAME "lam_polynomial_nttp")
 
-# Generate + attach the lam.polynomial_nttp:config partition. EXTRA_DEFINES feed
+# Generate + attach the lam.polynomial.nttp:config partition. EXTRA_DEFINES feed
 # the template's BLAS / Accelerate / TBB / TSAN / int128 fields (computed above).
 lam_add_config_partition(polynomial_nttp NAME polynomial_nttp
   EXTRA_DEFINES
@@ -112,18 +110,29 @@ lam_add_config_partition(polynomial_nttp NAME polynomial_nttp
     -DIS_TSAN_BUILD=${IS_TSAN_BUILD}
     -DLAM_HAS_INT128_BOOL=${LAM_HAS_INT128_BOOL})
 
-add_subdirectory(tests)
-add_subdirectory(examples)
-add_subdirectory(benchmarks)
+# Config-dump smoke test: imports lam.polynomial.nttp + prints the :config
+# partition. MODULE/NAMESPACE overrides because the module/namespace diverge
+# from the package name (polynomial_nttp).
+lam_add_config_dump(polynomial_nttp
+  NAME      polynomial_nttp
+  MODULE    lam.polynomial.nttp
+  NAMESPACE lam::polynomial::nttp::config)
+
+if(LAM_POLYNOMIAL_NTTP_BUILD_TESTS)
+  add_subdirectory(tests)
+  add_subdirectory(examples)
+  add_subdirectory(benchmarks)
+endif()
 
 # On macOS with -DCMAKE_INSTALL_PREFIX=/usr/local:
 #   Libraries     -> /usr/local/lib/liblam_polynomial_nttp.a
 #   CMake config  -> /usr/local/lib/cmake/lam_polynomial_nttp/
-#   C++ modules   -> /usr/local/include/lam/polynomial_nttp/
+#   C++ modules   -> /usr/local/include/lam/polynomial/nttp/
 #   CPS metadata  -> /usr/local/lib/cps/
 lam_install_module_package(polynomial_nttp
-  NAME        polynomial_nttp
-  DESCRIPTION "lam.polynomial_nttp — number-theoretic transform polynomial arithmetic (C++23 modules)"
-  LICENSE     "AGPL-3.0-or-later"
-  REQUIRES    lam_concepts
+  NAME          polynomial_nttp
+  MODULE_SUBDIR polynomial/nttp
+  DESCRIPTION   "lam.polynomial.nttp — number-theoretic transform polynomial arithmetic (C++23 modules)"
+  LICENSE       "AGPL-3.0-or-later"
+  REQUIRES      lam_concepts
 )

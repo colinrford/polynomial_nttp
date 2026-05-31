@@ -5,9 +5,9 @@ module;
 
 import std;
 
-export module lam.polynomial_nttp:config;
+export module lam.polynomial.nttp:config;
 
-export namespace lam::polynomial::config
+export namespace lam::polynomial::nttp::config
 {
   // Version
   inline constexpr int version_major = @PROJECT_VERSION_MAJOR@;
@@ -55,4 +55,23 @@ export namespace lam::polynomial::config
 
   // 128-bit Integer Support
   inline constexpr bool has_int128 = @LAM_HAS_INT128_BOOL@;
+
+  void print()
+  {
+    std::println("lam.polynomial.nttp {}  [{}]",
+                 version_string,
+                 build_type.empty() ? std::string_view{"unspecified"} : build_type);
+    std::println("  git        {}{}", git_hash, is_debug ? "  (debug)" : "");
+    std::println("  compiler   {} {}", compiler_id, compiler_version);
+    std::println("  system     {} / {}  [{}]",
+                 system_name, system_processor, generator);
+    std::println("  toolchain  {}",
+                 toolchain_file.empty() ? std::string_view{"(none)"} : toolchain_file);
+    std::println("  accelerate {}  [{}]", use_accelerate, accelerate_backend);
+    std::println("  blas       {}  [{}]", use_blas, blas_backend);
+    std::println("  tbb        {}   (threshold {})", use_tbb, parallel_threshold);
+    std::println("  tsan       {}", is_tsan_build);
+    std::println("  int128     {}", has_int128);
+    std::println("  cxx_flags  {}", cxx_flags);
+  }
 }
