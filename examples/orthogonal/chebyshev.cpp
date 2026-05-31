@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2025-2026 Colin Ford
+
 /*
  *  chebyshev.cpp
  *    see github.com/colinrford/polynomial_nttp for AGPL-3.0 License, and
@@ -14,7 +17,7 @@
 #endif
 
 import std;
-import lam.polynomial_nttp;
+import lam.polynomial.nttp;
 
 namespace lam::orthogonal
 {

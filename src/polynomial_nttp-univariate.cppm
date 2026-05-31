@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2025-2026 Colin Ford
+
 /*
  *  polynomial_nttp-univariate.cppm – written by Colin Ford
  *    see github.com/colinrford/polynomial_nttp for AGPL-3.0 License, and
@@ -5,9 +8,10 @@
  *  polynomial_nttp is a c++ module
  */
 
-export module lam.polynomial_nttp:univariate;
+export module lam.polynomial.nttp:univariate;
 
 export import :univariate.structure;
+export import :univariate.acceleration;
 export import :univariate.algebra;
 export import :univariate.finite_field;
 export import :univariate.roots;

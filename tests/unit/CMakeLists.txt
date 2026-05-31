@@ -8,7 +8,7 @@
 # Structure Tests
 # ============================================================
 
-add_polynomial_test(constructor SOURCE structure/constructor.cpp LIBS lam::concepts)
+add_polynomial_test(constructor SOURCE structure/constructor.cpp LIBS lam_concepts::concepts)
 add_polynomial_test(initializer_list_constructor SOURCE structure/init_list_constructor.cpp)
 add_polynomial_test(constant_cast_constructor SOURCE structure/constant_cast_constructor.cpp)
 add_polynomial_test(array_cast_constructor SOURCE structure/array_cast_constructor.cpp)
@@ -39,7 +39,7 @@ add_polynomial_test(unary_negate_operator SOURCE structure/unary_negate_operator
 
 add_polynomial_test(binary_add_polynomials
   SOURCE algebra/binary_add_polynomials.cpp
-  LIBS lam::concepts
+  LIBS lam_concepts::concepts
   TEST_NAME "Polynomial_Nttp_Binary_Add_Polynomials_operator+")
 
 add_polynomial_test(binary_add_polynomial_with_constant
@@ -52,12 +52,12 @@ add_polynomial_test(binary_add_polynomial_with_constant
 
 add_polynomial_test(binary_subtract_polynomials
   SOURCE algebra/binary_subtract_polynomials.cpp
-  LIBS lam::concepts
+  LIBS lam_concepts::concepts
   TEST_NAME "Polynomial_Nttp_Binary_Subtract_Polynomials_operator-")
 
 add_polynomial_test(binary_subtract_polynomial_with_constant
   SOURCE algebra/binary_subtract_polynomial_with_constant.cpp
-  LIBS lam::concepts
+  LIBS lam_concepts::concepts
   TEST_NAME "Polynomial_Nttp_Binary_Subtract_Polynomial_With_Constant_operator-")
 
 # ============================================================
@@ -66,7 +66,7 @@ add_polynomial_test(binary_subtract_polynomial_with_constant
 
 add_polynomial_test(binary_multiply_polynomials
   SOURCE algebra/binary_multiply_polynomials.cpp
-  LIBS lam::concepts
+  LIBS lam_concepts::concepts
   TEST_NAME "Polynomial_Nttp_Binary_Multiply_Polynomials_operator*")
 
 add_polynomial_test(binary_multiply_polynomial_with_constant
@@ -79,12 +79,13 @@ add_polynomial_test(precision_benchmark SOURCE fft/precision_benchmark.cpp)
 add_polynomial_test(real_world_signal_fft SOURCE fft/real_world_signal_fft.cpp)
 
 # FFT tests require increased constexpr step limits for compile-time evaluation
+include(LamConstexprLimit)
 # 16384-point FFT requires ~1 billion steps
-target_compile_options(real_world_signal_fft PRIVATE -fconstexpr-steps=1000000000)
+lam_target_constexpr_limit(real_world_signal_fft 1000000000)
 # 1024-point FFT round-trip requires ~100 million steps
-target_compile_options(precision_benchmark PRIVATE -fconstexpr-steps=100000000)
+lam_target_constexpr_limit(precision_benchmark 100000000)
 # Binary multiply with FFT uses fixed-size polynomials
-target_compile_options(binary_multiply_fft PRIVATE -fconstexpr-steps=100000000)
+lam_target_constexpr_limit(binary_multiply_fft 100000000)
 
 # ============================================================
 # Algebra Tests
@@ -114,7 +115,7 @@ add_polynomial_test(antiderivative SOURCE algebra/antiderivative.cpp TEST_NAME "
 
 add_polynomial_test(concepts_check
   SOURCE concepts/concepts_check.cpp
-  LIBS lam::concepts
+  LIBS lam_concepts::concepts
   TEST_NAME "Concepts_Check")
 
 add_polynomial_test(roots SOURCE roots/roots.cpp)

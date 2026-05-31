@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2025-2026 Colin Ford
+
 /*
  *  binary_multiply_fft.cpp
  *    see github.com/colinrford/polynomial_nttp for AGPL-3.0 License
@@ -7,10 +10,10 @@
  */
 
 import std;
-import lam.polynomial_nttp;
+import lam.polynomial.nttp;
 
 using namespace lam;
-using namespace lam::polynomial::univariate;
+using namespace lam::polynomial::nttp::univariate;
 
 constexpr double tolerance = 1e-10;
 

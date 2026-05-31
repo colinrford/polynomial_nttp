@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2025-2026 Colin Ford
+
 /*
  *  polynomial_nttp-univariate-structure.cppm – written by Colin Ford
  *    see github.com/colinrford/polynomial_nttp for AGPL-3.0 License, and
@@ -12,7 +15,7 @@ module;
 #include <tbb/parallel_for.h>
 #endif
 
-export module lam.polynomial_nttp:univariate.structure;
+export module lam.polynomial.nttp:univariate.structure;
 
 import std;
 import lam.concepts;
@@ -22,7 +25,7 @@ import :univariate.acceleration;
 namespace stdr = std::ranges;
 namespace stdv = std::views;
 
-namespace lam::polynomial::univariate
+namespace lam::polynomial::nttp::univariate
 {
 
 template<typename R>
@@ -550,7 +553,7 @@ struct polynomial_nttp
     }
     else
     {
-      if constexpr (lam::polynomial::config::use_accelerate)
+      if constexpr (lam::polynomial::nttp::config::use_accelerate)
       {
         if constexpr (std::is_same_v<coefficient_t, double> && N >= 80)
         {
@@ -578,7 +581,7 @@ struct polynomial_nttp
         }
       }
 
-      if constexpr (lam::polynomial::config::use_blas)
+      if constexpr (lam::polynomial::nttp::config::use_blas)
       {
         // Double precision support
         if constexpr (std::is_same_v<coefficient_t, double> && N >= 80)
@@ -625,7 +628,7 @@ struct polynomial_nttp
     std::size_t size = inputs.size();
 
     // 1. TBB Path (Preferred for overhead)
-    if constexpr (lam::polynomial::config::use_tbb)
+    if constexpr (lam::polynomial::nttp::config::use_tbb)
     {
 #ifdef LAM_USE_TBB
       tbb::parallel_for(tbb::blocked_range<std::size_t>(0, size), [&](const tbb::blocked_range<std::size_t>& r) {
@@ -646,7 +649,7 @@ struct polynomial_nttp
     }
     else
     {
-      if (size > lam::polynomial::config::parallel_threshold)
+      if (size > lam::polynomial::nttp::config::parallel_threshold)
       {
         std::size_t num_threads = std::thread::hardware_concurrency();
         if (num_threads == 0)
@@ -752,22 +755,22 @@ struct roots_result
   }
 };
 
-} // end namespace lam::polynomial::univariate
+} // end namespace lam::polynomial::nttp::univariate
 
-// Export to lam::polynomial for convenient access
-namespace lam::polynomial
+// Export to lam::polynomial::nttp for convenient access
+namespace lam::polynomial::nttp
 {
 export using univariate::polynomial_nttp;
 export using univariate::is_approx_equal;
 export using univariate::is_negligible;
 export using univariate::get_epsilon;
-} // end namespace lam::polynomial
+} // end namespace lam::polynomial::nttp
 
 // Export to lam for the simplest access
 namespace lam
 {
-export using polynomial::univariate::polynomial_nttp;
-export using polynomial::univariate::is_approx_equal;
-export using polynomial::univariate::is_negligible;
-export using polynomial::univariate::get_epsilon;
+export using polynomial::nttp::univariate::polynomial_nttp;
+export using polynomial::nttp::univariate::is_approx_equal;
+export using polynomial::nttp::univariate::is_negligible;
+export using polynomial::nttp::univariate::get_epsilon;
 } // end namespace lam

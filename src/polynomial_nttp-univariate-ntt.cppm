@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2025-2026 Colin Ford
+
 /*
  *  polynomial_nttp-univariate-ntt.cppm
  *    see github.com/colinrford/polynomial_nttp for AGPL-3.0 License, and
@@ -11,13 +14,13 @@ module;
 #include <tbb/parallel_for.h>
 #endif
 
-export module lam.polynomial_nttp:univariate.ntt;
+export module lam.polynomial.nttp:univariate.ntt;
 
 import std;
 import :univariate.structure;
 import :config;
 
-namespace lam::polynomial::univariate::ntt
+namespace lam::polynomial::nttp::univariate::ntt
 {
 
 // =============================================================================
@@ -338,4 +341,4 @@ constexpr void ntt_transform(Range&& data, bool inverse)
   }
 }
 
-} // namespace lam::polynomial::univariate::ntt
+} // namespace lam::polynomial::nttp::univariate::ntt

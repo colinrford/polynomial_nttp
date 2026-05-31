@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2025-2026 Colin Ford
+
 /*
  *  type_erased.cpp – written by Colin Ford
  *    see github.com/colinrford/polynomial_nttp for AGPL-3.0 License, and
@@ -16,7 +19,7 @@
 #include <ranges>
 #include <vector>
 
-import lam.polynomial_nttp;
+import lam.polynomial.nttp;
 
 namespace stdr = std::ranges;
 namespace stdv = std::views;

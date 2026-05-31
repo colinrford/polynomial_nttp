@@ -1,14 +1,17 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2025-2026 Colin Ford
+
 /*
  *  benchmark_ct_sunspots.cpp
  *    Benchmarks compilation time for Large Dataset FFT (Sunspots N=16384)
  */
 
 import std;
-import lam.polynomial_nttp;
+import lam.polynomial.nttp;
 
 #include "../examples/data/sunspot_data.hpp"
 
-using namespace lam::polynomial::univariate::fft;
+using namespace lam::polynomial::nttp::univariate::fft;
 using complex = std::complex<double>;
 
 consteval auto sunspot_bench()

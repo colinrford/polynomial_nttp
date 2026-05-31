@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2025-2026 Colin Ford
+
 /*
  *  polynomial_nttp-univariate-fft.cppm
  *    see github.com/colinrford/polynomial_nttp for AGPL-3.0 License
@@ -17,7 +20,7 @@ module;
 #include <span>
 #include <vector>
 
-export module lam.polynomial_nttp:univariate.fft;
+export module lam.polynomial.nttp:univariate.fft;
 
 // Import the Math module for constexpr sin/cos
 import :univariate.math;
@@ -29,7 +32,7 @@ extern "C++"
   void fft_software_impl(std::span<std::complex<double>> data, bool inverse);
 }
 
-export namespace lam::polynomial::univariate::fft
+export namespace lam::polynomial::nttp::univariate::fft
 {
 
 // Helper: Bit Reversal Permutation (Compile-Time Friendly)
@@ -142,4 +145,4 @@ constexpr std::vector<std::complex<double>> fft(const std::vector<double>& real_
 // Public exposure of generic software FFT for benchmarks (legacy wrapper)
 void soft_fft(std::vector<std::complex<double>>& data, bool inverse) { fft_software_impl(data, inverse); }
 
-} // namespace lam::polynomial::univariate::fft
+} // namespace lam::polynomial::nttp::univariate::fft

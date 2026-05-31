@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2025-2026 Colin Ford
+
 /*
  *  eval_benchmark.cpp
  *    see github.com/colinrford/polynomial_nttp for AGPL-3.0 License
@@ -11,7 +14,7 @@
 
 
 import std;
-import lam.polynomial_nttp;
+import lam.polynomial.nttp;
 
 #ifdef HAS_BOOST_MATH
 #include <boost/math/tools/polynomial.hpp>

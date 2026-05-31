@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2025-2026 Colin Ford
+
 /*
  *  wilkinson.cpp
  *    see github.com/colinrford/polynomial_nttp for AGPL-3.0 License, and
@@ -7,9 +10,9 @@
  */
 
 import std;
-import lam.polynomial_nttp;
+import lam.polynomial.nttp;
 
-using namespace lam::polynomial::univariate;
+using namespace lam::polynomial::nttp::univariate;
 
 // Helper to expand (x - 1)(x - 2)...(x - N)
 // This is done at runtime for simplicity, or we can use small N constants
@@ -59,7 +62,7 @@ int main()
   std::println("\nWilkinson N=5:");
   std::println("P(x) = {}", w5);
 
-  auto roots5 = lam::polynomial::univariate::roots::roots(w5);
+  auto roots5 = lam::polynomial::nttp::univariate::roots::roots(w5);
   std::println("Found {} roots:", roots5.size());
   for (auto r : roots5)
   {
@@ -123,7 +126,7 @@ constexpr bool test_w3_constexpr()
 {
   using Real = double;
   constexpr polynomial_nttp<Real, 3> w3{{-6.0, 11.0, -6.0, 1.0}};
-  auto r = lam::polynomial::univariate::roots::roots(w3);
+  auto r = lam::polynomial::nttp::univariate::roots::roots(w3);
   return check_roots_contain(r, {1.0, 2.0, 3.0});
 }
 static_assert(test_w3_constexpr(), "Wilkinson(3) [Cardano] should be solvable at compile-time");
@@ -133,7 +136,7 @@ constexpr bool test_w4_constexpr()
 {
   using Real = double;
   constexpr polynomial_nttp<Real, 4> w4{{24.0, -50.0, 35.0, -10.0, 1.0}};
-  auto r = lam::polynomial::univariate::roots::roots(w4);
+  auto r = lam::polynomial::nttp::univariate::roots::roots(w4);
   return check_roots_contain(r, {1.0, 2.0, 3.0, 4.0});
 }
 static_assert(test_w4_constexpr(), "Wilkinson(4) [Newton] should be solvable at compile-time");
@@ -143,7 +146,7 @@ constexpr bool test_w5_constexpr()
 {
   using Real = double;
   constexpr polynomial_nttp<Real, 5> w5{{-120.0, 274.0, -225.0, 85.0, -15.0, 1.0}};
-  auto r = lam::polynomial::univariate::roots::roots(w5);
+  auto r = lam::polynomial::nttp::univariate::roots::roots(w5);
   return check_roots_contain(r, {1.0, 2.0, 3.0, 4.0, 5.0});
 }
 static_assert(test_w5_constexpr(), "Wilkinson(5) [Newton Rec.] should be solvable at compile-time");

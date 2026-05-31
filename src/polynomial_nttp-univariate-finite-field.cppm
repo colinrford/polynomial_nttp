@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2025-2026 Colin Ford
+
 /*
  *  polynomial_nttp-univariate-finite-field.cppm – written by Colin Ford
  *    see github.com/colinrford/polynomial_nttp for AGPL-3.0 License, and
@@ -5,22 +8,22 @@
  *  polynomial_nttp is a c++ module
  */
 
-export module lam.polynomial_nttp:univariate.finite_field;
+export module lam.polynomial.nttp:univariate.finite_field;
 
 import std;
 import lam.concepts;
 import :univariate.structure;
 import :univariate.algebra;
 
-namespace lam::polynomial::univariate::finite_field
+namespace lam::polynomial::nttp::univariate::finite_field
 {
 
 template<typename K>
 concept field_element_c_weak = lam::concepts::experimental::field_element_c_weak<K>;
 
-using lam::polynomial::univariate::polynomial_nttp;
-using lam::polynomial::univariate::algebra::poly_inv;
-using lam::polynomial::univariate::algebra::poly_rem;
+using lam::polynomial::nttp::univariate::polynomial_nttp;
+using lam::polynomial::nttp::univariate::algebra::poly_inv;
+using lam::polynomial::nttp::univariate::algebra::poly_rem;
 
 // Pick the multiplicative identity of K, preferring K::one() over K(1).
 template<field_element_c_weak K>
@@ -94,14 +97,14 @@ template<field_element_c_weak K, std::size_t N, polynomial_nttp<K, N> Irreducibl
 constexpr auto operator/(finite_field_extension<K, N, Irreducible> a, finite_field_extension<K, N, Irreducible> b)
 { return a * inv(b); }
 
-} // end namespace lam::polynomial::univariate::finite_field
+} // end namespace lam::polynomial::nttp::univariate::finite_field
 
-namespace lam::polynomial
+namespace lam::polynomial::nttp
 {
 export using univariate::finite_field::finite_field_extension;
-} // end namespace lam::polynomial
+} // end namespace lam::polynomial::nttp
 
 namespace lam
 {
-export using polynomial::univariate::finite_field::finite_field_extension;
+export using polynomial::nttp::univariate::finite_field::finite_field_extension;
 } // end namespace lam

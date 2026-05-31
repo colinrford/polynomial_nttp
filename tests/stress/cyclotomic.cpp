@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2025-2026 Colin Ford
+
 /*
  *  cyclotomic.cpp
  *    see github.com/colinrford/polynomial_nttp for AGPL-3.0 License, and
@@ -7,9 +10,9 @@
  */
 
 import std;
-import lam.polynomial_nttp;
+import lam.polynomial.nttp;
 
-using namespace lam::polynomial::univariate;
+using namespace lam::polynomial::nttp::univariate;
 
 // Cyclotomic Polynomial Phi_30(x)
 // Degree phi(30) = 8.
@@ -28,7 +31,7 @@ int main()
   std::println("Phi_30(x) = {}", phi30);
 
   // Solve with real arithmetic
-  auto roots30 = lam::polynomial::univariate::roots::roots(phi30);
+  auto roots30 = lam::polynomial::nttp::univariate::roots::roots(phi30);
 
   std::println("Found {} roots:", roots30.size());
   for (auto r : roots30)

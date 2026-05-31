@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2025-2026 Colin Ford
+
 /*
  *  real_world_signal_fft.cpp
  *    see github.com/colinrford/polynomial_nttp for AGPL-3.0 License, and
@@ -7,11 +10,11 @@
  */
 
 import std;
-import lam.polynomial_nttp;
+import lam.polynomial.nttp;
 
 #include "../../../examples/data/sunspot_data.hpp"
 
-using namespace lam::polynomial::univariate;
+using namespace lam::polynomial::nttp::univariate;
 
 consteval double verify_energy_conservation()
 {

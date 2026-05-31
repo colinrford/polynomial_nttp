@@ -1,10 +1,13 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2025-2026 Colin Ford
+
 #include <new> // Workaround for libc++ ambiguous operator new bug
 
 import std;
-import lam.polynomial_nttp;
+import lam.polynomial.nttp;
 import lam.ctbignum;
 
-using namespace lam::polynomial::univariate::ntt;
+using namespace lam::polynomial::nttp::univariate::ntt;
 void check_bit_reversal()
 {
   std::println("Checking Bit Reversal for N=16...");
@@ -87,7 +90,7 @@ constexpr std::uint64_t P = 18446744069414584321ULL;
 using Zq = lam::cbn::ZqElement<std::uint64_t, P>;
 
 // Replicate benchmark traits EXACTLY
-namespace lam::polynomial::univariate
+namespace lam::polynomial::nttp::univariate
 {
 template<>
 struct finite_field_traits<Zq>
@@ -99,7 +102,7 @@ struct finite_field_traits<Zq>
   static constexpr K mul(const K& a, const K& b)
   {
     unsigned __int128 prod = static_cast<unsigned __int128>(a.data[0]) * b.data[0];
-    std::uint64_t solinas_res = lam::polynomial::univariate::ntt::reduce_solinas(prod);
+    std::uint64_t solinas_res = lam::polynomial::nttp::univariate::ntt::reduce_solinas(prod);
 
     // Cross-check
     if (!std::is_constant_evaluated())
@@ -143,7 +146,7 @@ struct finite_field_traits<Zq>
     return res;
   }
 };
-} // namespace lam::polynomial::univariate
+} // namespace lam::polynomial::nttp::univariate
 
 using Wrapper = Zq;
 
@@ -231,7 +234,7 @@ void check_convolution_logic()
   std::vector<Wrapper> c(N);
   for (std::size_t i = 0; i < N; ++i)
   {
-    c[i] = lam::polynomial::univariate::finite_field_traits<Wrapper>::mul(a[i], b[i]);
+    c[i] = lam::polynomial::nttp::univariate::finite_field_traits<Wrapper>::mul(a[i], b[i]);
   }
 
   // Inverse
@@ -270,7 +273,7 @@ void check_convolution_logic()
 
   for (std::size_t i = 0; i < N; ++i)
   {
-    c[i] = lam::polynomial::univariate::finite_field_traits<Wrapper>::mul(a[i], b[i]);
+    c[i] = lam::polynomial::nttp::univariate::finite_field_traits<Wrapper>::mul(a[i], b[i]);
   }
 
   ntt_transform(c, true);

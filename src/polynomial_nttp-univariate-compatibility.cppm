@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2025-2026 Colin Ford
+
 /*
  *  polynomial_nttp-univariate-compatibility.cppm – written by Colin Ford
  *    see github.com/colinrford/polynomial_nttp for AGPL-3.0 License, and
@@ -5,14 +8,14 @@
  *  polynomial_nttp is a c++ module
  */
 
-export module lam.polynomial_nttp:univariate.compat;
+export module lam.polynomial.nttp:univariate.compat;
 
 import std;
 import :univariate.structure;
 import :univariate.algebra;
 import :univariate.roots;
 
-namespace lam::polynomial::univariate::compat
+namespace lam::polynomial::nttp::univariate::compat
 {
 
 // ============================================================
@@ -396,4 +399,4 @@ constexpr bool verify_approximate_linear_roots(T a, T b, T expected_root, std::o
   return true;
 }
 
-} // namespace lam::polynomial::univariate::compat
+} // namespace lam::polynomial::nttp::univariate::compat

@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2025-2026 Colin Ford
+
 /*
  *  polynomial_nttp-univariate-print.cppm – written by Colin Ford
  *    see github.com/colinrford/polynomial_nttp for AGPL-3.0 License, and
@@ -5,12 +8,12 @@
  *  polynomial_nttp is a c++ module
  */
 
-export module lam.polynomial_nttp:univariate.print;
+export module lam.polynomial.nttp:univariate.print;
 
 import std;
 import :univariate.structure;
 
-template<lam::polynomial::univariate::ring_element_c_weak R, std::size_t N>
+template<lam::polynomial::nttp::univariate::ring_element_c_weak R, std::size_t N>
 struct std::formatter<lam::polynomial_nttp<R, N>>
 {
   char variable = 'x';

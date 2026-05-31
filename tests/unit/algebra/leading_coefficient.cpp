@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2025-2026 Colin Ford
+
 /*
  *  leading_coefficient.cpp – written by Colin Ford
  *    see github.com/colinrford/polynomial_nttp for AGPL-3.0 License, and
@@ -5,7 +8,7 @@
  *  unit test for polynomial_nttp obtaining leading coefficient
  */
 
-import lam.polynomial_nttp;
+import lam.polynomial.nttp;
 
 using namespace lam;
 

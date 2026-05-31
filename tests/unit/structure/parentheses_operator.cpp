@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2025-2026 Colin Ford
+
 /*
  *  parentheses_operator.cpp
  *  Unit test for polynomial_nttp parentheses operator() evaluation.
@@ -8,7 +11,7 @@
  */
 
 import std;
-import lam.polynomial_nttp;
+import lam.polynomial.nttp;
 
 using namespace lam;
 
@@ -112,11 +115,11 @@ int main()
     check_approx(val_optimized, val_ref, "Large Degree Double (Optimization Check)");
 
     // Explicitly check configuration status
-    if constexpr (lam::polynomial::config::use_accelerate)
+    if constexpr (lam::polynomial::nttp::config::use_accelerate)
     {
       std::print("  -> Verified using Apple Accelerate path for N=100\n");
     }
-    else if constexpr (lam::polynomial::config::use_blas)
+    else if constexpr (lam::polynomial::nttp::config::use_blas)
     {
       std::print("  -> Verified using BLAS path for N=100\n");
     }
@@ -143,11 +146,11 @@ int main()
 
     check_approx(val_optimized, val_ref, "Large Degree Complex (Optimization Check)");
 
-    if constexpr (lam::polynomial::config::use_accelerate)
+    if constexpr (lam::polynomial::nttp::config::use_accelerate)
     {
       std::print("  -> Verified using Apple Accelerate path (Complex) for N=85\n");
     }
-    else if constexpr (lam::polynomial::config::use_blas)
+    else if constexpr (lam::polynomial::nttp::config::use_blas)
     {
       std::print("  -> Verified using BLAS Complex path for N=85\n");
     }

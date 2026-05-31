@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2025-2026 Colin Ford
+
 /*
  *  laguerre.cpp
  *    see github.com/colinrford/polynomial_nttp for AGPL-3.0 License, and
@@ -16,7 +19,7 @@
 #endif
 
 import std;
-import lam.polynomial_nttp;
+import lam.polynomial.nttp;
 
 // Error-free transformation: TwoProductFMA
 // Computes x*y = p + e exactly

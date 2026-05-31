@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2025-2026 Colin Ford
+
 /*
  *  polynomial_nttp-univariate-interpolation.cppm – Colin Ford
  *    see github.com/colinrford/polynomial_nttp for AGPL-3.0 License, and
@@ -5,14 +8,14 @@
  *  polynomial_nttp:univariate.interpolation provides Lagrange interpolation
  */
 
-export module lam.polynomial_nttp:univariate.interpolation;
+export module lam.polynomial.nttp:univariate.interpolation;
 
 import std;
 import lam.concepts;
 import :univariate.structure;
 import :univariate.algebra;
 
-namespace lam::polynomial::univariate
+namespace lam::polynomial::nttp::univariate
 {
 
 /**
@@ -83,9 +86,9 @@ constexpr auto lagrange_interpolate(const std::array<K, N + 1>& x_vals, const st
   return result;
 }
 
-} // namespace lam::polynomial::univariate
+} // namespace lam::polynomial::nttp::univariate
 
 namespace lam
 {
-export using polynomial::univariate::lagrange_interpolate;
+export using polynomial::nttp::univariate::lagrange_interpolate;
 }

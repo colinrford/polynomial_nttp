@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2025-2026 Colin Ford
+
 /*
  *  benchmark_multiplication_crossover.cpp
  *    see github.com/colinrford/polynomial_nttp for AGPL-3.0 License
@@ -7,9 +10,9 @@
  */
 
 import std;
-import lam.polynomial_nttp;
+import lam.polynomial.nttp;
 
-using namespace lam::polynomial;
+using namespace lam::polynomial::nttp;
 
 template<typename T>
 std::vector<T> naive_multiply(const std::vector<T>& a, const std::vector<T>& b)

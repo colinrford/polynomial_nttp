@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2025-2026 Colin Ford
+
 /*
  *  polynomial_nttp-univariate-math.cppm – written by Colin Ford
  *    see github.com/colinrford/polynomial_nttp for AGPL-3.0 License, and
@@ -5,10 +8,10 @@
  *  polynomial_nttp is a c++ module
  */
 
-export module lam.polynomial_nttp:univariate.math;
+export module lam.polynomial.nttp:univariate.math;
 import std;
 
-export namespace lam::polynomial::univariate::math
+export namespace lam::polynomial::nttp::univariate::math
 {
 
 // High-Precision PI (Matches std::numbers::pi)
@@ -143,4 +146,4 @@ constexpr T sqrt(T x)
   }
 }
 
-} // namespace lam::polynomial::univariate::math
+} // namespace lam::polynomial::nttp::univariate::math

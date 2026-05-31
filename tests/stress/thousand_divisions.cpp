@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2025-2026 Colin Ford
+
 /*
  *  thousand_divisions.cpp - written by Colin Ford
  *    see github.com/colinrford/polynomial_nttp for AGPL-3.0 License, and
@@ -7,10 +10,10 @@
  */
 
 import std;
-import lam.polynomial_nttp;
+import lam.polynomial.nttp;
 
 namespace fs = std::filesystem;
-namespace math = lam::polynomial::univariate;
+namespace math = lam::polynomial::nttp::univariate;
 
 const std::string filename{"thousand_divisions"};
 const std::string quotient_file_ext{".quotient"};

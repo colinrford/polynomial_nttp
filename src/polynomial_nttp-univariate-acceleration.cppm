@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2025-2026 Colin Ford
+
 /*
  *  polynomial_nttp-univariate-acceleration.cppm
  *    see github.com/colinrford/polynomial_nttp for AGPL-3.0 License
@@ -68,9 +71,9 @@ extern "C"
 }
 #endif
 
-export module lam.polynomial_nttp:univariate.acceleration;
+export module lam.polynomial.nttp:univariate.acceleration;
 
-export namespace lam::polynomial::univariate::acceleration
+export namespace lam::polynomial::nttp::univariate::acceleration
 {
 #ifdef LAM_USE_ACCELERATE
 using ::DSP_double_split_complex;
@@ -93,4 +96,4 @@ using ::cblas_daxpy;
 using ::cblas_saxpy;
 using ::cblas_zaxpy;
 #endif
-} // namespace lam::polynomial::univariate::acceleration
+} // namespace lam::polynomial::nttp::univariate::acceleration
