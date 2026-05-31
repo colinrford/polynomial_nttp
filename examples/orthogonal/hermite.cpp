@@ -19,7 +19,7 @@
 #endif
 
 import std;
-import lam.polynomial_nttp;
+import lam.polynomial.nttp;
 
 // Error-free transformation: TwoProductFMA
 template<typename T>

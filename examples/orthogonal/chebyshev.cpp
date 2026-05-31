@@ -17,7 +17,7 @@
 #endif
 
 import std;
-import lam.polynomial_nttp;
+import lam.polynomial.nttp;
 
 namespace lam::orthogonal
 {

@@ -19,7 +19,7 @@
 #include <ranges>
 #include <vector>
 
-import lam.polynomial_nttp;
+import lam.polynomial.nttp;
 
 namespace stdr = std::ranges;
 namespace stdv = std::views;
