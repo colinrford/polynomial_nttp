@@ -9,9 +9,9 @@
  */
 
 import std;
-import lam.polynomial_nttp;
+import lam.polynomial.nttp;
 
-using namespace lam::polynomial::univariate;
+using namespace lam::polynomial::nttp::univariate;
 
 // Helper to ensure forcing compile-time evaluation
 template<std::size_t N>

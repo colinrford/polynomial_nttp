@@ -15,9 +15,9 @@
 #include <print>
 #include <vector>
 
-import lam.polynomial_nttp;
+import lam.polynomial.nttp;
 
-using namespace lam::polynomial::univariate;
+using namespace lam::polynomial::nttp::univariate;
 
 // Helper for approximate equality
 bool is_close(double a, double b, double tol = 1e-9) { return std::abs(a - b) < tol; }
@@ -126,7 +126,7 @@ void test_compat_module()
 {
   std::print("Testing Compatibility Module...\n");
 
-  using namespace lam::polynomial::univariate::compat;
+  using namespace lam::polynomial::nttp::univariate::compat;
 
   // Check capabilities
   static_assert(type_capabilities<double>::is_approximate, "double should be approximate");

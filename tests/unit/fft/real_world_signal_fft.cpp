@@ -10,11 +10,11 @@
  */
 
 import std;
-import lam.polynomial_nttp;
+import lam.polynomial.nttp;
 
 #include "../../../examples/data/sunspot_data.hpp"
 
-using namespace lam::polynomial::univariate;
+using namespace lam::polynomial::nttp::univariate;
 
 consteval double verify_energy_conservation()
 {

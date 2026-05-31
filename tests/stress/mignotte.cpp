@@ -11,9 +11,9 @@
  */
 
 import std;
-import lam.polynomial_nttp;
+import lam.polynomial.nttp;
 
-using namespace lam::polynomial::univariate;
+using namespace lam::polynomial::nttp::univariate;
 
 // Mignotte Polynomial: P(x) = x^n - 2(ax - 1)^2
 // With n=5, a=100.
@@ -30,7 +30,7 @@ int main()
 
   std::println("Mignotte(5, 100): P(x) = {}", m5);
 
-  auto roots5 = lam::polynomial::univariate::roots::roots(m5);
+  auto roots5 = lam::polynomial::nttp::univariate::roots::roots(m5);
   std::println("Found {} roots:", roots5.size());
   std::vector<Real> close_roots;
 

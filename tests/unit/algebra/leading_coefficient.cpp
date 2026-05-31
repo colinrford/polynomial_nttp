@@ -8,7 +8,7 @@
  *  unit test for polynomial_nttp obtaining leading coefficient
  */
 
-import lam.polynomial_nttp;
+import lam.polynomial.nttp;
 
 using namespace lam;
 

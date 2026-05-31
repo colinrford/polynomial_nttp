@@ -9,7 +9,7 @@
 
 import std;
 import lam.concepts;
-import lam.polynomial_nttp;
+import lam.polynomial.nttp;
 
 using namespace lam;
 

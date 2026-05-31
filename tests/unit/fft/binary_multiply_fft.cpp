@@ -10,10 +10,10 @@
  */
 
 import std;
-import lam.polynomial_nttp;
+import lam.polynomial.nttp;
 
 using namespace lam;
-using namespace lam::polynomial::univariate;
+using namespace lam::polynomial::nttp::univariate;
 
 constexpr double tolerance = 1e-10;
 

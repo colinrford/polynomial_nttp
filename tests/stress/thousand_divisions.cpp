@@ -10,10 +10,10 @@
  */
 
 import std;
-import lam.polynomial_nttp;
+import lam.polynomial.nttp;
 
 namespace fs = std::filesystem;
-namespace math = lam::polynomial::univariate;
+namespace math = lam::polynomial::nttp::univariate;
 
 const std::string filename{"thousand_divisions"};
 const std::string quotient_file_ext{".quotient"};

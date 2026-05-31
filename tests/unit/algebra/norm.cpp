@@ -8,7 +8,7 @@
  *  unit test for polynomial_nttp norm of a polynomial
  */
 
-import lam.polynomial_nttp;
+import lam.polynomial.nttp;
 
 using namespace lam;
 
