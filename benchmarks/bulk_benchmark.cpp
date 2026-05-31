@@ -20,7 +20,7 @@
 #endif
 
 import std;
-import lam.polynomial_nttp;
+import lam.polynomial.nttp;
 
 std::vector<double> generate_random_points(std::size_t n)
 {
@@ -62,7 +62,7 @@ void run_boost_benchmark(const std::vector<double>& inputs, std::vector<double>&
 
   auto start = std::chrono::steady_clock::now();
 
-  if constexpr (lam::polynomial::config::use_tbb)
+  if constexpr (lam::polynomial::nttp::config::use_tbb)
   {
 #ifdef LAM_USE_TBB
     tbb::parallel_for(tbb::blocked_range<std::size_t>(0, inputs.size()), [&](const tbb::blocked_range<std::size_t>& r) {
@@ -102,7 +102,7 @@ void run_complex_benchmark(std::size_t M)
   std::array<R, N + 1> coeffs;
   for (auto& c : coeffs)
     c = {1.0, 1.0};
-  lam::polynomial::polynomial_nttp<R, N> poly(coeffs);
+  lam::polynomial::nttp::polynomial_nttp<R, N> poly(coeffs);
 
   auto start = std::chrono::steady_clock::now();
   poly.evaluate_bulk(inputs, outputs);
@@ -125,7 +125,7 @@ void run_complex_scalar_benchmark(std::size_t M)
   std::array<R, N + 1> coeffs;
   for (auto& c : coeffs)
     c = {1.0, 1.0};
-  lam::polynomial::polynomial_nttp<R, N> poly(coeffs);
+  lam::polynomial::nttp::polynomial_nttp<R, N> poly(coeffs);
 
   auto start = std::chrono::steady_clock::now();
   for (std::size_t i = 0; i < M; ++i)
@@ -157,7 +157,7 @@ void run_boost_complex_benchmark(std::size_t M)
 
   auto start = std::chrono::steady_clock::now();
 #ifdef LAM_USE_TBB
-  if constexpr (lam::polynomial::config::use_tbb)
+  if constexpr (lam::polynomial::nttp::config::use_tbb)
   {
     tbb::parallel_for(tbb::blocked_range<std::size_t>(0, M), [&](const tbb::blocked_range<std::size_t>& r) {
       for (std::size_t i = r.begin(); i != r.end(); ++i)
@@ -186,19 +186,19 @@ void run_boost_complex_benchmark(std::size_t M)
 
 int main()
 {
-  constexpr std::size_t M = lam::polynomial::config::is_tsan_build ? 100'000 : 10'000'000;
+  constexpr std::size_t M = lam::polynomial::nttp::config::is_tsan_build ? 100'000 : 10'000'000;
 
   std::println("Warming up...");
   std::print("=== Bulk Evaluation Benchmark (M={}) [", M);
-  if constexpr (lam::polynomial::config::use_tbb)
+  if constexpr (lam::polynomial::nttp::config::use_tbb)
     std::print("TBB:ON ");
   else
     std::print("TBB:OFF ");
-  if constexpr (lam::polynomial::config::use_accelerate)
+  if constexpr (lam::polynomial::nttp::config::use_accelerate)
     std::print("ACC:ON ");
   else
     std::print("ACC:OFF ");
-  if constexpr (lam::polynomial::config::use_blas)
+  if constexpr (lam::polynomial::nttp::config::use_blas)
     std::print("BLAS:ON ");
   else
     std::print("BLAS:OFF ");

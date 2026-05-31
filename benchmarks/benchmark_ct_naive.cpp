@@ -7,7 +7,7 @@
  */
 
 import std;
-import lam.polynomial_nttp;
+import lam.polynomial.nttp;
 
 using complex = std::complex<double>;
 constexpr std::size_t N = 256;

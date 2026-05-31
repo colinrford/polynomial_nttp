@@ -10,9 +10,9 @@
  */
 
 import std;
-import lam.polynomial_nttp;
+import lam.polynomial.nttp;
 
-using namespace lam::polynomial;
+using namespace lam::polynomial::nttp;
 
 template<typename T>
 std::vector<T> naive_multiply(const std::vector<T>& a, const std::vector<T>& b)

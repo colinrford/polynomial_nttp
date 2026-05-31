@@ -10,9 +10,9 @@
  */
 
 import std;
-import lam.polynomial_nttp;
+import lam.polynomial.nttp;
 
-using namespace lam::polynomial;
+using namespace lam::polynomial::nttp;
 
 template<std::size_t N>
 void bench_operator(const char* label)

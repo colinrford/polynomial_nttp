@@ -7,14 +7,14 @@
  */
 
 import std;
-import lam.polynomial_nttp;
+import lam.polynomial.nttp;
 
 constexpr std::size_t N = 256;
 
 template<std::size_t Size>
 consteval auto make_poly_pattern()
 {
-  lam::polynomial::univariate::polynomial_nttp<double, Size> p{};
+  lam::polynomial::nttp::univariate::polynomial_nttp<double, Size> p{};
   for (std::size_t i = 0; i <= Size; ++i)
   {
     p.coefficients[i] = static_cast<double>((i % 17) + 1);
@@ -28,7 +28,7 @@ consteval auto gcd_bench()
   auto b = make_poly_pattern<N>();
   b.coefficients[0] += 1.0;
 
-  auto res = lam::polynomial::poly_gcd(a, b);
+  auto res = lam::polynomial::nttp::poly_gcd(a, b);
   return res;
 }
 

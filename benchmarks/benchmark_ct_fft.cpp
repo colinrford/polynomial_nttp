@@ -7,9 +7,9 @@
  */
 
 import std;
-import lam.polynomial_nttp;
+import lam.polynomial.nttp;
 
-using namespace lam::polynomial::univariate::fft;
+using namespace lam::polynomial::nttp::univariate::fft;
 using complex = std::complex<double>;
 constexpr std::size_t N = 256;
 

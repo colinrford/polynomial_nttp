@@ -14,7 +14,7 @@
 
 
 import std;
-import lam.polynomial_nttp;
+import lam.polynomial.nttp;
 
 #ifdef HAS_BOOST_MATH
 #include <boost/math/tools/polynomial.hpp>

@@ -7,11 +7,11 @@
  */
 
 import std;
-import lam.polynomial_nttp;
+import lam.polynomial.nttp;
 
 #include "../examples/data/sunspot_data.hpp"
 
-using namespace lam::polynomial::univariate::fft;
+using namespace lam::polynomial::nttp::univariate::fft;
 using complex = std::complex<double>;
 
 consteval auto sunspot_bench()
