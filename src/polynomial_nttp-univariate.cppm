@@ -8,7 +8,7 @@
  *  polynomial_nttp is a c++ module
  */
 
-export module lam.polynomial_nttp:univariate;
+export module lam.polynomial.nttp:univariate;
 
 export import :univariate.structure;
 export import :univariate.acceleration;

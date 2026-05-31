@@ -8,10 +8,10 @@
  *  polynomial_nttp is a c++ module
  */
 
-export module lam.polynomial_nttp:univariate.math;
+export module lam.polynomial.nttp:univariate.math;
 import std;
 
-export namespace lam::polynomial::univariate::math
+export namespace lam::polynomial::nttp::univariate::math
 {
 
 // High-Precision PI (Matches std::numbers::pi)
@@ -146,4 +146,4 @@ constexpr T sqrt(T x)
   }
 }
 
-} // namespace lam::polynomial::univariate::math
+} // namespace lam::polynomial::nttp::univariate::math

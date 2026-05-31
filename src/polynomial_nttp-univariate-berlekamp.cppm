@@ -10,7 +10,7 @@
  *  Berlekamp's algorithm for polynomial factorization over finite fields
  */
 
-export module lam.polynomial_nttp:univariate.berlekamp;
+export module lam.polynomial.nttp:univariate.berlekamp;
 
 import std;
 import lam.concepts;
@@ -20,7 +20,7 @@ import :univariate.algebra;
 namespace stdr = std::ranges;
 namespace stdv = std::views;
 
-namespace lam::polynomial::univariate::berlekamp
+namespace lam::polynomial::nttp::univariate::berlekamp
 {
 
 // ============================================================
@@ -436,12 +436,12 @@ constexpr auto roots_berlekamp(const polynomial_nttp<K, N>& f, K zero, K one) ->
   return result;
 }
 
-} // namespace lam::polynomial::univariate::berlekamp
+} // namespace lam::polynomial::nttp::univariate::berlekamp
 
 // Export symbols to parent namespace
-namespace lam::polynomial
+namespace lam::polynomial::nttp
 {
-export using lam::polynomial::univariate::berlekamp::poly_gcd;
-export using lam::polynomial::univariate::berlekamp::berlekamp_factor;
-export using lam::polynomial::univariate::berlekamp::roots_berlekamp;
-} // namespace lam::polynomial
+export using lam::polynomial::nttp::univariate::berlekamp::poly_gcd;
+export using lam::polynomial::nttp::univariate::berlekamp::berlekamp_factor;
+export using lam::polynomial::nttp::univariate::berlekamp::roots_berlekamp;
+} // namespace lam::polynomial::nttp

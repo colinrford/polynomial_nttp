@@ -10,7 +10,7 @@
 
 module;
 
-export module lam.polynomial_nttp:univariate.roots;
+export module lam.polynomial.nttp:univariate.roots;
 
 import std;
 import lam.concepts;
@@ -21,7 +21,7 @@ import :univariate.berlekamp;
 namespace stdr = std::ranges;
 namespace stdv = std::views;
 
-namespace lam::polynomial::univariate::roots
+namespace lam::polynomial::nttp::univariate::roots
 {
 template<typename K>
 concept field_element_c_weak = lam::concepts::experimental::field_element_c_weak<K>;
@@ -771,7 +771,7 @@ constexpr roots_result<K, N> roots(const polynomial_nttp<K, N>& p)
   if constexpr (univariate::finite_field_traits<K>::is_finite_field)
   {
     constexpr auto P = univariate::finite_field_traits<K>::field_order;
-    return lam::polynomial::univariate::berlekamp::roots_berlekamp<K, P, N>(p, K(0), K(1));
+    return lam::polynomial::nttp::univariate::berlekamp::roots_berlekamp<K, P, N>(p, K(0), K(1));
   }
 
   if constexpr (N == 0)
@@ -808,9 +808,9 @@ constexpr roots_result<K, N> roots(const polynomial_nttp<K, N>& p)
   }
 }
 
-} // end namespace lam::polynomial::univariate::roots
+} // end namespace lam::polynomial::nttp::univariate::roots
 
-namespace lam::polynomial
+namespace lam::polynomial::nttp
 {
 export using univariate::roots::root_with_multiplicity;
 export using univariate::roots::roots_result;
@@ -820,12 +820,12 @@ export using univariate::roots::roots_degree_3;
 export using univariate::roots::roots_degree_4;
 export using univariate::roots::roots_brute_force;
 export using univariate::roots::roots;
-} // namespace lam::polynomial
+} // namespace lam::polynomial::nttp
 
 // Export to lam for the simplest access
 namespace lam
 {
-export using polynomial::univariate::roots::roots;
-export using polynomial::univariate::roots::roots_result;
-export using polynomial::univariate::roots::root_with_multiplicity;
+export using polynomial::nttp::univariate::roots::roots;
+export using polynomial::nttp::univariate::roots::roots_result;
+export using polynomial::nttp::univariate::roots::root_with_multiplicity;
 } // namespace lam

@@ -10,7 +10,7 @@
 
 module;
 
-export module lam.polynomial_nttp;
+export module lam.polynomial.nttp;
 
 export import :univariate;
 export import :config;

@@ -8,14 +8,14 @@
  *  polynomial_nttp is a c++ module
  */
 
-export module lam.polynomial_nttp:univariate.compat;
+export module lam.polynomial.nttp:univariate.compat;
 
 import std;
 import :univariate.structure;
 import :univariate.algebra;
 import :univariate.roots;
 
-namespace lam::polynomial::univariate::compat
+namespace lam::polynomial::nttp::univariate::compat
 {
 
 // ============================================================
@@ -399,4 +399,4 @@ constexpr bool verify_approximate_linear_roots(T a, T b, T expected_root, std::o
   return true;
 }
 
-} // namespace lam::polynomial::univariate::compat
+} // namespace lam::polynomial::nttp::univariate::compat

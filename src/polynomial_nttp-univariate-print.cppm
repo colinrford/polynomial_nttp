@@ -8,12 +8,12 @@
  *  polynomial_nttp is a c++ module
  */
 
-export module lam.polynomial_nttp:univariate.print;
+export module lam.polynomial.nttp:univariate.print;
 
 import std;
 import :univariate.structure;
 
-template<lam::polynomial::univariate::ring_element_c_weak R, std::size_t N>
+template<lam::polynomial::nttp::univariate::ring_element_c_weak R, std::size_t N>
 struct std::formatter<lam::polynomial_nttp<R, N>>
 {
   char variable = 'x';

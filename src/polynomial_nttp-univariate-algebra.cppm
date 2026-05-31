@@ -14,7 +14,7 @@ module;
 #include <tbb/parallel_for.h>
 #endif
 
-export module lam.polynomial_nttp:univariate.algebra;
+export module lam.polynomial.nttp:univariate.algebra;
 
 import std;
 import lam.concepts;
@@ -27,7 +27,7 @@ import :config;
 namespace stdr = std::ranges;
 namespace stdv = std::views;
 
-namespace lam::polynomial::univariate
+namespace lam::polynomial::nttp::univariate
 {
 
 const auto indexing_set = [](auto n) { return stdv::iota(static_cast<decltype(n)>(0), n); };
@@ -133,7 +133,7 @@ constexpr auto operator+(const polynomial_nttp<R, M>& p, const polynomial_nttp<R
       constexpr std::size_t jthread_threshold = 50000;
       std::size_t N_size = max_degree + 1;
 
-      if constexpr (lam::polynomial::config::use_tbb)
+      if constexpr (lam::polynomial::nttp::config::use_tbb)
       {
 #ifdef LAM_USE_TBB
         if (N_size >= tbb_threshold)
@@ -149,7 +149,7 @@ constexpr auto operator+(const polynomial_nttp<R, M>& p, const polynomial_nttp<R
 #endif
       }
 
-      if (!accelerated && !lam::polynomial::config::use_tbb && N_size >= jthread_threshold)
+      if (!accelerated && !lam::polynomial::nttp::config::use_tbb && N_size >= jthread_threshold)
       {
         std::size_t num_threads = std::thread::hardware_concurrency();
         if (num_threads == 0)
@@ -345,7 +345,7 @@ constexpr auto operator-(const polynomial_nttp<R, M>& p, const polynomial_nttp<R
       constexpr std::size_t jthread_threshold = 50000;
       std::size_t N_size = max_degree + 1;
 
-      if constexpr (lam::polynomial::config::use_tbb)
+      if constexpr (lam::polynomial::nttp::config::use_tbb)
       {
 #ifdef LAM_USE_TBB
         if (N_size >= tbb_threshold)
@@ -361,7 +361,7 @@ constexpr auto operator-(const polynomial_nttp<R, M>& p, const polynomial_nttp<R
 #endif
       }
 
-      if (!accelerated && !lam::polynomial::config::use_tbb && N_size >= jthread_threshold)
+      if (!accelerated && !lam::polynomial::nttp::config::use_tbb && N_size >= jthread_threshold)
       {
         std::size_t num_threads = std::thread::hardware_concurrency();
         if (num_threads == 0)
@@ -577,9 +577,9 @@ constexpr auto operator/(const polynomial_nttp<R, N>& p, const R& r) noexcept
   return p_quotient_r;
 }
 
-} // end namespace lam::polynomial::univariate
+} // end namespace lam::polynomial::nttp::univariate
 
-namespace lam::polynomial::univariate::algebra
+namespace lam::polynomial::nttp::univariate::algebra
 {
 
 const auto indexing_set = [](auto n) { return stdv::iota(static_cast<decltype(n)>(0), n); };
@@ -992,16 +992,16 @@ constexpr auto poly_inv(const polynomial_nttp<R, N - 1>& a)
   }
 }
 
-} // end namespace lam::polynomial::univariate::algebra
+} // end namespace lam::polynomial::nttp::univariate::algebra
 
 namespace lam
 {
-export using polynomial::univariate::algebra::norm;
-export using polynomial::univariate::algebra::leading;
-export using polynomial::univariate::algebra::make_monomial;
-export using polynomial::univariate::algebra::division_prototype;
-export using polynomial::univariate::algebra::derivative;
-export using polynomial::univariate::algebra::antiderivative;
-export using polynomial::univariate::algebra::poly_rem;
-export using polynomial::univariate::algebra::poly_inv;
+export using polynomial::nttp::univariate::algebra::norm;
+export using polynomial::nttp::univariate::algebra::leading;
+export using polynomial::nttp::univariate::algebra::make_monomial;
+export using polynomial::nttp::univariate::algebra::division_prototype;
+export using polynomial::nttp::univariate::algebra::derivative;
+export using polynomial::nttp::univariate::algebra::antiderivative;
+export using polynomial::nttp::univariate::algebra::poly_rem;
+export using polynomial::nttp::univariate::algebra::poly_inv;
 } // end namespace lam
