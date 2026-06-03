@@ -3,9 +3,9 @@
 
 module;
 
-import std;
-
 export module lam.polynomial.nttp:config;
+
+import std;
 
 export namespace lam::polynomial::nttp::config
 {
