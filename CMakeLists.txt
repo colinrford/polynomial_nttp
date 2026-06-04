@@ -132,7 +132,7 @@ endif()
 lam_install_module_package(polynomial_nttp
   NAME          polynomial_nttp
   MODULE_SUBDIR polynomial/nttp
-  DESCRIPTION   "lam.polynomial.nttp — number-theoretic transform polynomial arithmetic (C++23 modules)"
+  DESCRIPTION   "lam.polynomial.nttp — compile-time polynomial algebra (C++23 modules)"
   LICENSE       "AGPL-3.0-or-later"
   REQUIRES      lam_concepts
 )
