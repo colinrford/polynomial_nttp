@@ -24,10 +24,10 @@ class LamPolynomialNttpConan(ConanFile):
     author = "Colin Ford"
     url = "https://github.com/colinrford/polynomial_nttp"
     description = (
-        "Number-theoretic transform polynomial arithmetic for the lam "
-        "project (C++23 modules)."
+        "Compile-time polynomial algebra with non-type-template-parameter "
+        "coefficients for the lam project (C++23 modules)."
     )
-    topics = ("c++23", "modules", "polynomial", "ntt", "number-theory", "lam")
+    topics = ("c++23", "modules", "polynomial", "nttp", "constexpr", "lam")
 
     settings = "os", "compiler", "build_type", "arch"
     package_type = "static-library"
