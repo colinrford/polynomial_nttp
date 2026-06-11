@@ -27,74 +27,98 @@ namespace lam::polynomial::nttp::univariate::ntt
 // Modular Arithmetic Helpers (Constexpr)
 // =============================================================================
 
-export 
-constexpr std::uint64_t reduce_solinas(unsigned __int128 x)
+namespace detail
+{
+
+struct u128_parts { std::uint64_t hi; std::uint64_t lo; };
+
+// Schoolbook 64x64 -> 128 multiply; no 128-bit type, so MSVC-portable.
+constexpr u128_parts mul_wide_portable(std::uint64_t a, std::uint64_t b)
+{
+  const std::uint64_t a_lo = a & 0xFFFFFFFFULL, a_hi = a >> 32;
+  const std::uint64_t b_lo = b & 0xFFFFFFFFULL, b_hi = b >> 32;
+
+  const std::uint64_t ll = a_lo * b_lo;
+  const std::uint64_t lh = a_lo * b_hi;
+  const std::uint64_t hl = a_hi * b_lo;
+  const std::uint64_t hh = a_hi * b_hi;
+
+  const std::uint64_t cross = (ll >> 32) + (lh & 0xFFFFFFFFULL) + (hl & 0xFFFFFFFFULL);
+  const std::uint64_t lo = (ll & 0xFFFFFFFFULL) | (cross << 32);
+  const std::uint64_t hi = hh + (lh >> 32) + (hl >> 32) + (cross >> 32);
+  return { hi, lo };
+}
+
+// Native where available, else schoolbook. The token is preprocessor-gated:
+// if constexpr cannot hide __int128 from a front-end that rejects it.
+constexpr u128_parts mul_wide(std::uint64_t a, std::uint64_t b)
+{
+#if defined(LAM_HAS_INT128)
+  const unsigned __int128 p = static_cast<unsigned __int128>(a) * b;
+  return { static_cast<std::uint64_t>(p >> 64), static_cast<std::uint64_t>(p) };
+#else
+  return mul_wide_portable(a, b);
+#endif
+}
+
+// (a * b) % m for a 64-bit modulus, no 128-bit type (double-and-add).
+constexpr std::uint64_t mulmod64_portable(std::uint64_t a, std::uint64_t b,
+                                          std::uint64_t m)
+{
+  a %= m;
+  b %= m;
+  std::uint64_t res = 0;
+  while (b > 0)
+  {
+    if (b & 1ULL)
+      res = (res < m - a) ? res + a : res - (m - a);
+    if (b > 1)
+      a = (a < m - a) ? a + a : a - (m - a);
+    b >>= 1;
+  }
+  return res;
+}
+
+} // namespace detail
+
+// Goldilocks reduction for P = 2^64 - 2^32 + 1 on a 128-bit value (hi, lo).
+// 2^64 == 2^32 - 1 (mod P), 2^96 == -1 (mod P)  =>
+//   x == lo + a2*2^32 - a2 - a3 (mod P),  a2 = hi low half, a3 = hi high half.
+export
+constexpr std::uint64_t reduce_solinas(std::uint64_t hi, std::uint64_t lo)
 {
   constexpr std::uint64_t P = 0xFFFFFFFF00000001ULL;
 
-  // Split 128-bit x into four 32-bit chunks: a3, a2, a1, a0
-  std::uint64_t lo = static_cast<std::uint64_t>(x);
-  std::uint64_t hi = static_cast<std::uint64_t>(x >> 64);
+  const std::uint64_t a2 = hi & 0xFFFFFFFFULL;
+  const std::uint64_t a3 = hi >> 32;
 
-  std::uint64_t a0 = lo & 0xFFFFFFFF;
-  std::uint64_t a1 = lo >> 32;
-  std::uint64_t a2 = hi & 0xFFFFFFFF;
-  std::uint64_t a3 = hi >> 32;
+  const std::uint64_t term = (a2 << 32) - a2;    // a2*(2^32 - 1), < P
 
-  // Formula: Result = (a1 + a2) * 2^32 + a0 - a2 - a3
-  // S = (a1 + a2) << 32 + a0
-  // M = a2 + a3
-  // res = S - M
+  std::uint64_t r = lo + term;
+  if (r < lo)                  // carry out of 64 bits
+    r += 0xFFFFFFFFULL;        // 2^64 == 2^32 - 1 (mod P)
 
-  unsigned __int128 S = (static_cast<unsigned __int128>(a1 + a2) << 32) + a0;
-  unsigned __int128 M = a2 + a3;
+  if (r < a3)
+    r += P;
+  r -= a3;
 
-  // Handle subtraction (modulo P)
-  // If S < M, we need to wrap around. Since we want mod P, we add P.
-  // However, P = 2^64 - 2^32 + 1.
-  // It is simpler to add a multiple of P large enough, or just use signed logic conceptually.
-  // Since M is small (~66 bits max? No, 32+32=33 bits max), adding P once is enough.
-
-  if (S < M)
-  {
-    S += P; // Borrow from the field modulus
-  }
-  S -= M;
-
-  // Final reduction steps
-  // S is now approx 65 bits. We reduce until it fits in [0, P-1].
-  while (S >= P)
-  {
-    S -= P;
-  }
-
-  return static_cast<std::uint64_t>(S);
+  while (r >= P)
+    r -= P;
+  return r;
 }
 
-// Template-dispatched modular multiplication
-// When M is known at compile-time, the compiler generates optimized Barrett reduction
-export 
-template<std::uint64_t M>
-constexpr std::uint64_t mul_mod(std::uint64_t a, std::uint64_t b)
+// Back-compat overload for callers holding a native 128-bit value.
+#if defined(LAM_HAS_INT128)
+export
+constexpr std::uint64_t reduce_solinas(unsigned __int128 x)
 {
-  if constexpr (M == 0)
-  {
-    // Handle runtime or non-field case gracefully (should not happen in NTT loop)
-    return 0;
-  }
-  else if constexpr (M == 0xFFFFFFFF00000001ULL)
-  {
-    return reduce_solinas(static_cast<unsigned __int128>(a) * b);
-  }
-  else
-  {
-    return static_cast<std::uint64_t>((static_cast<unsigned __int128>(a) * b) % M);
-  }
+  return reduce_solinas(static_cast<std::uint64_t>(x >> 64),
+                        static_cast<std::uint64_t>(x));
 }
+#endif
 
-// Portable modular multiplication: (a * b) % m
-// Uses tiered optimizations based on modulus properties
-export 
+// (a * b) % m, tiered by operand width and modulus.
+export
 constexpr auto mul_mod(std::unsigned_integral auto a, std::unsigned_integral auto b,
                               std::unsigned_integral auto m)
 {
@@ -102,57 +126,83 @@ constexpr auto mul_mod(std::unsigned_integral auto a, std::unsigned_integral aut
   a %= m;
   b %= m;
 
-  // If m is actually a compile-time constant (passed via template in ntt_transform)
-  // this is effectively specialization.
-
-  // Use specialized Solinas path if applicable
+  // Goldilocks prime -> Solinas reduction.
   if constexpr (std::is_same_v<T, std::uint64_t>)
-  {
     if (m == 0xFFFFFFFF00000001ULL)
     {
-      return static_cast<T>(reduce_solinas(static_cast<unsigned __int128>(a) * b));
+      const auto [hi, lo] = detail::mul_wide(a, b);
+      return static_cast<T>(reduce_solinas(hi, lo));
     }
-  }
 
-  // Fallback: Use hardware 128-bit multiply + modulo
-  if constexpr (config::has_int128)
-  {
-    if constexpr (sizeof(T) <= 8)
-    {
-      unsigned __int128 res = static_cast<unsigned __int128>(a) * static_cast<unsigned __int128>(b);
-      return static_cast<T>(res % m);
-    }
-  }
-
-  // Fallback: Double-and-Add Algorithm
   if constexpr (sizeof(T) <= sizeof(std::uint32_t))
-  {
     return static_cast<T>((static_cast<std::uint64_t>(a) * b) % m);
-  }
   else
   {
-    T res = 0;
-    while (b > 0)
-    {
-      if (b % 2 == 1)
-      {
-        if (res < m - a)
-          res += a;
-        else
-          res -= (m - a);
-      }
-      if (b > 1)
-      {
-        if (a < m - a)
-          a += a;
-        else
-          a -= (m - a);
-      }
-      b /= 2;
-    }
-    return res;
+#if defined(LAM_HAS_INT128)
+    return static_cast<T>(static_cast<unsigned __int128>(a) * b % m);
+#else
+    return static_cast<T>(detail::mulmod64_portable(a, b, m));
+#endif
   }
 }
+
+// Compile-time M: the Goldilocks branch folds to the Solinas fast path.
+export
+template<std::uint64_t M>
+constexpr std::uint64_t mul_mod(std::uint64_t a, std::uint64_t b)
+{
+  if constexpr (M == 0)
+    return 0;
+  else if constexpr (M == 0xFFFFFFFF00000001ULL)
+  {
+    const auto [hi, lo] = detail::mul_wide(a, b);
+    return reduce_solinas(hi, lo);
+  }
+  else
+    return mul_mod(a, b, M);
+}
+
+// Where __int128 exists, prove the portable kernels match it at compile time;
+// passing here is the assurance for the cl.exe build, which has no native ref.
+#if defined(LAM_HAS_INT128)
+namespace detail::selfcheck
+{
+  constexpr bool wide_matches_native(std::uint64_t a, std::uint64_t b)
+  {
+    const unsigned __int128 p = static_cast<unsigned __int128>(a) * b;
+    const auto w = mul_wide_portable(a, b);
+    return w.hi == static_cast<std::uint64_t>(p >> 64)
+        && w.lo == static_cast<std::uint64_t>(p);
+  }
+
+  constexpr bool solinas_matches_native(std::uint64_t hi, std::uint64_t lo)
+  {
+    constexpr unsigned __int128 P = 0xFFFFFFFF00000001ULL;
+    const unsigned __int128 x = (static_cast<unsigned __int128>(hi) << 64) | lo;
+    return reduce_solinas(hi, lo) == static_cast<std::uint64_t>(x % P);
+  }
+
+  constexpr bool run_all()
+  {
+    std::uint64_t s = 0x243F6A8885A308D3ULL;
+    auto next = [&s]() { s ^= s << 13; s ^= s >> 7; s ^= s << 17; return s; };
+    for (int i = 0; i < 256; ++i)
+    {
+      const std::uint64_t a = next(), b = next();
+      if (!wide_matches_native(a, b))              return false;
+      if (!solinas_matches_native(next(), next())) return false;
+    }
+    if (!wide_matches_native(~0ULL, ~0ULL))     return false;
+    if (!solinas_matches_native(0, 0))          return false;
+    if (!solinas_matches_native(~0ULL, ~0ULL))  return false;
+    if (!solinas_matches_native(0, 1ULL << 63)) return false;
+    if (!solinas_matches_native(1ULL << 32, 0)) return false;
+    return true;
+  }
+
+  static_assert(run_all(), "portable 128-bit kernels disagree with native __int128");
+}
+#endif
 
 // Computes (base^exp) % mod
 export 
