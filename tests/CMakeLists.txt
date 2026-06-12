@@ -5,10 +5,15 @@ target_link_libraries(test_polynomial_nttp polynomial_nttp lam_concepts::concept
 target_compile_features(test_polynomial_nttp PRIVATE cxx_std_23)
 set_target_properties(test_polynomial_nttp PROPERTIES CXX_SCAN_FOR_MODULES ON)
 
-add_executable(test_polynomial_acceleration test_polynomial_acceleration.cpp)
-target_link_libraries(test_polynomial_acceleration polynomial_nttp lam_concepts::concepts)
-target_compile_features(test_polynomial_acceleration PRIVATE cxx_std_23)
-set_target_properties(test_polynomial_acceleration PROPERTIES CXX_SCAN_FOR_MODULES ON)
+# Only build the acceleration test where a BLAS/Accelerate backend is active;
+# without one the "accelerated" paths fall back to generic loops and there is
+# nothing acceleration-specific to exercise.
+if(NOT LAM_BLAS_BACKEND STREQUAL "none")
+  add_executable(test_polynomial_acceleration test_polynomial_acceleration.cpp)
+  target_link_libraries(test_polynomial_acceleration polynomial_nttp lam_concepts::concepts)
+  target_compile_features(test_polynomial_acceleration PRIVATE cxx_std_23)
+  set_target_properties(test_polynomial_acceleration PROPERTIES CXX_SCAN_FOR_MODULES ON)
+endif()
 
 
 add_subdirectory(unit)

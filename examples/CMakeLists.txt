@@ -7,9 +7,12 @@
 add_polynomial_executable(type_erased)
 add_polynomial_executable(audio_filtering_demo LIBS polynomial_nttp)
 
-# Embed Wav Demo needs dependency on audio filtering to get clean wav
-add_polynomial_executable(embed_wav_demo LIBS polynomial_nttp)
-add_dependencies(embed_wav_demo audio_filtering_demo)
+# Embed Wav Demo needs dependency on audio filtering to get clean wav.
+# Uses #embed (C23/C++26), which MSVC cl.exe does not support yet -- skip there.
+if(NOT MSVC)
+  add_polynomial_executable(embed_wav_demo LIBS polynomial_nttp)
+  add_dependencies(embed_wav_demo audio_filtering_demo)
+endif()
 
 # ============================================================
 # Orthogonal Polynomial Examples
@@ -38,11 +41,4 @@ if(Boost_FOUND)
 else()
   message(STATUS "Boost NOT found: using local reference implementation")
 endif()
-
-find_package(TBB QUIET)
-if(TBB_FOUND)
-  message(STATUS "TBB found: enabling parallel evaluation")
-  # TBB mainly used for bulk benchmarks which moved to benchmarks dir
-endif()
-
 
