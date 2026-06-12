@@ -153,13 +153,13 @@ std::function<double(double)> which_type_erased_polynomial(int index)
   switch (index)
   {
     case 0:
-      return [](double d) { return std::sin<double>(d); };
+      return [](double d) { return std::sin(d); };
     case 1:
-      return [](double d) { return std::cos<double>(d); };
+      return [](double d) { return std::cos(d); };
     case 2:
-      return [](double d) { return std::exp<double>(d); };
+      return [](double d) { return std::exp(d); };
     case 3:
-      return [](double d) { return std::sqrt<double>(d); };
+      return [](double d) { return std::sqrt(d); };
     default:
       return {};
   }
