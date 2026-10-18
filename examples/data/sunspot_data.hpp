@@ -1,5 +1,5 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
-// SPDX-FileCopyrightText: 2025-2026 Colin Ford
+// SPDX-License-Identifier: CC-BY-NC-4.0
+// SPDX-FileCopyrightText: WDC-SILSO, Royal Observatory of Belgium, Brussels
 
 #pragma once
 // Note: This header assumes std::array and std::size_t are available
