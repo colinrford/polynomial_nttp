@@ -57,7 +57,7 @@ jobs:
           wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc > /dev/null
           echo "deb https://apt.llvm.org/noble/ llvm-toolchain-noble-23 main" | sudo tee /etc/apt/sources.list.d/llvm-23.list
           sudo apt-get update
-          sudo apt-get install -y clang-23 clang-tools-23 libc++-23-dev libc++abi-23-dev libclang-rt-23-dev
+          sudo apt-get install -y clang-23 clang-tools-23 libc++-23-dev libc++abi-23-dev libclang-rt-23-dev libboost-dev
 
       - name: Install CMake and Ninja
         run: |
@@ -110,10 +110,10 @@ jobs:
           repository: colinrford/concepts
           path: _deps/concepts
 
-      - name: Install unzip
+      - name: Install unzip, OpenBLAS and Boost
         run: |
           apt-get update
-          apt-get install -y --no-install-recommends unzip
+          apt-get install -y --no-install-recommends unzip libopenblas-dev libboost-dev
 
       - name: Install CMake and Ninja
         run: |
@@ -136,6 +136,8 @@ jobs:
           cmake -S . -B build -G Ninja
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
           -DCMAKE_PREFIX_PATH="$RUNNER_TEMP/lam-prefix"
+          -DLAM_USE_OPENBLAS=ON
+          -DBLA_VENDOR=OpenBLAS
 
       - name: Build
         run: cmake --build build
@@ -154,8 +156,8 @@ jobs:
           repository: colinrford/concepts
           path: _deps/concepts
 
-      - name: Install Homebrew LLVM
-        run: brew install llvm
+      - name: Install Homebrew LLVM and Boost
+        run: brew install llvm boost
 
       - name: Install CMake and Ninja
         run: |
@@ -197,7 +199,7 @@ jobs:
         run: |
           cmake -S . -B build -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_PREFIX_PATH="$RUNNER_TEMP/lam-prefix" \
+            -DCMAKE_PREFIX_PATH="$RUNNER_TEMP/lam-prefix;$(brew --prefix)" \
             -DCMAKE_CXX_COMPILER="$LLVM_PREFIX/bin/clang++" \
             -DCMAKE_OSX_SYSROOT="$SDK_PATH" \
             -DCMAKE_CXX_STDLIB_MODULES_JSON="$MODULES_JSON" \
