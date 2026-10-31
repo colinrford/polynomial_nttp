@@ -17,7 +17,7 @@ set_property(DIRECTORY APPEND PROPERTY
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(PolynomialHelpers)
-include(LamModule)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/LamModule.cmake)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -96,6 +96,13 @@ endif()
 
 target_compile_features(polynomial_nttp PUBLIC cxx_std_23)
 set_target_properties(polynomial_nttp PROPERTIES CXX_SCAN_FOR_MODULES ON)
+
+# Preprocessor gate for the native unsigned __int128 paths in the NTT module.
+# Same source of truth as config::has_int128 (lam_check_int128 above), so the
+# gate and the introspectable bool never disagree.
+if(LAM_HAS_INT128_BOOL)
+  target_compile_definitions(polynomial_nttp PRIVATE LAM_HAS_INT128=1)
+endif()
 set_target_properties(polynomial_nttp PROPERTIES OUTPUT_NAME "lam_polynomial_nttp")
 
 # Generate + attach the lam.polynomial.nttp:config partition. EXTRA_DEFINES feed

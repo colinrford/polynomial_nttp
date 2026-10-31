@@ -176,7 +176,7 @@ void test_complex_fft_multiply()
   // Use volatile doubles to prevent consteval, then construct complex
   volatile double re = 1.0;
   volatile double im = 0.5;
-  C val{re, im};
+  C val{static_cast<double>(re), static_cast<double>(im)};
   std::fill(p1.begin(), p1.end(), val);
   std::fill(p2.begin(), p2.end(), val);
 

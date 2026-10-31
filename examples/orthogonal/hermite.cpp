@@ -416,7 +416,7 @@ int main()
   double numerator = two_pow_21 * fact20 * sqrt_pi_val;
 
   bool weights_passed = true;
-  for (size_t i = 0; i < 10; ++i)
+  for (std::size_t i = 0; i < 10; ++i)
   {
     double z = h20_ref_zeros[i];
     double ref_w = h20_ref_weights[i];

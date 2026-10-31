@@ -1,0 +1,374 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  # must have a rung in cmake/LamCxxModuleStd.cmake
+  CMAKE_VERSION: 4.4.4
+  NINJA_VERSION: 1.13.2
+
+jobs:
+  linux-clang:
+    name: Linux / Clang 23 libc++ / ${{ matrix.name }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Debug
+            build_type: Debug
+          - name: Release
+            build_type: Release
+          - name: ASan + UBSan
+            build_type: Debug
+            cxxflags: -fno-sanitize-recover=undefined
+            cmake_args: -DLAM_ENABLE_ASAN=ON -DLAM_ENABLE_UBSAN=ON
+    env:
+      CC: clang-23
+      CXX: clang++-23
+      CXXFLAGS: -stdlib=libc++ ${{ matrix.cxxflags }}
+      LDFLAGS: -stdlib=libc++
+      MODULES_JSON: /usr/lib/llvm-23/lib/libc++.modules.json
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/checkout@v7
+        with:
+          repository: colinrford/concepts
+          path: _deps/concepts
+
+      - name: Install Clang 23 and libc++
+        run: |
+          wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc > /dev/null
+          echo "deb https://apt.llvm.org/noble/ llvm-toolchain-noble-23 main" | sudo tee /etc/apt/sources.list.d/llvm-23.list
+          sudo apt-get update
+          sudo apt-get install -y clang-23 clang-tools-23 libc++-23-dev libc++abi-23-dev libclang-rt-23-dev libboost-dev
+
+      - name: Install CMake and Ninja
+        run: |
+          cmake_dir="cmake-${CMAKE_VERSION}-linux-x86_64"
+          curl -fsSL "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/${cmake_dir}.tar.gz" | tar -xz -C "$RUNNER_TEMP"
+          curl -fsSL -o "$RUNNER_TEMP/ninja.zip" "https://github.com/ninja-build/ninja/releases/download/v${NINJA_VERSION}/ninja-linux.zip"
+          unzip -q "$RUNNER_TEMP/ninja.zip" -d "$RUNNER_TEMP/${cmake_dir}/bin"
+          echo "$RUNNER_TEMP/${cmake_dir}/bin" >> "$GITHUB_PATH"
+
+      - name: Install lam.concepts
+        run: |
+          cmake -S _deps/concepts -B _deps/concepts/build -G Ninja \
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+            -DCMAKE_INSTALL_PREFIX="$RUNNER_TEMP/lam-prefix" \
+            -DCMAKE_CXX_STDLIB_MODULES_JSON="$MODULES_JSON"
+          cmake --build _deps/concepts/build
+          cmake --install _deps/concepts/build
+
+      - name: Configure
+        run: >
+          cmake -S . -B build -G Ninja
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          -DCMAKE_PREFIX_PATH="$RUNNER_TEMP/lam-prefix"
+          -DCMAKE_CXX_STDLIB_MODULES_JSON="$MODULES_JSON"
+          ${{ matrix.cmake_args }}
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Test
+        run: ctest --test-dir build --output-on-failure --no-tests=error
+
+  linux-gcc:
+    name: Linux / GCC 16 libstdc++ / ${{ matrix.build_type }}
+    runs-on: ubuntu-24.04
+    # upstream GCC image: Ubuntu's own packages ship a broken libstdc++.modules.json before 26.04
+    container: gcc:16.2
+    strategy:
+      fail-fast: false
+      matrix:
+        build_type: [Debug, Release]
+    env:
+      CC: gcc
+      CXX: g++
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/checkout@v7
+        with:
+          repository: colinrford/concepts
+          path: _deps/concepts
+
+      - name: Install unzip, OpenBLAS and Boost
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends unzip libopenblas-dev libboost-dev
+
+      - name: Install CMake and Ninja
+        run: |
+          cmake_dir="cmake-${CMAKE_VERSION}-linux-x86_64"
+          curl -fsSL "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/${cmake_dir}.tar.gz" | tar -xz -C "$RUNNER_TEMP"
+          curl -fsSL -o "$RUNNER_TEMP/ninja.zip" "https://github.com/ninja-build/ninja/releases/download/v${NINJA_VERSION}/ninja-linux.zip"
+          unzip -q "$RUNNER_TEMP/ninja.zip" -d "$RUNNER_TEMP/${cmake_dir}/bin"
+          echo "$RUNNER_TEMP/${cmake_dir}/bin" >> "$GITHUB_PATH"
+
+      - name: Install lam.concepts
+        run: |
+          cmake -S _deps/concepts -B _deps/concepts/build -G Ninja \
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+            -DCMAKE_INSTALL_PREFIX="$RUNNER_TEMP/lam-prefix"
+          cmake --build _deps/concepts/build
+          cmake --install _deps/concepts/build
+
+      - name: Configure
+        run: >
+          cmake -S . -B build -G Ninja
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          -DCMAKE_PREFIX_PATH="$RUNNER_TEMP/lam-prefix"
+          -DLAM_USE_OPENBLAS=ON
+          -DBLA_VENDOR=OpenBLAS
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Test
+        run: ctest --test-dir build --output-on-failure --no-tests=error
+
+  macos-llvm:
+    name: macOS / Homebrew LLVM libc++ / Release
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/checkout@v7
+        with:
+          repository: colinrford/concepts
+          path: _deps/concepts
+
+      - name: Install Homebrew LLVM and Boost
+        run: brew install llvm boost
+
+      - name: Install CMake and Ninja
+        run: |
+          cmake_dir="cmake-${CMAKE_VERSION}-macos-universal"
+          curl -fsSL "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/${cmake_dir}.tar.gz" | tar -xz -C "$RUNNER_TEMP"
+          mkdir -p "$RUNNER_TEMP/ninja"
+          curl -fsSL -o "$RUNNER_TEMP/ninja.zip" "https://github.com/ninja-build/ninja/releases/download/v${NINJA_VERSION}/ninja-mac.zip"
+          unzip -q "$RUNNER_TEMP/ninja.zip" -d "$RUNNER_TEMP/ninja"
+          echo "$RUNNER_TEMP/${cmake_dir}/CMake.app/Contents/bin" >> "$GITHUB_PATH"
+          echo "$RUNNER_TEMP/ninja" >> "$GITHUB_PATH"
+
+      - name: Configure toolchain
+        run: |
+          llvm_prefix="$(brew --prefix llvm)"
+          modules_json="$llvm_prefix/lib/c++/libc++.modules.json"
+          test -f "$modules_json"
+          "$llvm_prefix/bin/clang++" --version
+          {
+            echo "LLVM_PREFIX=$llvm_prefix"
+            echo "MODULES_JSON=$modules_json"
+            echo "SDK_PATH=$(xcrun --show-sdk-path)"
+          } >> "$GITHUB_ENV"
+
+      - name: Install lam.concepts
+        run: |
+          cmake -S _deps/concepts -B _deps/concepts/build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX="$RUNNER_TEMP/lam-prefix" \
+            -DCMAKE_CXX_COMPILER="$LLVM_PREFIX/bin/clang++" \
+            -DCMAKE_OSX_SYSROOT="$SDK_PATH" \
+            -DCMAKE_CXX_STDLIB_MODULES_JSON="$MODULES_JSON" \
+            -DCMAKE_CXX_FLAGS="-stdlib=libc++ -nostdinc++ -isystem $LLVM_PREFIX/include/c++/v1" \
+            -DCMAKE_EXE_LINKER_FLAGS="-L$LLVM_PREFIX/lib/c++ -L$LLVM_PREFIX/lib/unwind -lunwind" \
+            -DCMAKE_BUILD_RPATH="$LLVM_PREFIX/lib/c++;$LLVM_PREFIX/lib/unwind"
+          cmake --build _deps/concepts/build --parallel 3
+          cmake --install _deps/concepts/build
+
+      - name: Configure
+        run: |
+          cmake -S . -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_PREFIX_PATH="$RUNNER_TEMP/lam-prefix;$(brew --prefix)" \
+            -DCMAKE_CXX_COMPILER="$LLVM_PREFIX/bin/clang++" \
+            -DCMAKE_OSX_SYSROOT="$SDK_PATH" \
+            -DCMAKE_CXX_STDLIB_MODULES_JSON="$MODULES_JSON" \
+            -DCMAKE_CXX_FLAGS="-stdlib=libc++ -nostdinc++ -isystem $LLVM_PREFIX/include/c++/v1" \
+            -DCMAKE_EXE_LINKER_FLAGS="-L$LLVM_PREFIX/lib/c++ -L$LLVM_PREFIX/lib/unwind -lunwind" \
+            -DCMAKE_BUILD_RPATH="$LLVM_PREFIX/lib/c++;$LLVM_PREFIX/lib/unwind"
+
+      - name: Build
+        run: cmake --build build --parallel 3
+
+      - name: Test
+        run: ctest --test-dir build --output-on-failure --no-tests=error
+
+  conan-linux:
+    name: Conan / Linux / Clang 23 libc++
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/checkout@v7
+        with:
+          repository: colinrford/concepts
+          path: _deps/concepts
+
+      - name: Install Clang 23 and libc++
+        run: |
+          wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc > /dev/null
+          echo "deb https://apt.llvm.org/noble/ llvm-toolchain-noble-23 main" | sudo tee /etc/apt/sources.list.d/llvm-23.list
+          sudo apt-get update
+          sudo apt-get install -y clang-23 clang-tools-23 libc++-23-dev libc++abi-23-dev
+
+      - name: Install CMake and Ninja
+        run: |
+          cmake_dir="cmake-${CMAKE_VERSION}-linux-x86_64"
+          curl -fsSL "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/${cmake_dir}.tar.gz" | tar -xz -C "$RUNNER_TEMP"
+          curl -fsSL -o "$RUNNER_TEMP/ninja.zip" "https://github.com/ninja-build/ninja/releases/download/v${NINJA_VERSION}/ninja-linux.zip"
+          unzip -q "$RUNNER_TEMP/ninja.zip" -d "$RUNNER_TEMP/${cmake_dir}/bin"
+          echo "$RUNNER_TEMP/${cmake_dir}/bin" >> "$GITHUB_PATH"
+
+      - name: Install Conan
+        run: pipx install conan==2.32.0
+
+      - name: Write Conan profile
+        run: |
+          mkdir -p ~/.conan2/profiles
+          # Conan 2.32 lists clang up to 22
+          cat > ~/.conan2/settings_user.yml <<'EOF'
+          compiler:
+            clang:
+              version: ["23"]
+          EOF
+          cat > ~/.conan2/profiles/default <<'EOF'
+          [settings]
+          os=Linux
+          arch=x86_64
+          build_type=Release
+          compiler=clang
+          compiler.version=23
+          compiler.libcxx=libc++
+          compiler.cppstd=23
+          [conf]
+          tools.cmake.cmaketoolchain:generator=Ninja
+          tools.build:compiler_executables={"c": "clang-23", "cpp": "clang++-23"}
+          tools.cmake.cmaketoolchain:extra_variables={"CMAKE_CXX_STDLIB_MODULES_JSON": "/usr/lib/llvm-23/lib/libc++.modules.json"}
+          EOF
+
+      - name: conan create lam.concepts
+        run: conan create _deps/concepts
+
+      - name: conan create
+        run: conan create .
+
+  conan-macos:
+    name: Conan / macOS / Homebrew LLVM libc++
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/checkout@v7
+        with:
+          repository: colinrford/concepts
+          path: _deps/concepts
+
+      - name: Install Homebrew LLVM
+        run: brew install llvm
+
+      - name: Install CMake and Ninja
+        run: |
+          cmake_dir="cmake-${CMAKE_VERSION}-macos-universal"
+          curl -fsSL "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/${cmake_dir}.tar.gz" | tar -xz -C "$RUNNER_TEMP"
+          mkdir -p "$RUNNER_TEMP/ninja"
+          curl -fsSL -o "$RUNNER_TEMP/ninja.zip" "https://github.com/ninja-build/ninja/releases/download/v${NINJA_VERSION}/ninja-mac.zip"
+          unzip -q "$RUNNER_TEMP/ninja.zip" -d "$RUNNER_TEMP/ninja"
+          echo "$RUNNER_TEMP/${cmake_dir}/CMake.app/Contents/bin" >> "$GITHUB_PATH"
+          echo "$RUNNER_TEMP/ninja" >> "$GITHUB_PATH"
+
+      - name: Install Conan
+        run: pipx install conan==2.32.0
+
+      - name: Write Conan profile
+        run: |
+          llvm_prefix="$(brew --prefix llvm)"
+          modules_json="$llvm_prefix/lib/c++/libc++.modules.json"
+          test -f "$modules_json"
+          mkdir -p ~/.conan2/profiles
+          # Conan 2.32 lists clang up to 22
+          cat > ~/.conan2/settings_user.yml <<'EOF'
+          compiler:
+            clang:
+              version: ["23"]
+          EOF
+          cat > ~/.conan2/profiles/default <<EOF
+          [settings]
+          os=Macos
+          arch=armv8
+          build_type=Release
+          compiler=clang
+          compiler.version=23
+          compiler.libcxx=libc++
+          compiler.cppstd=23
+          [conf]
+          tools.cmake.cmaketoolchain:generator=Ninja
+          tools.build:compiler_executables={"c": "$llvm_prefix/bin/clang", "cpp": "$llvm_prefix/bin/clang++"}
+          tools.apple:sdk_path=$(xcrun --show-sdk-path)
+          tools.build:cxxflags=["-nostdinc++", "-isystem", "$llvm_prefix/include/c++/v1"]
+          tools.build:exelinkflags=["-L$llvm_prefix/lib/c++", "-L$llvm_prefix/lib/unwind", "-lunwind"]
+          tools.cmake.cmaketoolchain:extra_variables={"CMAKE_CXX_STDLIB_MODULES_JSON": "$modules_json", "CMAKE_BUILD_RPATH": "$llvm_prefix/lib/c++;$llvm_prefix/lib/unwind"}
+          EOF
+          cat ~/.conan2/profiles/default
+
+      - name: conan create lam.concepts
+        run: conan create _deps/concepts
+
+      - name: conan create
+        run: conan create .
+
+  windows-msvc:
+    name: Windows / MSVC / Release
+    runs-on: windows-2025
+    if: false
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/checkout@v7
+        with:
+          repository: colinrford/concepts
+          path: _deps/concepts
+
+      - name: Install CMake and Ninja
+        shell: pwsh
+        run: |
+          $cmakeDir = "cmake-$env:CMAKE_VERSION-windows-x86_64"
+          Invoke-WebRequest "https://github.com/Kitware/CMake/releases/download/v$env:CMAKE_VERSION/$cmakeDir.zip" -OutFile "$env:RUNNER_TEMP\cmake.zip"
+          Expand-Archive "$env:RUNNER_TEMP\cmake.zip" -DestinationPath "$env:RUNNER_TEMP"
+          Invoke-WebRequest "https://github.com/ninja-build/ninja/releases/download/v$env:NINJA_VERSION/ninja-win.zip" -OutFile "$env:RUNNER_TEMP\ninja.zip"
+          Expand-Archive "$env:RUNNER_TEMP\ninja.zip" -DestinationPath "$env:RUNNER_TEMP\$cmakeDir\bin"
+          "$env:RUNNER_TEMP\$cmakeDir\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+      # one step: the MSVC environment from vcvars64 does not carry across steps
+      - name: Install lam.concepts, configure, build, test
+        shell: cmd
+        run: |
+          for /f "usebackq delims=" %%i in (`"%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do set "VSROOT=%%i"
+          call "%VSROOT%\VC\Auxiliary\Build\vcvars64.bat" || exit /b 1
+          set "LAM_PREFIX=%RUNNER_TEMP%\lam-prefix"
+          cmake -S _deps\concepts -B _deps\concepts\build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=cl "-DCMAKE_INSTALL_PREFIX=%LAM_PREFIX%" || exit /b 1
+          cmake --build _deps\concepts\build || exit /b 1
+          cmake --install _deps\concepts\build || exit /b 1
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=cl "-DCMAKE_PREFIX_PATH=%LAM_PREFIX%" || exit /b 1
+          cmake --build build || exit /b 1
+          ctest --test-dir build --output-on-failure --no-tests=error

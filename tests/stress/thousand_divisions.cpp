@@ -92,12 +92,19 @@ consteval auto divide_thousand_polynomials()
       }(),
       ...);
   };
-  // clang is being weird for some reason and will not work for N > ~400???
+
   monster(std::make_integer_sequence<int, 1000>());
 
   return std::make_pair(
-    std::make_tuple(possible_deg_2_quotients, possible_deg_3_quotients, possible_deg_4_quotients, quotient_errors),
-    std::make_tuple(possible_deg_0_remainders, possible_deg_1_remainders, possible_deg_2_remainders, remainder_errors));
+    std::make_tuple(possible_deg_2_quotients,
+                    possible_deg_3_quotients,
+                    possible_deg_4_quotients,
+                    quotient_errors),
+    std::make_tuple(possible_deg_0_remainders,
+                    possible_deg_1_remainders,
+                    possible_deg_2_remainders,
+                    remainder_errors)
+  );
 }
 
 int main()
@@ -120,12 +127,12 @@ int main()
   remainder_deg_0_file.open(remainder_deg_0_file_string);
   // remainder_deg_1_file.open(remainder_deg_1_file_string);
   // remainder_deg_2_file.open(remainder_deg_2_file_string);
-  // relaxed key variable to const to avoid strict constexpr tuple issues in main logic
-  const auto quotients_and_remainders = divide_thousand_polynomials();
+
+  static constexpr auto quotients_and_remainders = divide_thousand_polynomials();
   // constexpr auto quotients = quotients_and_remainders.first;
   // constexpr auto deg_2_quotients = std::get<0>(quotients);
-  const auto remainders = quotients_and_remainders.second;
-  const auto deg_0_remainders = std::get<0>(remainders);
+  static constexpr auto remainders = quotients_and_remainders.second;
+  static constexpr auto deg_0_remainders = std::get<0>(remainders);
   if (remainder_deg_0_file.is_open())
   {
     std::println("succeeded to open thousand_divisions");

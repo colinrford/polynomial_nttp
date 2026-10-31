@@ -15,7 +15,8 @@ constexpr std::size_t N = 256;
 template<std::size_t Size>
 consteval auto naive_mult_bench()
 {
-  std::array<complex, Size> a, b;
+  std::array<complex, Size> a{};
+  std::array<complex, Size> b{};
   for (std::size_t i = 0; i < Size; ++i)
   {
     a[i] = {1.0, 0.0};
@@ -37,5 +38,4 @@ int main()
 {
   constexpr auto res = naive_mult_bench<N>();
   std::println("Naive Result (N={}): {}", N, res.real());
-  return 0;
 }

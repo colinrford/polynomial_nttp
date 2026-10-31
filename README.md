@@ -126,8 +126,11 @@ for details on getting `cmake` to avoid using Apple `clang` and `ld64` (Apple's
    ```
 
 ## thank you for checking out `lam.polynomial.nttp`
-I do not claim this is the first of its kind, but the work here is my own.
-There are possible blind spots of the author. In its current state, please
-expect it to work, albeit with an occasional quirk. If you find it does not
-work for some reason, please alert me somehow, either via GitHub or via
-email. Any feedback is greatly appreciated.
+I do not claim this is the first of its kind, but the algebra here is my own.
+There are possible blind spots of the author.
+
+After the algebra work was settled, I employed the use of LLMs,
+primarily Claude, in:
+- CMake, Conan, CI
+- further testing, experimentation, examples, benchmarks
+- expanding runtime capabilities with BLAS/LAPACK backends such as Accelerate on Apple platforms
